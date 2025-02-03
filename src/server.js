@@ -4,6 +4,8 @@ import userRoutes from "./routes/user_routes.js";
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 
+import { authenticateToken } from "./middleware/auth.js";
+
 
 dotenv.config();
 
@@ -19,6 +21,11 @@ app.use(cors());
 
 
 app.use("/users", userRoutes);
+
+app.get('/protected', authenticateToken, (req, res) => {
+    res.status(200).json({ message: 'This is a protected route', data: req.user });
+});
+
 
 // Start the server
 app.listen(port, () => {
