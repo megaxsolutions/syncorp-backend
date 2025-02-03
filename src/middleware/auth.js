@@ -1,7 +1,9 @@
-// middleware/auth.js
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
-const JWT_SECRET = 'test'; // Use the same secret key
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET; // Replace with your own secret key
 
 export const authenticateToken = (req, res, next) => {
     // const token = req.headers['authorization']?.split(' ')[1]; // Get token from Authorization header

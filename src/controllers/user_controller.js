@@ -3,8 +3,11 @@ import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
 import db from './../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
+import dotenv from 'dotenv';
 
-const JWT_SECRET = 'test'; // Replace with your own secret key
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET; // Replace with your own secret key
 
 
 function hashPassword(password) {

@@ -4,6 +4,7 @@ npm install cors
 npm install express mysql2 sequelize 
 npm install express-async-handler
 npm install moment-timezone
+npm install dotenv --save
 
 npm install express-async-handler express mysql2 sequelize cors -g nodemon body-parser jsonwebtoken
 
