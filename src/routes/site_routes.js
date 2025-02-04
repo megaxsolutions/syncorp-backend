@@ -7,7 +7,7 @@ import { authenticateToken } from "../middleware/auth.js";
 const siteRoutes = Router();
 
 
-siteRoutes.post('/create', SiteController.create_site);
+siteRoutes.post('/add_site', SiteController.create_site);
 siteRoutes.put('/update_site/:site_id', SiteController.update_site);
 siteRoutes.delete('/delete_site/:site_id', SiteController.delete_site);
 
