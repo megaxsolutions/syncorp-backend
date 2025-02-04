@@ -33,6 +33,7 @@ app.use("/clusters", clusterRoutes);
 app.use("/positions", positionRoutes);
 
 
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

@@ -9,7 +9,7 @@ import { authenticateToken } from "../middleware/auth.js";
 const employeeRoutes = Router();
 
 
-employeeRoutes.post('/create', UserController.create_employee);
+employeeRoutes.post('/add_employee', UserController.create_employee);
 employeeRoutes.post('/login_employee', UserController.login_employee);
 employeeRoutes.get('/get_all_employee', UserController.get_all_employee);
 

@@ -12,3 +12,6 @@ npm install express-async-handler express mysql2 sequelize cors -g nodemon body-
 sync_db
 sync_admin
 Kk9566678@!
+
+
+13.229.75.55

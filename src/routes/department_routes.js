@@ -7,7 +7,7 @@ import { authenticateToken } from "../middleware/auth.js";
 const departmentRoutes = Router();
 
 
-departmentRoutes.post('/create', DepartmentController.create_department);
+departmentRoutes.post('/add_department', DepartmentController.create_department);
 departmentRoutes.put('/update_department/:department_id', DepartmentController.update_department);
 departmentRoutes.delete('/delete_department/:department_id', DepartmentController.delete_department);
 

@@ -5,7 +5,7 @@ import { authenticateToken } from "../middleware/auth.js";
 
 const positionRoutes = Router();
 
-positionRoutes.post('/create', PositionController.create_position);
+positionRoutes.post('/add_position', PositionController.create_position);
 positionRoutes.put('/update_position/:position_id', PositionController.update_position);
 positionRoutes.delete('/delete_position/:position_id', PositionController.delete_position);
 
