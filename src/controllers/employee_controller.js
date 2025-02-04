@@ -10,20 +10,18 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET; // Replace with your own secret key
 
 
-function dateConverter(dateString) {
-    // Check if the input is valid (length of 8)
-    if (dateString.length !== 8) {
-        throw new Error('Invalid date format. Expected format is mmddyyyy.');
+
+function dateConverter(date) {
+    const dateFormatRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+    if (!dateFormatRegex.test(date)) {
+        throw new Error('Invalid date format. Please use "YYYY-MM-DD".');
     }
 
-    // Extract month, day, and year from the input string
-    const month = dateString.substring(0, 2); // First two characters
-    const day = dateString.substring(2, 4);   // Next two characters
-    const year = dateString.substring(4, 8);  // Last four characters
-
-    // Format the date in yyyy-mm-dd
-    return `${year}-${month}-${day}`;
+    const [year, month, day] = date.split('-');
+    return `${month}${day}${year}`;
 }
+
 
 function hashConverterMD5(password) {
     return crypto.createHash('md5').update(String(password)).digest('hex');
@@ -59,14 +57,14 @@ export const create_employee = asyncHandler(async (req, res) => {
          positionID  } = req.body;
 
     try {
-        const birthdateRegex = /^(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])\d{4}$/;
+        const birthdateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
         // Check if birthdate matches the regex
         if (!birthdateRegex.test(birthdate)) {
-            return res.status(400).json({ message: 'Invalid birthdate format. Please use mmddyyyy.' });
+            return res.status(400).json({ message: 'Invalid birthdate format. Please use YYYY-MM-DD.' });
         } else {
-            const hash = hashConverterMD5(birthdate);
-
+            const hash = hashConverterMD5(dateConverter(birthdate));
+        
             const sql  = 'INSERT INTO id_generator (datetime_created) VALUES (?)';
             const sql2 = 'INSERT INTO login (emp_ID, password, expiry_date) VALUES (?, ?, ?)';
             const sql3 = 'INSERT INTO employee_profile (emp_ID, fName, mName, lName, bDate, date_hired, departmentID, clusterID, siteID, email, phone, address, emergency_contact_person, emergency_contact_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
@@ -76,7 +74,7 @@ export const create_employee = asyncHandler(async (req, res) => {
 
             const [insert_data_id_generator] = await db.promise().query(sql, [storeCurrentDateTime(0, 'hours')]);
             const [insert_data_login] = await db.promise().query(sql2, [insert_data_id_generator['insertId'], hash, storeCurrentDateTime(3, 'months')]);
-            const [insert_data_employee_profile] = await db.promise().query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, dateConverter(birthdate), date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number]);
+            const [insert_data_employee_profile] = await db.promise().query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number]);
             const [insert_data_employee_profile_benefits] = await db.promise().query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay]);
             const [insert_data_employee_profile_standing] = await db.promise().query(sql5, [insert_data_id_generator['insertId'], employee_status, positionID]);
         }

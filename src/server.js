@@ -27,7 +27,7 @@ app.use(cors());
 
 app.use("/main", mainRoutes);
 app.use("/employees", employeeRoutes);
-app.use("/deparrtments", departmentRoutes);
+app.use("/departments", departmentRoutes);
 app.use("/sites", siteRoutes);
 app.use("/clusters", clusterRoutes);
 app.use("/positions", positionRoutes);
