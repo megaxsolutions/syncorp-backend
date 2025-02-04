@@ -1,10 +1,15 @@
 import express from 'express';
 import cors from 'cors';
-import userRoutes from "./routes/user_routes.js";
+
+import employeeRoutes from "./routes/employee_routes.js";
+import mainRoutes from "./routes/main_routes.js";
+import departmentRoutes from "./routes/department_routes.js";
+import siteRoutes from "./routes/site_routes.js";
+import clusterRoutes from "./routes/cluster_routes.js";
+import positionRoutes from "./routes/position_routes.js";
+
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
-
-import { authenticateToken } from "./middleware/auth.js";
 
 
 dotenv.config();
@@ -20,11 +25,12 @@ app.use(express.text()); // Handles text/plain content type
 app.use(cors());
 
 
-app.use("/users", userRoutes);
-
-app.get('/protected', authenticateToken, (req, res) => {
-    res.status(200).json({ message: 'This is a protected route', data: req.user });
-});
+app.use("/main", mainRoutes);
+app.use("/employees", employeeRoutes);
+app.use("/deparrtments", departmentRoutes);
+app.use("/sites", siteRoutes);
+app.use("/clusters", clusterRoutes);
+app.use("/positions", positionRoutes);
 
 
 // Start the server

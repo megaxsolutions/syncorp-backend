@@ -1,15 +1,23 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET; // Replace with your own secret key
 
+
+
+function hashConverterMD5(password) {
+    return crypto.createHash('md5').update(String(password)).digest('hex');
+}
+
 export const authenticateToken = (req, res, next) => {
     // const token = req.headers['authorization']?.split(' ')[1]; // Get token from Authorization header
    // const token = req.headers['Authorization'];
-    const token = req.headers['x-jwt-token']; // Use the new header name
+    const token = hashConverterMD5(req.headers['x-jwt-token']);
 
+   
     //console.log('data:' + token);
     if (!token) {
         return res.sendStatus(401); // Unauthorized
