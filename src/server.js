@@ -9,6 +9,8 @@ import clusterRoutes from "./routes/cluster_routes.js";
 import positionRoutes from "./routes/position_routes.js";
 import employeeLevelRoutes from "./routes/employee_level_routes.js";
 import adminRoutes from "./routes/admin_routes.js";
+import holidayRoutes from "./routes/holiday_routes.js";
+import cutOffRoutes from "./routes/cutoff_routes.js";
 
 
 
@@ -37,6 +39,8 @@ app.use("/sites", siteRoutes);
 app.use("/clusters", clusterRoutes);
 app.use("/positions", positionRoutes);
 app.use("/employee_levels", employeeLevelRoutes);
+app.use("/holidays", holidayRoutes);
+app.use("/cutoffs", cutOffRoutes);
 
 
 

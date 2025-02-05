@@ -54,7 +54,7 @@ export const create_employee = asyncHandler(async (req, res) => {
          cluster_id, site_id, email, phone, address, 
          emergency_contact_person, emergency_contact_number, sss, 
          pagibig, philhealth, tin, basic_pay, employee_status, 
-         positionID  } = req.body;
+         positionID, employee_level, healthcare  } = req.body;
 
     try {
         const birthdateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -67,16 +67,16 @@ export const create_employee = asyncHandler(async (req, res) => {
         
             const sql  = 'INSERT INTO id_generator (datetime_created) VALUES (?)';
             const sql2 = 'INSERT INTO login (emp_ID, password, expiry_date) VALUES (?, ?, ?)';
-            const sql3 = 'INSERT INTO employee_profile (emp_ID, fName, mName, lName, bDate, date_hired, departmentID, clusterID, siteID, email, phone, address, emergency_contact_person, emergency_contact_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-            const sql4 = 'INSERT INTO employee_profile_benefits (emp_ID, sss, pagibig, philhealth, tin, basic_pay) VALUES (?, ?, ?, ?, ?, ?)';
-            const sql5 = 'INSERT INTO employee_profile_standing (emp_ID, employee_status, positionID) VALUES (?, ?, ?)';
+            const sql3 = 'INSERT INTO employee_profile (emp_ID, fName, mName, lName, bDate, date_hired, departmentID, clusterID, siteID, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            const sql4 = 'INSERT INTO employee_profile_benefits (emp_ID, sss, pagibig, philhealth, tin, basic_pay, healthcare) VALUES (?, ?, ?, ?, ?, ?, ?)';
+            const sql5 = 'INSERT INTO employee_profile_standing (emp_ID, employee_status, positionID, date_added, datetime_updated) VALUES (?, ?, ?, ?, ?)';
 
 
             const [insert_data_id_generator] = await db.promise().query(sql, [storeCurrentDateTime(0, 'hours')]);
             const [insert_data_login] = await db.promise().query(sql2, [insert_data_id_generator['insertId'], hash, storeCurrentDateTime(3, 'months')]);
-            const [insert_data_employee_profile] = await db.promise().query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number]);
-            const [insert_data_employee_profile_benefits] = await db.promise().query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay]);
-            const [insert_data_employee_profile_standing] = await db.promise().query(sql5, [insert_data_id_generator['insertId'], employee_status, positionID]);
+            const [insert_data_employee_profile] = await db.promise().query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level]);
+            const [insert_data_employee_profile_benefits] = await db.promise().query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay, healthcare]);
+            const [insert_data_employee_profile_standing] = await db.promise().query(sql5, [insert_data_id_generator['insertId'], employee_status, positionID, storeCurrentDateTime(0, 'months'), storeCurrentDateTime(0, 'months')]);
         }
 
         return res.status(200).json({ success: 'Account successfully created.' });
