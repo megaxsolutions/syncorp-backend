@@ -7,6 +7,10 @@ import departmentRoutes from "./routes/department_routes.js";
 import siteRoutes from "./routes/site_routes.js";
 import clusterRoutes from "./routes/cluster_routes.js";
 import positionRoutes from "./routes/position_routes.js";
+import employeeLevelRoutes from "./routes/employee_level_routes.js";
+import adminRoutes from "./routes/admin_routes.js";
+
+
 
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
@@ -26,11 +30,13 @@ app.use(cors());
 
 
 app.use("/main", mainRoutes);
+app.use("/admins", adminRoutes);
 app.use("/employees", employeeRoutes);
 app.use("/departments", departmentRoutes);
 app.use("/sites", siteRoutes);
 app.use("/clusters", clusterRoutes);
 app.use("/positions", positionRoutes);
+app.use("/employee_levels", employeeLevelRoutes);
 
 
 
