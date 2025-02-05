@@ -14,15 +14,15 @@ jobs:
 
       - name: Set up SSH Connection
         run: |
-          mkdir -p /home/runner/.ssh
-          chmod 700 /home/runner/.ssh
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" | tee /home/runner/.ssh/id_rsa > /dev/null
-          chmod 600 /home/runner/.ssh/id_rsa
-          ssh-keyscan -H 13.229.75.55 | tee -a /home/runner/.ssh/known_hosts > /dev/null
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 13.229.75.55 >> ~/.ssh/known_hosts
 
       - name: Deploy to EC2
         run: |
-          ssh -i /home/runner/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@13.229.75.55 << 'EOF'
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@13.229.75.55 << 'EOF'
             cd /home/ubuntu/sync-backend
             git pull origin main
             npm install
