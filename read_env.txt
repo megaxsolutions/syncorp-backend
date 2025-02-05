@@ -1,0 +1,12 @@
+PORT=4000
+
+DB_HOST=13.229.75.55
+DB_NAME=sync_db
+DB_USER=sync_admin
+DB_PASS=Kk9566678@!
+
+JWT_SECRET=test
+
+#DB_HOST=https://api.megaxsolutions.com/3306
+
+
