@@ -1,6 +1,6 @@
 PORT=4000
 
-DB_HOST=13.228.73.214
+DB_HOST=api.megaxsolutions.com
 DB_NAME=sync_db
 DB_USER=sync_admin
 DB_PASS=Kk9566678@!
