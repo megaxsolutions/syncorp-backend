@@ -3,7 +3,7 @@ name: Deploy to AWS EC2
 on:
   push:
     branches:
-      - main  # Change if you use a different branch
+      - main  # Change if using a different branch
 
 jobs:
   deploy:
@@ -14,11 +14,17 @@ jobs:
 
       - name: Set up SSH Connection
         run: |
-          sudo mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          sudo chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H 13.229.75.55 >> ~/.ssh/known_hosts
+          mkdir -p /tmp/ssh
+          chmod 700 /tmp/ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" | tee /tmp/ssh/id_rsa > /dev/null
+          chmod 600 /tmp/ssh/id_rsa
+          ssh-keyscan -H 13.229.75.55 | tee -a /tmp/ssh/known_hosts > /dev/null
 
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@13.229.75.55 "cd /home/ubuntu/sync-backend && ./deploy.sh"
+          ssh -i /tmp/ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@13.229.75.55 << 'EOF'
+            cd /home/ubuntu/sync-backend
+            git pull origin main
+            npm install
+            pm2 restart all
+          EOF
