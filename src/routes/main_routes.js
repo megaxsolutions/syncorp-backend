@@ -6,8 +6,7 @@ import { authenticateToken } from "../middleware/auth.js";
 
 const mainRoutes = Router();
 
-//mainRoutes.get('/get_all_dropdown_data', authenticateToken, MainController.get_all_dropdown_data);
-
 mainRoutes.get('/get_all_dropdown_data', MainController.get_all_dropdown_data);
+
 
 export default mainRoutes;
