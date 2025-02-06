@@ -12,7 +12,7 @@ adminRoutes.post('/add_admin', authenticateToken, AdminController.create_admin);
 adminRoutes.get('/get_all_admin', authenticateToken, AdminController.get_all_admin);
 
 adminRoutes.get('/protected', authenticateToken, (req, res) => {
-    res.status(200).json({ message: 'This is a protected route', data: req.user });
+    res.status(200).json({ data: req.user });
 });
 
 // dminRoutes.get('/protected', authenticateToken, (req, res) => {

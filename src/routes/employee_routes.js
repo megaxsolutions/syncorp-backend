@@ -18,7 +18,7 @@ employeeRoutes.get('/get_all_employee', authenticateToken, UserController.get_al
 
 
 employeeRoutes.get('/protected', authenticateToken, (req, res) => {
-    res.status(200).json({ message: 'This is a protected route', data: req.user });
+    res.status(200).json({ data: req.user });
 });
 
 

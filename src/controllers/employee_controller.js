@@ -132,7 +132,8 @@ export const login_employee = asyncHandler(async (req, res) => {
         employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
         employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
         employee_profile_standing.datetime_updated, employee_profile_standing.positionID
-        FROM login  LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
+        FROM login  
+        LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
         LEFT JOIN employee_profile_benefits ON employee_profile.emp_ID = employee_profile_benefits.emp_ID 
         LEFT JOIN employee_profile_standing ON employee_profile.emp_ID = employee_profile_standing.emp_ID 
         WHERE login.emp_ID = ?`;
