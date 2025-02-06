@@ -11,11 +11,13 @@ import employeeLevelRoutes from "./routes/employee_level_routes.js";
 import adminRoutes from "./routes/admin_routes.js";
 import holidayRoutes from "./routes/holiday_routes.js";
 import cutOffRoutes from "./routes/cutoff_routes.js";
-
-
+import attendanceRoutes from "./routes/attendance_routes.js";
 
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
+
+import { authenticateToken } from "./middleware/auth.js";
+
 
 
 dotenv.config();
@@ -31,16 +33,18 @@ app.use(express.text()); // Handles text/plain content type
 app.use(cors());
 
 
-app.use("/main", mainRoutes);
 app.use("/admins", adminRoutes);
 app.use("/employees", employeeRoutes);
-app.use("/departments", departmentRoutes);
-app.use("/sites", siteRoutes);
-app.use("/clusters", clusterRoutes);
-app.use("/positions", positionRoutes);
-app.use("/employee_levels", employeeLevelRoutes);
-app.use("/holidays", holidayRoutes);
-app.use("/cutoffs", cutOffRoutes);
+
+app.use("/main", authenticateToken, mainRoutes);
+app.use("/departments", authenticateToken, departmentRoutes);
+app.use("/sites", authenticateToken, siteRoutes);
+app.use("/clusters", authenticateToken, clusterRoutes);
+app.use("/positions", authenticateToken, positionRoutes);
+app.use("/employee_levels", authenticateToken, employeeLevelRoutes);
+app.use("/holidays", authenticateToken, holidayRoutes);
+app.use("/cutoffs", authenticateToken, cutOffRoutes);
+app.use("/attendances", authenticateToken, attendanceRoutes);
 
 
 
