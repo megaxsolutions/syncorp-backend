@@ -27,7 +27,7 @@ export const get_all_dropdown_data = asyncHandler(async (req, res) => {
         };
 
         // Return the merged results in the response
-        return res.status(200).json({ data: result });
+        return res.status(200).json({ data2: 2, data: result });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
