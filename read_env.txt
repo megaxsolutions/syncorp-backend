@@ -1,5 +1,4 @@
 PORT=8000
-
 DB_HOST=api.megaxsolutions.com
 DB_NAME=sync_db
 DB_USER=sync_admin
