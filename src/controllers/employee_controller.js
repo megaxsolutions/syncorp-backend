@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import db from '../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
 import dotenv from 'dotenv';
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 
