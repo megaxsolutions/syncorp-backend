@@ -10,6 +10,34 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET; // Replace with your own secret key
 
 
+function storeCurrentDateTime2(expirationAmount, expirationUnit) {
+    // Get the current date and time in Asia/Manila timezone
+    const currentDateTime = moment.tz("Asia/Manila");
+
+    // Calculate the expiration date and time
+    const expirationDateTime = currentDateTime.clone().add(expirationAmount, expirationUnit);
+
+    // Convert the expiration date-time to UTC and format it
+    const formattedExpirationDateTime = expirationDateTime.utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+
+    // Return the formatted expiration date-time
+    return formattedExpirationDateTime;
+}
+
+function storeCurrentDate2(expirationAmount, expirationUnit) {
+    // Get the current date and time in Asia/Manila timezone
+    const currentDateTime = moment.tz("Asia/Manila");
+
+    // Calculate the expiration date and time
+    const expirationDateTime = currentDateTime.clone().add(expirationAmount, expirationUnit);
+
+    // Convert the expiration date-time to UTC and format it
+    const formattedExpirationDateTime = expirationDateTime.utc().format('YYYY-MM-DD');
+
+    // Return the formatted expiration date-time
+    return formattedExpirationDateTime;
+}
+
 function storeCurrentDate(expirationAmount, expirationUnit) {
     // Get the current date and time in Asia/Manila timezone
     const currentDateTime = moment.tz("Asia/Manila");
@@ -60,8 +88,6 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
     const formattedExpirationDateTime = expirationDateTime.format('YYYY-MM-DD HH:mm:ss');
 
     // Return both current and expiration date-time
-
-    
     return formattedExpirationDateTime;
     // return {
     //     currentDateTime: formattedCurrentDateTime,
@@ -122,7 +148,7 @@ export const login_admin = asyncHandler(async (req, res) => {
             });
 
             const hashToken = hashConverterMD5(token);
-            const [data_token] = await db.promise().query(sql2, [emp_ID, token, storeCurrentDateTime(1, 'hours')]);
+            const [data_token] = await db.promise().query(sql2, [emp_ID, token, storeCurrentDate(1, 'hours')]);
             const [data_admin_login] = await db.promise().query(sql3, [0, emp_ID]);
 
             return res.status(200).json({ data: token, emp_id: login[0]['emp_ID'] });
@@ -142,7 +168,6 @@ export const update_admin_login = asyncHandler(async (req, res) => {
 
     try {
         const hash_password = hashConverterMD5(password);
-        //storeCurrentDateTime(expirationAmount, expirationUnit);
 
         const sql  = 'UPDATE admin_login SET login_attempts = ?, expiry_date = ? WHERE emp_ID = ?';
         const sql2 = 'UPDATE admin_login SET login_attempts = ?, password = ?, expiry_date = ? WHERE emp_ID = ?';
@@ -156,12 +181,12 @@ export const update_admin_login = asyncHandler(async (req, res) => {
         }
 
         if(!password) {
-            const [update_login_no_password] = await db.promise().query(sql, [login_attempts, storeCurrentDateTime(match[1], match[2]), emp_id]);
+            const [update_login_no_password] = await db.promise().query(sql, [login_attempts, storeCurrentDate(match[1], match[2]), emp_id]);
             if (update_login_no_password.affectedRows === 0) {
                 return res.status(404).json({ error: 'Admin not found.' });
             }
         } else {
-            const [update_login_password] = await db.promise().query(sql2, [login_attempts, hash_password, storeCurrentDateTime(match[1], match[2]), emp_id]);
+            const [update_login_password] = await db.promise().query(sql2, [login_attempts, hash_password, storeCurrentDate(match[1], match[2]), emp_id]);
             
             if (update_login_password.affectedRows === 0) {
                 return res.status(404).json({ error: 'Admin not found.' });

@@ -8,8 +8,8 @@ const adminRoutes = Router();
 adminRoutes.post('/login_admin', AdminController.login_admin);
 
 adminRoutes.put('/update_employee_login/:emp_id', authenticateToken, AdminController.update_admin_login);
-adminRoutes.post('/add_admin', authenticateToken, AdminController.create_admin);
-adminRoutes.get('/get_all_admin', authenticateToken, AdminController.get_all_admin);
+adminRoutes.post('/add_admin', AdminController.create_admin);
+adminRoutes.get('/get_all_admin', AdminController.get_all_admin);
 
 adminRoutes.get('/protected', authenticateToken, (req, res) => {
     res.status(200).json({ data: req.user });
