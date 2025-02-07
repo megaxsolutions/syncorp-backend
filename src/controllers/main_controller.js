@@ -12,6 +12,7 @@ export const get_all_dropdown_data = asyncHandler(async (req, res) => {
         const sql3 = 'SELECT * FROM sites'; // Use a parameterized query
         const sql4 = 'SELECT * FROM positions'; // Use a parameterized query
         const sql5 = 'SELECT * FROM employee_levels'; // Use a parameterized query
+        
 
 
 
