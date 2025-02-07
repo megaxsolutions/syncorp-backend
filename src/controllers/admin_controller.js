@@ -60,6 +60,8 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
     const formattedExpirationDateTime = expirationDateTime.format('YYYY-MM-DD HH:mm:ss');
 
     // Return both current and expiration date-time
+
+    
     return formattedExpirationDateTime;
     // return {
     //     currentDateTime: formattedCurrentDateTime,
