@@ -120,22 +120,22 @@ export const login_employee = asyncHandler(async (req, res) => {
 
     try {
         const hash = hashConverterMD5(password);
-      //  const sql  = 'SELECT * FROM login WHERE emp_ID = ?'; // Use a parameterized query
+        const sql  = 'SELECT * FROM login WHERE emp_ID = ?'; // Use a parameterized query
 
-        const sql = `SELECT login.emp_ID, login.password, login.login_attempts, login.expiry_date, 
-        employee_profile.fName, employee_profile.mName, employee_profile.lName, employee_profile.bDate,
-        employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
-        employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
-        employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
-        employee_profile.employee_level, employee_profile_benefits.sss, employee_profile_benefits.pagibig,
-        employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
-        employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
-        employee_profile_standing.datetime_updated, employee_profile_standing.positionID
-        FROM login  
-        LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
-        LEFT JOIN employee_profile_benefits ON employee_profile.emp_ID = employee_profile_benefits.emp_ID 
-        LEFT JOIN employee_profile_standing ON employee_profile.emp_ID = employee_profile_standing.emp_ID 
-        WHERE login.emp_ID = ?`;
+        // const sql = `SELECT login.emp_ID, login.password, login.login_attempts, login.expiry_date, 
+        // employee_profile.fName, employee_profile.mName, employee_profile.lName, employee_profile.bDate,
+        // employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
+        // employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
+        // employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
+        // employee_profile.employee_level, employee_profile_benefits.sss, employee_profile_benefits.pagibig,
+        // employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
+        // employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
+        // employee_profile_standing.datetime_updated, employee_profile_standing.positionID
+        // FROM login  
+        // LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
+        // LEFT JOIN employee_profile_benefits ON employee_profile.emp_ID = employee_profile_benefits.emp_ID 
+        // LEFT JOIN employee_profile_standing ON employee_profile.emp_ID = employee_profile_standing.emp_ID 
+        // WHERE login.emp_ID = ?`;
         const sql2 = 'INSERT INTO tokens (emp_ID, token, expiry_datetime) VALUES (?, ?, ?)';
         const sql3 = 'UPDATE login SET login_attempts = ? WHERE emp_ID = ?';
 
@@ -168,7 +168,7 @@ export const login_employee = asyncHandler(async (req, res) => {
 
         return res.status(400).json({ error: 'Failed to login wrong password.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to login ' });
+        return res.status(500).json({ error: 'Failed to login' + error.stack});
     }
 });
 
