@@ -146,7 +146,9 @@ export const login_employee = asyncHandler(async (req, res) => {
         // if(storeCurrentDate(0, 'months') > expiryDate) {
         //     return res.status(400).json({ error: 'Your account has expired. Please contact the administrator for assistance.' });        
         // }
-
+        if (login.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
         if(login[0]['login_attempts'] == 5) {
             return res.status(400).json({ error: 'Please contact the admin.' });
         }
