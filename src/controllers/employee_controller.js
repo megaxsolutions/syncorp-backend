@@ -142,7 +142,7 @@ export const login_employee = asyncHandler(async (req, res) => {
         const [login] = await db.promise().query(sql, [emp_ID]);
         const dateObject = new Date(login[0]['expiry_date']);
         const expiryDate = dateObject.toISOString().split('T')[0];
-
+        console.log(login);
         if(storeCurrentDate(0, 'months') > expiryDate) {
             return res.status(400).json({ error: 'Your account has expired. Please contact the administrator for assistance.' });        
         }
