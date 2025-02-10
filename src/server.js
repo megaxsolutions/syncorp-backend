@@ -36,7 +36,7 @@ app.use(cors());
 app.use("/admins", adminRoutes);
 app.use("/employees", employeeRoutes);
 
-app.use("/main", authenticateToken, mainRoutes);
+app.use("/main", mainRoutes);
 app.use("/departments", authenticateToken, departmentRoutes);
 app.use("/sites", authenticateToken, siteRoutes);
 app.use("/clusters", authenticateToken, clusterRoutes);
