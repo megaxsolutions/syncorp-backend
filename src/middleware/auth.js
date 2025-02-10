@@ -23,7 +23,7 @@ export const authenticateToken = (req, res, next) => {
 
     //console.log('data:' + token);
     if (!token) {
-        return res.sendStatus(401); // Unauthorized
+        return res.sendStatus(402); // Unauthorized
     }
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
