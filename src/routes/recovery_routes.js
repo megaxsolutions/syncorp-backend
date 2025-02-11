@@ -6,8 +6,8 @@ import { authenticateToken } from "../middleware/auth.js";
 
 const recoveryRoutes = Router();
 
-recoveryRoutes.get('/send_otp', recoveryController.otp_recovery);
-recoveryRoutes.get('/otp_verification/:emp_id', recoveryController.otp_verification);
+recoveryRoutes.post('/send_otp', recoveryController.otp_recovery);
+recoveryRoutes.post('/otp_verification/:emp_id', recoveryController.otp_verification);
 recoveryRoutes.put('/account_recovery/:emp_id/:type', recoveryController.account_recovery);
 
 
