@@ -26,52 +26,46 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
     // };
 }
 
-
-export const create_attendance_time_in = asyncHandler(async (req, res) => {
-    const { emp_id, time_in, cluster_id } = req.body;
-
+export const create_break = asyncHandler(async (req, res) => {
     try {
-        const sql = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date ) VALUES (?, ?, ?, ?, ?)';
-        const [insert_data_site] = await db.promise().query(sql, [emp_id, time_in, cluster_id, storeCurrentDateTime(0, 'hours') ]);
+        const sql = 'INSERT INTO breaks (breakIN) VALUES (?)';
+        const [insert_data_break] = await db.promise().query(sql, [storeCurrentDateTime(0, 'hours')]);
       
         // Return the merged results in the response
-        return res.status(200).json({ success: 'Attendance successfully created.' });
+        return res.status(200).json({ success: 'Break successfully created.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to create attendance.' });
-    }
-});
-
-export const update_attendance_time_out = asyncHandler(async (req, res) => {
-    const { time_out } = req.body;
-    const { attendance_id } = req.params; // Assuming department_id is passed as a URL parameter
-
-
-    try {
-        const sql = 'UPDATE attendance SET timeOUT = ? WHERE id = ?';
-        const [update_data_site] = await db.promise().query(sql, [time_out, attendance_id ]);
-      
-        // Return the merged results in the response
-        return res.status(200).json({ success: 'Attendance successfully updated.' });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to update attendance.' });
+        return res.status(500).json({ error: 'Failed to create break.' });
     }
 });
 
 
+export const update_break_break_out = asyncHandler(async (req, res) => {
+    const { break_id } = req.params; // Assuming department_id is passed as a URL parameter
 
-export const get_all_attendance = asyncHandler(async (req, res) => {
+
     try {
-        const sql  = 'SELECT * FROM attendance'; // Use a parameterized query
+        const sql = 'UPDATE breaks SET breakOUT = ? WHERE id = ?';
+        const [update_data_break] = await db.promise().query(sql, [storeCurrentDateTime(0, 'hours'), break_id]);
+      
+        // Return the merged results in the response
+        return res.status(200).json({ success: 'Break successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update break.' });
+    }
+});
 
-        const [attendance] = await db.promise().query(sql);
+
+
+export const get_all_break = asyncHandler(async (req, res) => {
+    try {
+        const sql  = 'SELECT * FROM breaks'; // Use a parameterized query
+
+        const [breaks] = await db.promise().query(sql);
 
         // Return the merged results in the response
-        return res.status(200).json({ data: attendance });
+        return res.status(200).json({ data: breaks });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
 
-
-  
-  

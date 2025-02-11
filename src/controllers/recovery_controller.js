@@ -51,21 +51,32 @@ export const otp_recovery = asyncHandler(async (req, res) => {
         return res.status(404).json({ error: 'User not found.' });
     }
 
-    const [insert_data_site] = await db.promise().query(sql2, [randomNumber, emp_ID, storeCurrentDateTime(10, 'minutes')]);
+    const [insert_data_site] = await db.promise().query(sql2, [randomNumber, emp_ID, storeCurrentDateTime(30, 'seconds')]);
 
     mailer(employee_profile[0]['email'], "SYNERGIST", randomNumber);
 
     return res.status(200).json({ success: 'OTP has been successfully sent.' });
 });
+
+function formatTime(date) {
+    const options = {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: true, // Use 12-hour format
+        timeZone: 'Asia/Manila' // Adjust to your desired time zone
+    };
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+}
   
 export const otp_verification = asyncHandler(async (req, res) => {
-    const { otp } = req.body;
+    const { otp_code } = req.body;
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
         const sql = 'SELECT * FROM otp WHERE emp_ID = ? ORDER BY id DESC LIMIT 1';
 
-        const [otp ] = await db.promise().query(sql, [emp_id]);
+        const [otp] = await db.promise().query(sql, [emp_id]);
             
         if(otp.length == 0) {
             return res.status(404).json({ error: 'User not found.' });
@@ -74,12 +85,14 @@ export const otp_verification = asyncHandler(async (req, res) => {
 
         const date1 = new Date(convertToUTC(storeCurrentDateTime(0, 'months')));
         const date2 = new Date(otp[0]['date_time']);
-        
-        if(date1 > date2) {
+        const time1 = formatTime(date1);
+        const time2 = formatTime(date2);
+
+        if(time1 > time2) {
             return res.status(400).json({ error: 'Your OTP has expired. Please request a new one.' });
         }
 
-        if(otp != otp[0]['code']) {
+        if(otp_code != otp[0]['code']) {
             return res.status(400).json({ error: 'Invalid OTP. Please try again.' });
         }
 
