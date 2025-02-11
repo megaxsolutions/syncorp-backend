@@ -58,5 +58,20 @@ export const update_attendance_time_out = asyncHandler(async (req, res) => {
 });
 
 
+
+export const get_all_attendance = asyncHandler(async (req, res) => {
+    try {
+        const sql  = 'SELECT * FROM attendance'; // Use a parameterized query
+
+        const [attendance] = await db.promise().query(sql);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: attendance });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+
   
   

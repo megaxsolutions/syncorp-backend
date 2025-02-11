@@ -18,22 +18,29 @@ export const authenticateToken = (req, res, next) => {
    // const token = req.headers['Authorization'];
     //const token = hashConverterMD5(req.headers['x-jwt-token']);
    // const token  = req.headers['x-jwt-token'];
-    const token  = req.headers['x-jwt-token'];
-    const emp_id = req.headers['x-emp-id'];
+    const api_key  = req.headers['x-api-key'];
+    const token    = req.headers['x-jwt-token'];
+    const emp_id   = req.headers['x-emp-id'];
 
-    //console.log('data:' + token);
+    // if (!token || !api_key) {
+    //     return res.sendStatus(400); // Bad Request
+    // }
+
     if (!token) {
-        return res.sendStatus(401); // Unauthorized
+        return res.sendStatus(400); // Bad Request
     }
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
             return res.sendStatus(403); // Forbidden
-        }
+        }    
+        console.log(user.login[0]['emp_ID']);
+        console.log(emp_id);
 
         if(user.login[0]['emp_ID'] != emp_id) {
             return res.sendStatus(401); // Unauthorized
         }
+    
 
         req.user = user; // Save user info in request
         next(); // Proceed to the next middleware or route handler

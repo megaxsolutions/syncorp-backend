@@ -5,6 +5,7 @@ import db from '../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import sendEmail from "../utils/mailer.js";
 
 
 dotenv.config();
@@ -79,7 +80,7 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
 
 export const create_employee = asyncHandler(async (req, res) => {
-    const { birthdate, fname, mname, lname, department_id, 
+    const { birthdate, fname, mname, lname, date_hired, department_id, 
          cluster_id, site_id, email, phone, address, 
          emergency_contact_person, emergency_contact_number, sss, 
          pagibig, philhealth, tin, basic_pay, employee_status, 
@@ -91,7 +92,11 @@ export const create_employee = asyncHandler(async (req, res) => {
         // Check if birthdate matches the regex
         if (!birthdateRegex.test(birthdate)) {
             return res.status(400).json({ message: 'Invalid birthdate format. Please use YYYY-MM-DD.' });
-        } else {
+        } 
+
+        if (!birthdateRegex.test(date_hired)) {
+            return res.status(400).json({ message: 'Invalid date hired format. Please use YYYY-MM-DD.' });
+        }
             const hash = hashConverterMD5(dateConverter(birthdate));
         
             const sql  = 'INSERT INTO id_generator (datetime_created) VALUES (?)';
@@ -103,10 +108,10 @@ export const create_employee = asyncHandler(async (req, res) => {
 
             const [insert_data_id_generator] = await db.promise().query(sql, [storeCurrentDateTime(0, 'hours')]);
             const [insert_data_login] = await db.promise().query(sql2, [insert_data_id_generator['insertId'], hash, storeCurrentDate(3, 'months')]);
-            const [insert_data_employee_profile] = await db.promise().query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, storeCurrentDateTime(0, 'months'), department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level]);
+            const [insert_data_employee_profile] = await db.promise().query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level]);
             const [insert_data_employee_profile_benefits] = await db.promise().query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay, healthcare]);
             const [insert_data_employee_profile_standing] = await db.promise().query(sql5, [insert_data_id_generator['insertId'], employee_status, positionID, storeCurrentDateTime(0, 'months'), storeCurrentDateTime(0, 'months')]);
-        }
+        
 
         return res.status(200).json({ success: 'Account successfully created.' });
     } catch (error) {
@@ -155,7 +160,7 @@ export const login_employee = asyncHandler(async (req, res) => {
         if(login[0]['password'] == hash) {
             // Generate a JWT token
             const token = jwt.sign({ login }, JWT_SECRET, {
-                expiresIn: '1h' // Token expiration time
+                expiresIn: '7d' // Token expiration time
             });
 
             //const hashTokenBCRYPT = hashConverterBCRYPT(token);
@@ -174,16 +179,12 @@ export const login_employee = asyncHandler(async (req, res) => {
 });
 
 
-export const update_employee_login = asyncHandler(async (req, res) => {
-    const { login_attempts, expiry_date, password } = req.body;
+export const update_employee_expiration = asyncHandler(async (req, res) => {
+    const { expiry_date } = req.body;
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
-        const hash_password = hashConverterMD5(password);
-
-        const sql  = 'UPDATE login SET login_attempts = ?, expiry_date = ? WHERE emp_ID = ?';
-        const sql2 = 'UPDATE login SET login_attempts = ?, password = ?, expiry_date = ? WHERE emp_ID = ?';
-
+        const sql  = 'UPDATE login SET expiry_date = ? WHERE emp_ID = ?';
 
         const expirydateRegex = /^\d+\s+(hours|months|years)$/; // For "1 hours", "1 months", or "1 years"
         const match = expiry_date.match(expirydateRegex);
@@ -193,13 +194,37 @@ export const update_employee_login = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: 'Invalid expiry date format. Please use "<number> hours", "<number> months", or "<number> years".' });
         }
 
+        const [update_admin_expiration ] = await db.promise().query(sql, [storeCurrentDate(match[1], match[2]), emp_id]);
+            
+        if (update_admin_expiration.affectedRows === 0) {
+            return res.status(404).json({ error: 'Employee not found.' });
+        }
+        
+
+        return res.status(200).json({ success: 'Employee successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update employee.' });
+    }
+});
+
+export const update_employee_login = asyncHandler(async (req, res) => {
+    const { login_attempts, password } = req.body;
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+
+    try {
+        const hash_password = hashConverterMD5(password);
+
+        const sql  = 'UPDATE login SET login_attempts = ? WHERE emp_ID = ?';
+        const sql2 = 'UPDATE login SET login_attempts = ?, password = ? WHERE emp_ID = ?';
+
+
         if(!password) {
-            const [update_login_no_password] = await db.promise().query(sql, [login_attempts, storeCurrentDateTime(match[1], match[2]), emp_id]);
+            const [update_login_no_password] = await db.promise().query(sql, [login_attempts, emp_id]);
             if (update_login_no_password.affectedRows === 0) {
                 return res.status(404).json({ error: 'Employee not found.' });
             }
         } else {
-            const [update_login_password] = await db.promise().query(sql2, [login_attempts, hash_password, storeCurrentDateTime(match[1], match[2]), emp_id]);
+            const [update_login_password] = await db.promise().query(sql2, [login_attempts, hash_password, emp_id]);
             
             if (update_login_password.affectedRows === 0) {
                 return res.status(404).json({ error: 'Employee not found.' });
@@ -215,21 +240,30 @@ export const update_employee_login = asyncHandler(async (req, res) => {
 
 
 export const update_employee = asyncHandler(async (req, res) => {
-    const { birthdate, fname, mname, lname, department_id, 
+    const { birthdate, fname, mname, lname, date_hired, department_id, 
          cluster_id, site_id, email, phone, address, 
          emergency_contact_person, emergency_contact_number, sss, 
          pagibig, philhealth, tin, basic_pay, employee_status, 
          positionID, employee_level, healthcare  } = req.body;
 
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+    
+    const birthdateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
+    // Check if birthdate matches the regex
+    if (!birthdateRegex.test(birthdate)) {
+        return res.status(400).json({ message: 'Invalid birthdate format. Please use YYYY-MM-DD.' });
+    }
 
+    if (!birthdateRegex.test(date_hired)) {
+        return res.status(400).json({ message: 'Invalid date hired format. Please use YYYY-MM-DD.' });
+    }
     try {
-        const sql  = 'UPDATE employee_profile SET fName = ?, mName = ?, lName = ?, bDate = ?, departmentID = ?, clusterID = ?, siteID = ?, email = ?, phone = ?, address = ?, emergency_contact_person = ?, emergency_contact_number = ?, employee_level = ? WHERE emp_ID = ?';
+        const sql  = 'UPDATE employee_profile SET fName = ?, mName = ?, lName = ?, bDate = ?, date_hired = ?, departmentID = ?, clusterID = ?, siteID = ?, email = ?, phone = ?, address = ?, emergency_contact_person = ?, emergency_contact_number = ?, employee_level = ? WHERE emp_ID = ?';
         const sql2 = 'UPDATE employee_profile_benefits SET sss = ?, pagibig = ?, philhealth = ?, tin = ?, basic_pay = ?, healthcare = ? WHERE emp_ID = ?';
         const sql3 = 'UPDATE employee_profile_standing SET employee_status = ?, positionID = ?, datetime_updated = ? WHERE emp_ID = ?';
 
-        const [insert_data_employee_profile] = await db.promise().query(sql, [fname, mname, lname, birthdate, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, emp_id]);
+        const [insert_data_employee_profile] = await db.promise().query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, emp_id]);
         const [insert_data_employee_profile_benefits] = await db.promise().query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, emp_id]);
         const [insert_data_employee_profile_standing] = await db.promise().query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
 

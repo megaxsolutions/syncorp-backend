@@ -12,7 +12,7 @@ export const get_all_dropdown_data = asyncHandler(async (req, res) => {
         const sql3 = 'SELECT * FROM sites'; // Use a parameterized query
         const sql4 = 'SELECT * FROM positions'; // Use a parameterized query
         const sql5 = 'SELECT * FROM employee_levels'; // Use a parameterized query
-        
+        const sql6 = 'SELECT * FROM admin_level'; // Use a parameterized query
 
 
 
@@ -21,6 +21,8 @@ export const get_all_dropdown_data = asyncHandler(async (req, res) => {
         const [sites] = await db.promise().query(sql3);
         const [positions] = await db.promise().query(sql4);
         const [employee_levels] = await db.promise().query(sql5);
+        const [admin_level] = await db.promise().query(sql6);
+
 
 
           // Merge the results into a single object
@@ -29,7 +31,8 @@ export const get_all_dropdown_data = asyncHandler(async (req, res) => {
             clusters,
             sites,
             positions,
-            employee_levels
+            employee_levels,
+            admin_level
         };
 
         // Return the merged results in the response
