@@ -1,12 +1,20 @@
-PORT=4000
+PORT=8000
 
-DB_HOST=13.229.75.55
+DB_HOST=api.megaxsolutions.com
+
 DB_NAME=sync_db
 DB_USER=sync_admin
 DB_PASS=Kk9566678@!
 
-JWT_SECRET=test
+#EMAIL_USER=projectqr00@gmail.com
+#EMAIL_PASS=jalrejeyeajpvzge
 
-#DB_HOST=https://api.megaxsolutions.com/3306
+EMAIL_USER=megaxsolutions@gmail.com
+EMAIL_PASS=oiwibzbgbokxmwwg
+
+
+
+JWT_SECRET=test
+#DB_HOST=13.229.75.55
 
 
