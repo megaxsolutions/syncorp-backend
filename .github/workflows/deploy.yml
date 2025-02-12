@@ -25,8 +25,8 @@ jobs:
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@13.229.75.55 << 'EOF'
             cd /home/ubuntu/sync-backend
             git pull origin main
-            chmod 755 /home/ubuntu/sync-backend/src/
-            sudo chown -R ubuntu:ubuntu /home/ubuntu/sync-backend/src/
+            chmod 755 /home/ubuntu/sync-backend/syncorp-backend/src/
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/sync-backend/syncorp-backend/src/
             npm install
             pm2 restart all
           EOF
