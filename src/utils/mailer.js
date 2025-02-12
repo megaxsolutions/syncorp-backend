@@ -23,7 +23,7 @@ const sendEmail = async (email, subject, otp) => {
         <p style="font-size: 16px; color: #333;">Hello,</p>
         <p style="font-size: 16px; color: #333;">
           Your OTP code is <strong style="color: #FF5722; font-size: 20px;">${otp}</strong>. 
-          Use this code to complete your password reset process. This code will expire in 3 minutes.
+          Use this code to complete your password reset process. This code will expire in 10 minutes.
         </p>
         <p style="font-size: 16px; color: #333;">
           If you did not request a password reset, please ignore this email.
