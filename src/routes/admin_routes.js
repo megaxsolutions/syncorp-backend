@@ -5,7 +5,7 @@ import { authenticateToken } from "../middleware/auth.js";
 
 const adminRoutes = Router();
 
-
+//data
 adminRoutes.post('/login_admin', AdminController.login_admin);
 
 
