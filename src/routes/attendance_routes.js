@@ -9,6 +9,7 @@ const attendanceRoutes = Router();
 
 attendanceRoutes.post('/add_attendance', AttendanceController.create_attendance_time_in);
 attendanceRoutes.put('/update_attendance/:attendance_id', AttendanceController.update_attendance_time_out);
+attendanceRoutes.get('/get_all_attendance', AttendanceController.get_all_attendance);
 
 
 export default attendanceRoutes;
