@@ -14,8 +14,8 @@ npm-debug.log*
 #build
 
 # Temporary files
-tmp
-temp
+#tmp
+#temp
 
 # IDE specific files
 .vscode/
