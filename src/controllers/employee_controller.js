@@ -128,6 +128,7 @@ export const login_employee = asyncHandler(async (req, res) => {
 
     try {
         const hash = hashConverterMD5(password);
+        
         const sql = `SELECT login.emp_ID, login.password, login.login_attempts, login.expiry_date, 
         employee_profile.fName, employee_profile.mName, employee_profile.lName, employee_profile.bDate,
         employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
@@ -143,7 +144,6 @@ export const login_employee = asyncHandler(async (req, res) => {
         LEFT JOIN employee_profile_benefits ON employee_profile.emp_ID = employee_profile_benefits.emp_ID 
         LEFT JOIN employee_profile_standing ON employee_profile.emp_ID = employee_profile_standing.emp_ID 
         WHERE login.emp_ID = ?`;
-        
         const sql2 = 'INSERT INTO tokens (emp_ID, token, expiry_datetime) VALUES (?, ?, ?)';
         const sql3 = 'UPDATE login SET login_attempts = ? WHERE emp_ID = ?';
 
