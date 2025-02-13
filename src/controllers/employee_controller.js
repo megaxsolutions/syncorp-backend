@@ -143,6 +143,7 @@ export const login_employee = asyncHandler(async (req, res) => {
         LEFT JOIN employee_profile_benefits ON employee_profile.emp_ID = employee_profile_benefits.emp_ID 
         LEFT JOIN employee_profile_standing ON employee_profile.emp_ID = employee_profile_standing.emp_ID 
         WHERE login.emp_ID = ?`;
+
         const sql2 = 'INSERT INTO tokens (emp_ID, token, expiry_datetime) VALUES (?, ?, ?)';
         const sql3 = 'UPDATE login SET login_attempts = ? WHERE emp_ID = ?';
 

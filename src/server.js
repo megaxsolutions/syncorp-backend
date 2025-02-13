@@ -56,8 +56,6 @@ app.use(cors());
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-console.log((path.join(__dirname, '../uploads')));
-
 app.use("/admins", adminRoutes);
 app.use("/employees", employeeRoutes);
 app.use("/recovery", recoveryRoutes);
