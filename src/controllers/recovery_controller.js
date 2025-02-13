@@ -120,7 +120,7 @@ export const otp_verification = asyncHandler(async (req, res) => {
         if(otp_code != otp[0]['code']) {
             return res.status(400).json({ error: 'Invalid OTP. Please try again.' });
         }
-        return res.status(200).json({ data1: otp[0]['date_time'], date1: date1, date2: date2, time3: time3, time1: time1, time2: time2, test:1 });
+        return res.status(200).json({ data1: otp[0]['date_time'], date1: date1, date2: date2, time3: time3, time1: time1, time2: time2, test:12 });
 
         return res.status(200).json({ success: 'OTP is correct. Operation successful.' });    
     } catch (error) {
