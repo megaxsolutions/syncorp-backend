@@ -107,12 +107,12 @@ export const otp_verification = asyncHandler(async (req, res) => {
 
 
         const date1 = new Date(convertToUTC(storeCurrentDateTime(0, 'months')));
-        //const date2 = new Date(convertToUTC(otp[0]['date_time']));
-        const date2 = formatDateTo12HourTime(convertToUTC(otp[0]['date_time']));
+        const date2 = new Date(convertToUTC(otp[0]['date_time']));
+        const date3 = formatDateTo12HourTime(convertToUTC(otp[0]['date_time']));
         const time1 = formatTime(date1);
         const time2 = formatTime(date2);
         
-        return res.status(200).json({ data1: otp[0]['date_time'], date1: date1, date2: date2, time1: time1, time2: time2, test:123 });
+        return res.status(200).json({ data1: otp[0]['date_time'], date1: date1, date2: date2, date3: date3, time1: time1, time2: time2, test:1234 });
 
         // if(time1 > time2) {
         //     return res.status(400).json({ error: 'Your OTP has expired. Please request a new one.' });
