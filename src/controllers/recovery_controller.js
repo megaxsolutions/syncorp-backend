@@ -74,7 +74,7 @@ export const otp_recovery = asyncHandler(async (req, res) => {
         return res.status(404).json({ error: 'User not found.' });
     }
 
-    const [insert_data_site] = await db.promise().query(sql2, [randomNumber, emp_ID, storeCurrentDateTime(30, 'seconds')]);
+    const [insert_data_site] = await db.promise().query(sql2, [randomNumber, emp_ID, storeCurrentDateTime(1, 'minutes')]);
 
     mailer(employee_profile[0]['email'], "SYNERGIST", randomNumber);
 
