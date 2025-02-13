@@ -74,7 +74,7 @@ export const otp_recovery = asyncHandler(async (req, res) => {
         return res.status(404).json({ error: 'User not found.' });
     }
 
-    const [insert_data_site] = await db.promise().query(sql2, [randomNumber, emp_ID, storeCurrentDateTime(10, 'minutes')]);
+    const [insert_data_site] = await db.promise().query(sql2, [randomNumber, emp_ID, storeCurrentDateTime(30, 'seconds')]);
 
     mailer(employee_profile[0]['email'], "SYNERGIST", randomNumber);
 
@@ -112,15 +112,15 @@ export const otp_verification = asyncHandler(async (req, res) => {
         const time1 = formatTime(date1);
         const time2 = formatTime(date2);
         
-        return res.status(200).json({ data1: otp[0]['date_time'], date1: date1, date2: date2, date3: date3, time1: time1, time2: time2, test:1234 });
 
-        // if(time1 > time2) {
-        //     return res.status(400).json({ error: 'Your OTP has expired. Please request a new one.' });
-        // }
+        if(time1 > date3) {
+             return res.status(400).json({ error: 'Your OTP has expired. Please request a new one.' });
+        }
 
         if(otp_code != otp[0]['code']) {
             return res.status(400).json({ error: 'Invalid OTP. Please try again.' });
         }
+        return res.status(200).json({ data1: otp[0]['date_time'], date1: date1, date2: date2, date3: date3, time1: time1, time2: time2, test:1 });
 
         return res.status(200).json({ success: 'OTP is correct. Operation successful.' });    
     } catch (error) {
