@@ -112,12 +112,6 @@ export const otp_verification = asyncHandler(async (req, res) => {
         const time2 = formatTime(date2);
         const time3 = formatDateTo12HourTime(convertToUTC(otp[0]['date_time']));
 
-        console.log(date1);
-        console.log(date2);
-        console.log(time1);
-        console.log(time2);
-        console.log(time3);
-
 
         if(time1 > time3) {
              return res.status(400).json({ error: 'Your OTP has expired. Please request a new one.' });
