@@ -9,6 +9,29 @@ function hashConverterMD5(password) {
     return crypto.createHash('md5').update(String(password)).digest('hex');
 }
 
+function formatDateTo12HourTime(isoDateString) {
+    const date = new Date(isoDateString);
+    
+    // Get hours, minutes, and seconds
+    let hours = date.getUTCHours(); // Use getUTCHours() if the date is in UTC
+    const minutes = date.getUTCMinutes();
+    const seconds = date.getUTCSeconds();
+    
+    // Determine AM or PM suffix
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    // Convert to 12-hour format
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    
+    // Format minutes and seconds to be two digits
+    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+    const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+    
+    // Return the formatted time
+    return `${hours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
+}
+
 
 function convertToUTC(dateString) {
     // Parse the input date string in Asia/Manila timezone
@@ -84,8 +107,8 @@ export const otp_verification = asyncHandler(async (req, res) => {
 
 
         const date1 = new Date(convertToUTC(storeCurrentDateTime(0, 'months')));
-        const date2 = new Date(convertToUTC(otp[0]['date_time']));
-
+        //const date2 = new Date(convertToUTC(otp[0]['date_time']));
+        const date2 = formatDateTo12HourTime(convertToUTC(otp[0]['date_time']));
         const time1 = formatTime(date1);
         const time2 = formatTime(date2);
         
