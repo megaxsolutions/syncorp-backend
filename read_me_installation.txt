@@ -8,6 +8,7 @@ npm install dotenv --save
 npm install bcrypt
 npm install jwt-decode
 npm install nodemailer
+npm install multer
 
 npm install express-async-handler express mysql2 sequelize cors -g nodemon body-parser jsonwebtoken
 

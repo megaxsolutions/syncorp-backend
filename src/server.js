@@ -19,6 +19,9 @@ import dtrRoutes from "./routes/dtr_routes.js";
 import recoveryRoutes from "./routes/recovery_routes.js";
 import adminLevelRoutes from "./routes/admin_level_routes.js";
 import breakRoutes from "./routes/break_routes.js";
+import leaveRequestRoutes from "./routes/leave_request_routes.js";
+import leaveTypeRoutes from "./routes/leave_type_routes.js";
+import overtimeTypeRoutes from "./routes/overtime_type_routes.js";
 
 
 import bodyParser from 'body-parser';
@@ -26,6 +29,16 @@ import dotenv from 'dotenv';
 
 import { authenticateToken } from "./middleware/auth.js";
 
+
+import path from 'path'; // Import the path module
+import fs from 'fs'; // Import fs to check if the directory exists
+import { fileURLToPath } from 'url'; // Import fileURLToPath
+import { dirname } from 'path'; // Import dirname
+
+
+// Get the current directory name
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 
 dotenv.config();
@@ -41,6 +54,9 @@ app.use(express.urlencoded({ extended: true }));
 //app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+console.log((path.join(__dirname, '../uploads')));
 
 app.use("/admins", adminRoutes);
 app.use("/employees", employeeRoutes);
@@ -55,9 +71,13 @@ app.use("/employee_levels", authenticateToken, employeeLevelRoutes);
 app.use("/admin_levels", authenticateToken, adminLevelRoutes);
 app.use("/holidays", authenticateToken, holidayRoutes);
 app.use("/cutoffs", authenticateToken, cutOffRoutes);
-app.use("/attendances", attendanceRoutes);
+app.use("/attendances", authenticateToken, attendanceRoutes);
 app.use("/dtr", authenticateToken, dtrRoutes);
 app.use("/breaks", authenticateToken, breakRoutes);
+app.use("/leave_requests", authenticateToken, leaveRequestRoutes);
+app.use("/leave_types", authenticateToken, leaveTypeRoutes);
+app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
+
 
 
 db.connect(err => {
