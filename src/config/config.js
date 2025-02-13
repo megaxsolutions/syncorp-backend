@@ -10,7 +10,7 @@ const db = mysql.createConnection({
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
     port: 3306,
-    timezone: 'Asia/Manila' // Set the timezone to Asia/Manila
+    timezone: '+08:00' // Set the timezone to UTC+8
 });
 
 
