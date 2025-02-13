@@ -47,7 +47,7 @@ export const update_holiday = asyncHandler(async (req, res) => {
 
 
     try {
-        const sql = 'UPDATE holidays SET date = ?, holiday_name = ?, holiday_type =?  WHERE id = ?';        
+        const sql = 'UPDATE holidays SET date = ?, holiday_name = ?, holiday_type = ?  WHERE id = ?';        
         const [result] = await db.promise().query(sql, [date, holiday_name, holiday_type, holiday_id]);
 
         if (result.affectedRows === 0) {
