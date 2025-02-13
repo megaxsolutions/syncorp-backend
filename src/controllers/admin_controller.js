@@ -93,7 +93,8 @@ export const create_admin = asyncHandler(async (req, res) => {
         employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
         employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
         employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
-        employee_profile.employee_level, employee_profile_benefits.sss, employee_profile_benefits.pagibig,
+        employee_profile.employee_level, employee_profile.photo,
+        employee_profile_benefits.sss, employee_profile_benefits.pagibig,
         employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
         employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
         employee_profile_standing.datetime_updated, employee_profile_standing.positionID
@@ -141,7 +142,8 @@ export const login_admin = asyncHandler(async (req, res) => {
         employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
         employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
         employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
-        employee_profile.employee_level, employee_profile_benefits.sss, employee_profile_benefits.pagibig,
+        employee_profile.employee_level, employee_profile.photo,
+        employee_profile_benefits.sss, employee_profile_benefits.pagibig,
         employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
         employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
         employee_profile_standing.datetime_updated, employee_profile_standing.positionID
@@ -252,6 +254,45 @@ export const update_admin_login = asyncHandler(async (req, res) => {
 });
 
 
+export const update_admin = asyncHandler(async (req, res) => {
+    const { birthdate, fname, mname, lname, date_hired, department_id, 
+         cluster_id, site_id, email, phone, address, 
+         emergency_contact_person, emergency_contact_number, sss, 
+         pagibig, philhealth, tin, basic_pay, employee_status, 
+         positionID, employee_level, healthcare  } = req.body;
+
+    const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+    const filename_insert = `users/${filename}`; 
+
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+    
+    const birthdateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+    // Check if birthdate matches the regex
+    if (!birthdateRegex.test(birthdate)) {
+        return res.status(400).json({ message: 'Invalid birthdate format. Please use YYYY-MM-DD.' });
+    }
+
+    if (!birthdateRegex.test(date_hired)) {
+        return res.status(400).json({ message: 'Invalid date hired format. Please use YYYY-MM-DD.' });
+    }
+    try {
+        const sql  = 'UPDATE employee_profile SET fName = ?, mName = ?, lName = ?, bDate = ?, date_hired = ?, departmentID = ?, clusterID = ?, siteID = ?, email = ?, phone = ?, address = ?, emergency_contact_person = ?, emergency_contact_number = ?, employee_level = ?, photo = ? WHERE emp_ID = ?';
+        const sql2 = 'UPDATE employee_profile_benefits SET sss = ?, pagibig = ?, philhealth = ?, tin = ?, basic_pay = ?, healthcare = ? WHERE emp_ID = ?';
+        const sql3 = 'UPDATE employee_profile_standing SET employee_status = ?, positionID = ?, datetime_updated = ? WHERE emp_ID = ?';
+
+        const [insert_data_employee_profile] = await db.promise().query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : null, emp_id]);
+        const [insert_data_employee_profile_benefits] = await db.promise().query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, emp_id]);
+        const [insert_data_employee_profile_standing] = await db.promise().query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
+
+        return res.status(200).json({ success: 'Employee successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update employee entry' });
+    }
+});
+
+
+
 export const get_all_admin = asyncHandler(async (req, res) => {
     try {
         const sql = `SELECT admin_login.emp_ID, admin_login.password, admin_login.login_attempts, 
@@ -260,7 +301,8 @@ export const get_all_admin = asyncHandler(async (req, res) => {
         employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
         employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
         employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
-        employee_profile.employee_level, employee_profile_benefits.sss, employee_profile_benefits.pagibig,
+        employee_profile.employee_level, employee_profile.photo,
+        employee_profile_benefits.sss, employee_profile_benefits.pagibig,
         employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
         employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
         employee_profile_standing.datetime_updated, employee_profile_standing.positionID

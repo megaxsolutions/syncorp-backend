@@ -85,6 +85,9 @@ export const create_employee = asyncHandler(async (req, res) => {
          pagibig, philhealth, tin, basic_pay, employee_status, 
          positionID, employee_level, healthcare  } = req.body;
 
+         const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+         const filename_insert = `users/${filename}`; 
+
     try {
         const birthdateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -100,14 +103,14 @@ export const create_employee = asyncHandler(async (req, res) => {
         
             const sql  = 'INSERT INTO id_generator (datetime_created) VALUES (?)';
             const sql2 = 'INSERT INTO login (emp_ID, password, expiry_date) VALUES (?, ?, ?)';
-            const sql3 = 'INSERT INTO employee_profile (emp_ID, fName, mName, lName, bDate, date_hired, departmentID, clusterID, siteID, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            const sql3 = 'INSERT INTO employee_profile (emp_ID, fName, mName, lName, bDate, date_hired, departmentID, clusterID, siteID, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, photo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const sql4 = 'INSERT INTO employee_profile_benefits (emp_ID, sss, pagibig, philhealth, tin, basic_pay, healthcare) VALUES (?, ?, ?, ?, ?, ?, ?)';
             const sql5 = 'INSERT INTO employee_profile_standing (emp_ID, employee_status, positionID, date_added, datetime_updated) VALUES (?, ?, ?, ?, ?)';
 
 
             const [insert_data_id_generator] = await db.promise().query(sql, [storeCurrentDateTime(0, 'hours')]);
             const [insert_data_login] = await db.promise().query(sql2, [insert_data_id_generator['insertId'], hash, storeCurrentDate(3, 'months')]);
-            const [insert_data_employee_profile] = await db.promise().query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level]);
+            const [insert_data_employee_profile] = await db.promise().query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : null]);
             const [insert_data_employee_profile_benefits] = await db.promise().query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay, healthcare]);
             const [insert_data_employee_profile_standing] = await db.promise().query(sql5, [insert_data_id_generator['insertId'], employee_status, positionID, storeCurrentDateTime(0, 'months'), storeCurrentDateTime(0, 'months')]);
         
@@ -132,7 +135,8 @@ export const login_employee = asyncHandler(async (req, res) => {
         employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
         employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
         employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
-        employee_profile.employee_level, employee_profile_benefits.sss, employee_profile_benefits.pagibig,
+        employee_profile.employee_level, employee_profile.photo,
+        employee_profile_benefits.sss, employee_profile_benefits.pagibig,
         employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
         employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
         employee_profile_standing.datetime_updated, employee_profile_standing.positionID
@@ -247,6 +251,9 @@ export const update_employee = asyncHandler(async (req, res) => {
          pagibig, philhealth, tin, basic_pay, employee_status, 
          positionID, employee_level, healthcare  } = req.body;
 
+    const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+    const filename_insert = `users/${filename}`; 
+
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
     
     const birthdateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -260,11 +267,11 @@ export const update_employee = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: 'Invalid date hired format. Please use YYYY-MM-DD.' });
     }
     try {
-        const sql  = 'UPDATE employee_profile SET fName = ?, mName = ?, lName = ?, bDate = ?, date_hired = ?, departmentID = ?, clusterID = ?, siteID = ?, email = ?, phone = ?, address = ?, emergency_contact_person = ?, emergency_contact_number = ?, employee_level = ? WHERE emp_ID = ?';
+        const sql  = 'UPDATE employee_profile SET fName = ?, mName = ?, lName = ?, bDate = ?, date_hired = ?, departmentID = ?, clusterID = ?, siteID = ?, email = ?, phone = ?, address = ?, emergency_contact_person = ?, emergency_contact_number = ?, employee_level = ?, photo = ? WHERE emp_ID = ?';
         const sql2 = 'UPDATE employee_profile_benefits SET sss = ?, pagibig = ?, philhealth = ?, tin = ?, basic_pay = ?, healthcare = ? WHERE emp_ID = ?';
         const sql3 = 'UPDATE employee_profile_standing SET employee_status = ?, positionID = ?, datetime_updated = ? WHERE emp_ID = ?';
 
-        const [insert_data_employee_profile] = await db.promise().query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, emp_id]);
+        const [insert_data_employee_profile] = await db.promise().query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : null, emp_id]);
         const [insert_data_employee_profile_benefits] = await db.promise().query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, emp_id]);
         const [insert_data_employee_profile_standing] = await db.promise().query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
 
@@ -282,7 +289,8 @@ export const get_all_employee = asyncHandler(async (req, res) => {
         employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
         employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
         employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
-        employee_profile.employee_level, employee_profile_benefits.sss, employee_profile_benefits.pagibig,
+        employee_profile.employee_level, employee_profile.photo,
+        employee_profile_benefits.sss, employee_profile_benefits.pagibig,
         employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
         employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
         employee_profile_standing.datetime_updated, employee_profile_standing.positionID

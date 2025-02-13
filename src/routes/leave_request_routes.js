@@ -1,8 +1,8 @@
 import { Router } from "express";
-import * as AdminController  from '../controllers/admin_controller.js'; // Adjust the path as necessary
+import * as LeaveRequestController  from '../controllers/leave_request_controller.js'; // Adjust the path as necessary
+import multer from 'multer';
 import { authenticateToken } from "../middleware/auth.js";
 
-import multer from 'multer';
 import path from 'path'; // Import the path module
 import fs from 'fs'; // Import fs to check if the directory exists
 import { fileURLToPath } from 'url'; // Import fileURLToPath
@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Define the uploads directory relative to the current file
-const uploadsDir = path.join(__dirname, '../../uploads/users/');
+const uploadsDir = path.join(__dirname, '../../uploads/leave_requests/');
 
 // Ensure the uploads directory exists
 if (!fs.existsSync(uploadsDir)) {
@@ -34,20 +34,14 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-const adminRoutes = Router();
-
-//data
-adminRoutes.post('/login_admin', AdminController.login_admin);
+const leaveRequestRoutes = Router();
 
 
-adminRoutes.put('/update_admin_expiration/:emp_id', authenticateToken, AdminController.update_admin_expiration);
-adminRoutes.put('/update_admin_login/:emp_id', authenticateToken, AdminController.update_admin_login);
-adminRoutes.put('/update_admin/:emp_id', authenticateToken, upload.single('file_uploaded'), AdminController.update_admin);
-adminRoutes.post('/add_admin', authenticateToken,  AdminController.create_admin);
-adminRoutes.get('/get_all_admin', authenticateToken, AdminController.get_all_admin);
+leaveRequestRoutes.post('/add_leave_request', upload.single('file_uploaded'), LeaveRequestController.create_leave_request);
+leaveRequestRoutes.put('/update_user_leave_request/:leave_request_id',  upload.single('file_uploaded'), LeaveRequestController.update_user_leave_request);
+leaveRequestRoutes.put('/update_approval_leave_request/:leave_request_id', LeaveRequestController.update_approval_leave_request);
+leaveRequestRoutes.get('/get_all_leave_request', LeaveRequestController.get_all_leave_request);
+leaveRequestRoutes.delete('/delete_leave_request/:leave_request_id', LeaveRequestController.delete_leave_request);
 
-adminRoutes.get('/protected', authenticateToken, (req, res) => {
-    res.status(200).json({ data: req.user });
-});
 
-export default adminRoutes;
+export default leaveRequestRoutes;

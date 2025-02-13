@@ -47,49 +47,95 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 }
 
 export const create_leave_request = asyncHandler(async (req, res) => {
-    const { leave_type, emp_ID, details } = req.body;
-
-   const filename = file_uploaded;
+    const { leave_type, emp_ID, details} = req.body;
+    const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+    const filename_insert = `leave_requests/${filename}`; 
 
     try {
-        const sql = 'INSERT INTO leave_request (date, leave_type, emp_ID, details, file_uploaded) VALUES (?)';
-        const [insert_data_break] = await db.promise().query(sql, [storeCurrentDate(0, 'hours'), leave_type, emp_ID, details, filename]);
+        const sql = 'INSERT INTO leave_request (date, leave_type, emp_ID, details, file_uploaded) VALUES (?, ?, ?, ?, ?)';
+        const [insert_data_leave_request] = await db.promise().query(sql, [storeCurrentDate(0, 'hours'), leave_type, emp_ID, details, filename_insert]);
       
         // Return the merged results in the response
-        return res.status(200).json({ success: 'Break successfully created.' });
+        return res.status(200).json({ success: 'Leave request successfully created.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to create break.' });
+        return res.status(500).json({ error: 'Failed to create leave request .' });
     }
 });
 
 
-export const update_break_break_out = asyncHandler(async (req, res) => {
-    const { break_id } = req.params; // Assuming department_id is passed as a URL parameter
+export const update_user_leave_request = asyncHandler(async (req, res) => {
+    const { leave_type, details} = req.body;
+    const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+    const filename_insert = `leave_request/${filename}`; 
+    const { leave_request_id } = req.params; // Assuming department_id is passed as a URL parameter
 
 
+    
     try {
-        const sql = 'UPDATE breaks SET breakOUT = ? WHERE id = ?';
-        const [update_data_break] = await db.promise().query(sql, [storeCurrentDate(0, 'hours'), break_id]);
+        const sql  = 'SELECT * FROM leave_request WHERE id = ?'; // Use a parameterized query
+        const sql2 = 'UPDATE leave_request SET leave_type = ?, details = ?, file_uploaded = ? WHERE id = ?';
+        
+        const [leave_request] = await db.promise().query(sql, [leave_request_id]);
+        const [update_data_leave_request] = await db.promise().query(sql2, [leave_type, details, req.file ? filename_insert : leave_request[0]['file_uploaded'], leave_request_id]);
       
         // Return the merged results in the response
-        return res.status(200).json({ success: 'Break successfully updated.' });
+        return res.status(200).json({ success: 'Leave request successfully updated.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to update break.' });
+        return res.status(500).json({ error: 'Failed to update leave request.' });
     }
 });
 
 
 
-export const get_all_break = asyncHandler(async (req, res) => {
-    try {
-        const sql  = 'SELECT * FROM breaks'; // Use a parameterized query
+export const update_approval_leave_request = asyncHandler(async (req, res) => {
+    const { emp_id_approved_by, status} = req.body;
+    const { leave_request_id } = req.params; // Assuming department_id is passed as a URL parameter
 
-        const [breaks] = await db.promise().query(sql);
+
+    
+    try {
+        const sql  = 'UPDATE leave_request SET approved_by = ?, date_approved = ?, status = ? WHERE id = ?';
+
+        const [update_data_leave_request] = await db.promise().query(sql, [emp_id_approved_by, storeCurrentDate(0, 'hours'), status, leave_request_id]);
+      
+        // Return the merged results in the response
+        return res.status(200).json({ success: 'Leave request successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update leave request.' });
+    }
+});
+
+
+export const get_all_leave_request = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+
+    try {
+        const sql  = 'SELECT * FROM leave_request WHERE emp_ID = ?'; // Use a parameterized query
+
+        const [leave_request] = await db.promise().query(sql, [emp_id]);
 
         // Return the merged results in the response
-        return res.status(200).json({ data: breaks });
+        return res.status(200).json({ data: leave_request });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+
+export const delete_leave_request = asyncHandler(async (req, res) => {
+    const { leave_request_id } = req.params; // Assuming department_id is passed as a URL parameter
+
+    try {
+        const sql = 'DELETE FROM leave_request WHERE id = ?';
+        const [result] = await db.promise().query(sql, [leave_request_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Leave request not found.' });
+        }
+
+        return res.status(200).json({ success: 'Leave request successfully deleted.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to delete leave request.' });
     }
 });
 
