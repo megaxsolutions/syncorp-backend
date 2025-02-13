@@ -18,7 +18,7 @@ function convertToUTC(dateString) {
     const utcDateTime = manilaDateTime.clone().utc();
 
     // Format the date in ISO 8601 format
-    const formattedUtcDateTime = utcDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+    const formattedUtcDateTime = utcDateTime.format('YYYY-MM-DDTHH:mm:ss');
 
     return formattedUtcDateTime;
 }
@@ -89,7 +89,7 @@ export const otp_verification = asyncHandler(async (req, res) => {
         const time1 = formatTime(date1);
         const time2 = formatTime(otp[0]['date_time']);
         
-        return res.status(200).json({ data1: otp[0]['date_time'], date1: date1, date2: date2, time1: time1, time2: time2, test:12345 });
+        return res.status(200).json({ data1: otp[0]['date_time'], date1: date1, date2: date2, time1: time1, time2: time2, test:123456 });
 
         // if(time1 > time2) {
         //     return res.status(400).json({ error: 'Your OTP has expired. Please request a new one.' });
