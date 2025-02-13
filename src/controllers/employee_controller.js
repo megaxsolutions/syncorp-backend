@@ -128,7 +128,6 @@ export const login_employee = asyncHandler(async (req, res) => {
 
     try {
         const hash = hashConverterMD5(password);
-        
         const sql = `SELECT login.emp_ID, login.password, login.login_attempts, login.expiry_date, 
         employee_profile.fName, employee_profile.mName, employee_profile.lName, employee_profile.bDate,
         employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
