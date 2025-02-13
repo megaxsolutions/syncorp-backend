@@ -84,7 +84,8 @@ export const otp_verification = asyncHandler(async (req, res) => {
 
 
         const date1 = new Date(convertToUTC(storeCurrentDateTime(0, 'months')));
-        const date2 = new Date(otp[0]['date_time']);
+        const date2 = new Date(convertToUTC(otp[0]['date_time']));
+
         const time1 = formatTime(date1);
         const time2 = formatTime(date2);
         
