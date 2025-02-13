@@ -7,7 +7,6 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import sendEmail from "../utils/mailer.js";
 
-
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET; // Replace with your own secret key
@@ -129,7 +128,6 @@ export const login_employee = asyncHandler(async (req, res) => {
 
     try {
         const hash = hashConverterMD5(password);
-
         const sql = `SELECT login.emp_ID, login.password, login.login_attempts, login.expiry_date, 
         employee_profile.fName, employee_profile.mName, employee_profile.lName, employee_profile.bDate,
         employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
@@ -152,11 +150,13 @@ export const login_employee = asyncHandler(async (req, res) => {
         const [login] = await db.promise().query(sql, [emp_ID]);
         const dateObject = new Date(login[0]['expiry_date']);
         const expiryDate = dateObject.toISOString().split('T')[0];
-
+        console.log(login);
         if(storeCurrentDate(0, 'months') > expiryDate) {
-            return res.status(400).json({ error: 'Your account has expired. Please contact the administrator for assistance.' });        
+             return res.status(400).json({ error: 'Your account has expired. Please contact the administrator for assistance.' });        
         }
-
+        if (login.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
         if(login[0]['login_attempts'] == 5) {
             return res.status(400).json({ error: 'Please contact the admin.' });
         }
@@ -178,7 +178,7 @@ export const login_employee = asyncHandler(async (req, res) => {
 
         return res.status(400).json({ error: 'Failed to login wrong password.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to login ' });
+        return res.status(500).json({ error: 'Failed to login' + error.stack});
     }
 });
 
