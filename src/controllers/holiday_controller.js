@@ -27,11 +27,11 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 }
 
 export const create_holiday = asyncHandler(async (req, res) => {
-    const { date } = req.body;
+    const { date, holiday_name, holiday_type } = req.body;
 
     try {
-        const sql = 'INSERT INTO holidays (date, date_added) VALUES (?, ?)';
-        const [insert_data_holiday] = await db.promise().query(sql, [date, storeCurrentDateTime(0, 'hours') ]);
+        const sql = 'INSERT INTO holidays (date, date_added, holiday_name. holiday_type) VALUES (?, ?, ?, ?)';
+        const [insert_data_holiday] = await db.promise().query(sql, [date, storeCurrentDateTime(0, 'hours'), holiday_name, holiday_type]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Holiday successfully created.' });
@@ -42,13 +42,13 @@ export const create_holiday = asyncHandler(async (req, res) => {
 
 
 export const update_holiday = asyncHandler(async (req, res) => {
-    const { date } = req.body;
+    const { date, holiday_name, holiday_type } = req.body;
     const { holiday_id } = req.params; // Assuming department_id is passed as a URL parameter
 
 
     try {
-        const sql = 'UPDATE holidays SET date = ? WHERE id = ?';        
-        const [result] = await db.promise().query(sql, [date, holiday_id ]);
+        const sql = 'UPDATE holidays SET date = ?, holiday_name = ?, holiday_type =?  WHERE id = ?';        
+        const [result] = await db.promise().query(sql, [date, holiday_name, holiday_type, holiday_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Holiday not found.' });
@@ -60,6 +60,19 @@ export const update_holiday = asyncHandler(async (req, res) => {
     }
 });
 
+
+export const get_all_holiday = asyncHandler(async (req, res) => {
+    try {
+        const sql  = 'SELECT * FROM holidays'; // Use a parameterized query
+
+        const [holidays] = await db.promise().query(sql);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: holidays });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
 
 
 export const delete_holiday = asyncHandler(async (req, res) => {

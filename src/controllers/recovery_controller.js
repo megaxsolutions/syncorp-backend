@@ -9,6 +9,29 @@ function hashConverterMD5(password) {
     return crypto.createHash('md5').update(String(password)).digest('hex');
 }
 
+function formatDateTo12HourTime(isoDateString) {
+    const date = new Date(isoDateString);
+    
+    // Get hours, minutes, and seconds
+    let hours = date.getUTCHours(); // Use getUTCHours() if the date is in UTC
+    const minutes = date.getUTCMinutes();
+    const seconds = date.getUTCSeconds();
+    
+    // Determine AM or PM suffix
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    // Convert to 12-hour format
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    
+    // Format minutes and seconds to be two digits
+    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+    const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+    
+    // Return the formatted time
+    return `${hours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
+}
+
 
 function convertToUTC(dateString) {
     // Parse the input date string in Asia/Manila timezone
@@ -18,7 +41,7 @@ function convertToUTC(dateString) {
     const utcDateTime = manilaDateTime.clone().utc();
 
     // Format the date in ISO 8601 format
-    const formattedUtcDateTime = utcDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+    const formattedUtcDateTime = utcDateTime.format('YYYY-MM-DDTHH:mm:ss');
 
     return formattedUtcDateTime;
 }
@@ -51,7 +74,7 @@ export const otp_recovery = asyncHandler(async (req, res) => {
         return res.status(404).json({ error: 'User not found.' });
     }
 
-    const [insert_data_site] = await db.promise().query(sql2, [randomNumber, emp_ID, storeCurrentDateTime(10, 'minutes')]);
+    const [insert_data_site] = await db.promise().query(sql2, [randomNumber, emp_ID, storeCurrentDateTime(1, 'minutes')]);
 
     mailer(employee_profile[0]['email'], "SYNERGIST", randomNumber);
 
@@ -87,14 +110,23 @@ export const otp_verification = asyncHandler(async (req, res) => {
         const date2 = new Date(otp[0]['date_time']);
         const time1 = formatTime(date1);
         const time2 = formatTime(date2);
+        const time3 = formatDateTo12HourTime(convertToUTC(otp[0]['date_time']));
 
-        if(time1 > time2) {
-            return res.status(400).json({ error: 'Your OTP has expired. Please request a new one.' });
+        console.log(date1);
+        console.log(date2);
+        console.log(time1);
+        console.log(time2);
+        console.log(time3);
+
+
+        if(time1 > time3) {
+             return res.status(400).json({ error: 'Your OTP has expired. Please request a new one.' });
         }
 
         if(otp_code != otp[0]['code']) {
             return res.status(400).json({ error: 'Invalid OTP. Please try again.' });
         }
+        //return res.status(200).json({ data1: otp[0]['date_time'], date1: date1, date2: date2, time3: time3, time1: time1, time2: time2, test:123 });
 
         return res.status(200).json({ success: 'OTP is correct. Operation successful.' });    
     } catch (error) {
