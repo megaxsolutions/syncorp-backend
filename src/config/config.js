@@ -9,8 +9,7 @@ const db = mysql.createConnection({
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
-    port: 3306,
-    timezone: '+08:00' // Set the timezone to UTC+8
+    port: 3306
 });
 
 
