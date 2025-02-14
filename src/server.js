@@ -78,13 +78,15 @@ app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
 
 
 
-db.connect(err => {
-    if (err) {
-        console.error('Database connection failed:', err);
-        return;
-    }
-    console.log('Connected to MySQL database.');
-});
+// db.connect(err => {
+//     if (err) {
+//         console.error('Database connection failed:', err);
+//         return;
+//     }
+//     console.log('Connected to MySQL database.');
+// });
+
+
 
 
 // Start the server
