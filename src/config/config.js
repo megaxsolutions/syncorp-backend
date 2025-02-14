@@ -1,4 +1,3 @@
-// db.js
 import mysql from 'mysql2';
 import dotenv from 'dotenv';
 
@@ -14,7 +13,7 @@ function handleDisconnect() {
     database: process.env.DB_NAME,
     port: 3306,
   });
-
+  
   db.connect((err) => {
     if (err) {
       console.error('Error connecting to the database:', err);

@@ -60,10 +60,12 @@ export const update_attendance_time_out = asyncHandler(async (req, res) => {
 
 
 export const get_all_attendance = asyncHandler(async (req, res) => {
-    try {
-        const sql  = 'SELECT * FROM attendance'; // Use a parameterized query
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
-        const [attendance] = await db.promise().query(sql);
+    try {
+        const sql  = 'SELECT * FROM attendance WHERE emp_ID = ?'; // Use a parameterized query
+
+        const [attendance] = await db.promise().query(sql, [emp_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ data: attendance });
