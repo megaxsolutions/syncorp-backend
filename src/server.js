@@ -22,6 +22,8 @@ import breakRoutes from "./routes/break_routes.js";
 import leaveRequestRoutes from "./routes/leave_request_routes.js";
 import leaveTypeRoutes from "./routes/leave_type_routes.js";
 import overtimeTypeRoutes from "./routes/overtime_type_routes.js";
+import overtimeRequestRoutes from "./routes/overtime_request_routes.js";
+
 
 
 import bodyParser from 'body-parser';
@@ -75,6 +77,8 @@ app.use("/breaks", authenticateToken, breakRoutes);
 app.use("/leave_requests", authenticateToken, leaveRequestRoutes);
 app.use("/leave_types", authenticateToken, leaveTypeRoutes);
 app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
+app.use("/overtime_requests", authenticateToken, overtimeRequestRoutes);
+
 
 
 
