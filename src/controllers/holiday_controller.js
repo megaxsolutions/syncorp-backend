@@ -30,7 +30,7 @@ export const create_holiday = asyncHandler(async (req, res) => {
     const { date, holiday_name, holiday_type } = req.body;
 
     try {
-        const sql = 'INSERT INTO holidays (date, date_added, holiday_name. holiday_type) VALUES (?, ?, ?, ?)';
+        const sql = 'INSERT INTO holidays (date, date_added, holiday_name, holiday_type) VALUES (?, ?, ?, ?)';
         const [insert_data_holiday] = await db.promise().query(sql, [date, storeCurrentDateTime(0, 'hours'), holiday_name, holiday_type]);
       
         // Return the merged results in the response
