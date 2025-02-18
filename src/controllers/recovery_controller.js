@@ -106,11 +106,11 @@ export const otp_verification = asyncHandler(async (req, res) => {
         if(otp.length == 0) {
             return res.status(404).json({ error: 'User not found.' });
         }
+        return res.status(200).json({ data1: storeCurrentDateTime(0, 'months'), data2: otp[0]['date_time'] });
 
         if(storeCurrentDateTime(0, 'months') > otp[0]['date_time']) {
              return res.status(400).json({ error: 'Your OTP has expired. Please request a new one.' });
         }
-        //return res.status(200).json({ data1: storeCurrentDateTime(0, 'months'), data2: otp[0]['date_time'] });
 
         if(otp_code != otp[0]['code']) {
             return res.status(400).json({ error: 'Invalid OTP. Please try again.' });
