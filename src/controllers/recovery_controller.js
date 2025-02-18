@@ -97,7 +97,9 @@ export const otp_verification = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
-        const sql = 'SELECT * FROM otp WHERE emp_ID = ? ORDER BY id DESC LIMIT 1';
+        const sql = `SELECT id, code, emp_ID,
+        DATE_FORMAT(date_time, '%Y-%m-%d %H:%i:%s') AS date_time
+        FROM otp WHERE emp_ID = ? ORDER BY id DESC LIMIT 1`;
 
         const [otp] = await db.promise().query(sql, [emp_id]);
             
@@ -105,21 +107,7 @@ export const otp_verification = asyncHandler(async (req, res) => {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-
-        const date1 = new Date(convertToUTC(storeCurrentDateTime(0, 'months')));
-        const date2 = new Date(otp[0]['date_time']);
-        const time1 = formatTime(date1);
-        const time2 = formatTime(date2);
-        const time3 = formatDateTo12HourTime(convertToUTC(otp[0]['date_time']));
-
-        console.log(date1);
-        console.log(date2);
-        console.log(time1);
-        console.log(time2);
-        console.log(time3);
-
-
-        if(time1 > time3) {
+        if(storeCurrentDateTime(0, 'months') > otp[0]['date_time']) {
              return res.status(400).json({ error: 'Your OTP has expired. Please request a new one.' });
         }
 

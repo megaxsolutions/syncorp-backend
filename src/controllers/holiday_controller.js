@@ -30,7 +30,7 @@ export const create_holiday = asyncHandler(async (req, res) => {
     const { date, holiday_name, holiday_type } = req.body;
 
     try {
-        const sql = 'INSERT INTO holidays (date, date_added, holiday_name. holiday_type) VALUES (?, ?, ?, ?)';
+        const sql = 'INSERT INTO holidays (date, datetime_added, holiday_name, holiday_type) VALUES (?, ?, ?, ?)';
         const [insert_data_holiday] = await db.promise().query(sql, [date, storeCurrentDateTime(0, 'hours'), holiday_name, holiday_type]);
       
         // Return the merged results in the response
@@ -63,7 +63,14 @@ export const update_holiday = asyncHandler(async (req, res) => {
 
 export const get_all_holiday = asyncHandler(async (req, res) => {
     try {
-        const sql  = 'SELECT * FROM holidays'; // Use a parameterized query
+        const sql  = `SELECT id,
+        DATE_FORMAT(date, '%Y-%m-%d') AS date, 
+        DATE_FORMAT(datetime_added, '%Y-%m-%d %H:%i:%s') AS datetime_added,
+        holiday_name,
+        holiday_type
+        FROM holidays`; // Use a parameterized query
+
+
 
         const [holidays] = await db.promise().query(sql);
 

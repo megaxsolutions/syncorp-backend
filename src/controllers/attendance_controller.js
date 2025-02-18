@@ -43,12 +43,15 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
 
 export const update_attendance_time_out = asyncHandler(async (req, res) => {
     const { time_out } = req.body;
-    const { attendance_id } = req.params; // Assuming department_id is passed as a URL parameter
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
 
     try {
-        const sql = 'UPDATE attendance SET timeOUT = ? WHERE id = ?';
-        const [update_data_site] = await db.promise().query(sql, [time_out, attendance_id ]);
+        const sql  = 'SELECT * FROM attendance WHERE emp_ID = ? ORDER BY id DESC LIMIT 1';
+        const sql2 = 'UPDATE attendance SET timeOUT = ? WHERE id = ?';
+
+        const [attendance] = await db.promise().query(sql, [emp_id]);
+        const [update_data_site] = await db.promise().query(sql2, [time_out,  attendance[0]['id']]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Attendance successfully updated.' });
@@ -58,12 +61,53 @@ export const update_attendance_time_out = asyncHandler(async (req, res) => {
 });
 
 
+export const get_user_latest_attendance = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+
+    try {
+
+        const sql = `
+        SELECT 
+            DATE_FORMAT(date, '%Y-%m-%d') AS date, 
+            DATE_FORMAT(timeIN, '%Y-%m-%d %H:%i:%s') AS time_in, 
+            DATE_FORMAT(timeOUT, '%Y-%m-%d %H:%i:%s') AS time_out 
+        FROM 
+            attendance 
+        WHERE 
+            emp_ID = ? 
+        ORDER BY 
+            id DESC 
+        LIMIT 1`;
+
+        const [attendance] = await db.promise().query(sql, [emp_id]); // Use 'sql' instead of 'sql2'
+        
+      
+        const result = {  
+            time_in : attendance[0]['time_in'],
+            time_out : attendance[0]['time_out'],
+            date : attendance[0]['date'],
+        };
+
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: result });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get attendance data.' });
+    }
+});
+
+
 
 export const get_all_attendance = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
-        const sql  = 'SELECT * FROM attendance WHERE emp_ID = ?'; // Use a parameterized query
+        const sql = `SELECT 
+                    DATE_FORMAT(timeIN, '%Y-%m-%d %H:%i:%s') AS timeIN,
+                    DATE_FORMAT(timeOUT, '%Y-%m-%d %H:%i:%s') AS timeOUT, 
+                    DATE_FORMAT(date, '%Y-%m-%d') AS date, 
+                    clusterID FROM attendance WHERE emp_ID = ?`; // Use a parameterized query
+
 
         const [attendance] = await db.promise().query(sql, [emp_id]);
 

@@ -120,7 +120,12 @@ export const get_all_overtime_request = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
-        const sql  = 'SELECT * FROM overtime_request WHERE emp_ID = ?'; // Use a parameterized query
+        const sql  = `SELECT 
+        id,
+        DATE_FORMAT(date, '%Y-%m-%d') AS date, 
+        hrs, ot_type, emp_ID, approved_by, 
+        DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved, 
+        status FROM overtime_request WHERE emp_ID = ?`; // Use a parameterized query
 
         const [overtime_request] = await db.promise().query(sql, [emp_id]);
 

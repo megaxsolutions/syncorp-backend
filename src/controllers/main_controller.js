@@ -9,11 +9,17 @@ export const get_all_dropdown_data = asyncHandler(async (req, res) => {
     try {
         const sql  = 'SELECT * FROM departments'; // Use a parameterized query
         const sql2 = 'SELECT * FROM clusters'; // Use a parameterized query
-        const sql3 = 'SELECT * FROM sites'; // Use a parameterized query
+        const sql3 = `SELECT 
+        id, siteName,
+        DATE_FORMAT(stamp, '%Y-%m-%d') AS stamp
+        FROM sites`; // Use a parameterized query
         const sql4 = 'SELECT * FROM positions'; // Use a parameterized query
         const sql5 = 'SELECT * FROM employee_levels'; // Use a parameterized query
         const sql6 = 'SELECT * FROM admin_level'; // Use a parameterized query
-        const sql7 = 'SELECT * FROM cutoff'; // Use a parameterized query
+        const sql7 = `SELECT id,
+        DATE_FORMAT(startDate, '%Y-%m-%d') AS startDate,
+        DATE_FORMAT(endDate, '%Y-%m-%d') AS endDate
+        FROM cutoff`; // Use a parameterized query
 
 
 

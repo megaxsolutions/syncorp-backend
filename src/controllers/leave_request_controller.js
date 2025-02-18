@@ -127,8 +127,14 @@ export const get_all_leave_request = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
-        const sql  = 'SELECT * FROM leave_request WHERE emp_ID = ?'; // Use a parameterized query
+        const sql  = `SELECT 
+        DATE_FORMAT(date, '%Y-%m-%d') AS date, 
+        leave_type, emp_ID, approved_by, 
+        DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved,
+        status, details, file_uploaded
+        FROM leave_request WHERE emp_ID = ?`; // Use a parameterized query
 
+ 
         const [leave_request] = await db.promise().query(sql, [emp_id]);
 
         // Return the merged results in the response
