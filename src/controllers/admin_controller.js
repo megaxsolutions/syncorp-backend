@@ -134,12 +134,13 @@ export const login_admin = asyncHandler(async (req, res) => {
 
     try {
         const hash = hashConverterMD5(password);
-      //  const sql  = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
 
         const sql = `SELECT admin_login.emp_ID, admin_login.password, admin_login.login_attempts, 
-        admin_login.expiry_date, admin_login.user_level, 
-        employee_profile.fName, employee_profile.mName, employee_profile.lName, employee_profile.bDate,
-        employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
+        DATE_FORMAT(admin_login.expiry_date, '%Y-%m-%d') AS expiry_date, admin_login.user_level, 
+        employee_profile.fName, employee_profile.mName, employee_profile.lName, 
+        DATE_FORMAT(employee_profile.bDate, '%Y-%m-%d') AS bDate,
+        DATE_FORMAT(employee_profile.date_hired, '%Y-%m-%d') AS date_hired,
+        employee_profile.departmentID, employee_profile.clusterID,
         employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
         employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
         employee_profile.employee_level, employee_profile.photo,
@@ -295,10 +296,13 @@ export const update_admin = asyncHandler(async (req, res) => {
 
 export const get_all_admin = asyncHandler(async (req, res) => {
     try {
+
         const sql = `SELECT admin_login.emp_ID, admin_login.password, admin_login.login_attempts, 
-        admin_login.expiry_date, admin_login.user_level, 
-        employee_profile.fName, employee_profile.mName, employee_profile.lName, employee_profile.bDate,
-        employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
+        DATE_FORMAT(admin_login.expiry_date, '%Y-%m-%d') AS expiry_date, admin_login.user_level, 
+        employee_profile.fName, employee_profile.mName, employee_profile.lName, 
+        DATE_FORMAT(employee_profile.bDate, '%Y-%m-%d') AS bDate,
+        DATE_FORMAT(employee_profile.date_hired, '%Y-%m-%d') AS date_hired,
+        employee_profile.departmentID, employee_profile.clusterID,
         employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
         employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
         employee_profile.employee_level, employee_profile.photo,

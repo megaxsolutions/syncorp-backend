@@ -128,9 +128,12 @@ export const login_employee = asyncHandler(async (req, res) => {
 
     try {
         const hash = hashConverterMD5(password);
-        const sql = `SELECT login.emp_ID, login.password, login.login_attempts, login.expiry_date, 
-        employee_profile.fName, employee_profile.mName, employee_profile.lName, employee_profile.bDate,
-        employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
+        const sql = `SELECT login.emp_ID, login.password, login.login_attempts, 
+        DATE_FORMAT(login.expiry_date, '%Y-%m-%d') AS expiry_date,
+        employee_profile.fName, employee_profile.mName, employee_profile.lName, 
+        DATE_FORMAT(employee_profile.bDate, '%Y-%m-%d') AS bDate,
+        DATE_FORMAT(employee_profile.date_hired, '%Y-%m-%d') AS date_hired,
+        employee_profile.departmentID, employee_profile.clusterID,
         employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
         employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
         employee_profile.employee_level, employee_profile.photo,
@@ -148,15 +151,11 @@ export const login_employee = asyncHandler(async (req, res) => {
         const sql3 = 'UPDATE login SET login_attempts = ? WHERE emp_ID = ?';
 
         const [login] = await db.promise().query(sql, [emp_ID]);
-        const dateObject = new Date(login[0]['expiry_date']);
-        const expiryDate = dateObject.toISOString().split('T')[0];
-        console.log(login);
-        if(storeCurrentDate(0, 'months') > expiryDate) {
-             return res.status(400).json({ error: 'Your account has expired. Please contact the administrator for assistance.' });        
+
+        if(storeCurrentDate(0, 'months') > login[0]['expiry_date']) {
+            return res.status(400).json({ error: 'Your account has expired. Please contact the administrator for assistance.' });        
         }
-        if (login.length === 0) {
-            return res.status(404).json({ error: "User not found" });
-        }
+      
         if(login[0]['login_attempts'] == 5) {
             return res.status(400).json({ error: 'Please contact the admin.' });
         }
@@ -283,9 +282,14 @@ export const update_employee = asyncHandler(async (req, res) => {
 
 export const get_all_employee = asyncHandler(async (req, res) => {
     try {
-        const sql = `SELECT login.emp_ID, login.password, login.login_attempts, login.expiry_date, 
-        employee_profile.fName, employee_profile.mName, employee_profile.lName, employee_profile.bDate,
-        employee_profile.date_hired, employee_profile.departmentID, employee_profile.clusterID,
+
+
+        const sql = `SELECT login.emp_ID, login.password, login.login_attempts, 
+        DATE_FORMAT(login.expiry_date, '%Y-%m-%d') AS expiry_date,
+        employee_profile.fName, employee_profile.mName, employee_profile.lName, 
+        DATE_FORMAT(employee_profile.bDate, '%Y-%m-%d') AS bDate,
+        DATE_FORMAT(employee_profile.date_hired, '%Y-%m-%d') AS date_hired,
+        employee_profile.departmentID, employee_profile.clusterID,
         employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
         employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
         employee_profile.employee_level, employee_profile.photo,

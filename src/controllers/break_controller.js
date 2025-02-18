@@ -57,13 +57,13 @@ export const update_break_break_out = asyncHandler(async (req, res) => {
 
 
 export const get_all_break = asyncHandler(async (req, res) => {
-    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
-
     try {
-        const sql  = 'SELECT * FROM breaks WHERE emp_ID = ?'; // Use a parameterized query
-
-
-        const [breaks] = await db.promise().query(sql, [emp_id]);
+        const sql  = `SELECT id,
+        DATE_FORMAT(breakIN, '%Y-%m-%d %H:%i:%s') AS breakIN,  
+        DATE_FORMAT(breakOUT, '%Y-%m-%d %H:%i:%s') AS breakOUT
+        FROM breaks`; // Use a parameterized query
+                                  
+        const [breaks] = await db.promise().query(sql);
 
         // Return the merged results in the response
         return res.status(200).json({ data: breaks });

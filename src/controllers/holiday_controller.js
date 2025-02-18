@@ -63,7 +63,14 @@ export const update_holiday = asyncHandler(async (req, res) => {
 
 export const get_all_holiday = asyncHandler(async (req, res) => {
     try {
-        const sql  = 'SELECT * FROM holidays'; // Use a parameterized query
+        const sql  = `SELECT id,
+        DATE_FORMAT(date, '%Y-%m-%d') AS date, 
+        DATE_FORMAT(datetime_added, '%Y-%m-%d %H:%i:%s') AS datetime_added,
+        holiday_name,
+        holiday_type
+        FROM holidays`; // Use a parameterized query
+
+
 
         const [holidays] = await db.promise().query(sql);
 
