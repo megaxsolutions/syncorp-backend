@@ -66,7 +66,7 @@ export const get_all_overtime_type = asyncHandler(async (req, res) => {
         const [overtime_type] = await db.promise().query(sql);
 
         // Return the merged results in the response
-        return res.status(200).json({ data: leave_type });
+        return res.status(200).json({ data: overtime_type });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }

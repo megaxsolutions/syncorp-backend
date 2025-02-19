@@ -9,6 +9,8 @@ npm install bcrypt
 npm install jwt-decode
 npm install nodemailer
 npm install multer
+npm install socket.io 
+npm install express ws
 
 npm install express-async-handler express mysql2 sequelize cors -g nodemon body-parser jsonwebtoken
 
@@ -19,3 +21,7 @@ Kk9566678@!
 
 
 13.229.75.55
+
+
+
+npm install socket.io-client
