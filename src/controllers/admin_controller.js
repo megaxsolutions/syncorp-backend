@@ -85,7 +85,7 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 
 
 export const create_admin = asyncHandler(async (req, res) => {
-    const { emp_id, password, user_level, user_level_name } = req.body;
+    const { emp_id, password, user_level } = req.body;
 
     try {
         const sql = `SELECT id_generator.id,
