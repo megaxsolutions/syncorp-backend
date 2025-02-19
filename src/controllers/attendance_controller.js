@@ -14,25 +14,30 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
     // Calculate the expiration date and time
     const expirationDateTime = currentDateTime.clone().add(expirationAmount, expirationUnit);
 
-    // Format the current date and expiration date
-    const formattedCurrentDateTime = currentDateTime.format('YYYY-MM-DD HH:mm:ss');
     const formattedExpirationDateTime = expirationDateTime.format('YYYY-MM-DD HH:mm:ss');
 
-    // Return both current and expiration date-time
     return formattedExpirationDateTime;
-    // return {
-    //     currentDateTime: formattedCurrentDateTime,
-    //     expirationDateTime: formattedExpirationDateTime
-    // };
+}
+
+function storeCurrentDate(expirationAmount, expirationUnit) {
+    // Get the current date and time in Asia/Manila timezone
+    const currentDateTime = moment.tz("Asia/Manila");
+
+    // Calculate the expiration date and time
+    const expirationDateTime = currentDateTime.clone().add(expirationAmount, expirationUnit);
+
+    const formattedExpirationDateTime = expirationDateTime.format('YYYY-MM-DD');
+
+    return formattedExpirationDateTime;
 }
 
 
 export const create_attendance_time_in = asyncHandler(async (req, res) => {
-    const { emp_id, time_in, cluster_id } = req.body;
+    const { emp_id, cluster_id } = req.body;
 
     try {
-        const sql = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date ) VALUES (?, ?, ?, ?, ?)';
-        const [insert_data_site] = await db.promise().query(sql, [emp_id, time_in, cluster_id, storeCurrentDateTime(0, 'hours') ]);
+        const sql = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date ) VALUES (?, ?, ?, ?)';
+        const [insert_data_site] = await db.promise().query(sql, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours') ]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Attendance successfully created.' });
@@ -42,7 +47,6 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
 });
 
 export const update_attendance_time_out = asyncHandler(async (req, res) => {
-    const { time_out } = req.body;
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
 
@@ -51,7 +55,7 @@ export const update_attendance_time_out = asyncHandler(async (req, res) => {
         const sql2 = 'UPDATE attendance SET timeOUT = ? WHERE id = ?';
 
         const [attendance] = await db.promise().query(sql, [emp_id]);
-        const [update_data_site] = await db.promise().query(sql2, [time_out,  attendance[0]['id']]);
+        const [update_data_attendance] = await db.promise().query(sql2, [storeCurrentDateTime(0, 'hours'),  attendance[0]['id']]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Attendance successfully updated.' });
@@ -98,7 +102,7 @@ export const get_user_latest_attendance = asyncHandler(async (req, res) => {
 
 
 
-export const get_all_attendance = asyncHandler(async (req, res) => {
+export const get_all_user_attendance = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {

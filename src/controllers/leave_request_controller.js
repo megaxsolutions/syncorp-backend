@@ -48,12 +48,13 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
 export const create_leave_request = asyncHandler(async (req, res) => {
     const { leave_type, emp_ID, details} = req.body;
+    
     const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
     const filename_insert = `leave_requests/${filename}`; 
 
     try {
         const sql = 'INSERT INTO leave_request (date, leave_type, emp_ID, details, file_uploaded) VALUES (?, ?, ?, ?, ?)';
-        const [insert_data_leave_request] = await db.promise().query(sql, [storeCurrentDate(0, 'hours'), leave_type, emp_ID, details, filename_insert]);
+        const [insert_data_leave_request] = await db.promise().query(sql, [storeCurrentDate(0, 'hours'), leave_type, emp_ID, details, req.file ? filename_insert : null]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Leave request successfully created.' });

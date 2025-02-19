@@ -32,15 +32,27 @@ import dotenv from 'dotenv';
 import { authenticateToken } from "./middleware/auth.js";
 //j
 
+
+
 import path from 'path'; // Import the path module
 import fs from 'fs'; // Import fs to check if the directory exists
 import { fileURLToPath } from 'url'; // Import fileURLToPath
-import { dirname } from 'path'; // Import dirname
+import { dirname, join } from 'path'; // Import dirname
+
+
+
+import { Server } from 'socket.io';
+import { createServer } from 'node:http';
 
 
 // Get the current directory name
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+//const __filename = fileURLToPath(import.meta.url);
+//const __dirname = dirname(__filename);
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+
+
 
 
 dotenv.config();
@@ -48,12 +60,24 @@ dotenv.config();
 const port = process.env.PORT;
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:5173", // Adjust this to your React app's URL
+        methods: ["GET", "POST"],
+        allowedHeaders: ["my-custom-header"],
+        credentials: true
+    }
+});
+
+  
 
 app.use(express.json());
 app.use(express.text()); 
 app.use(express.urlencoded({ extended: true }));
 //app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(cors());
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -80,8 +104,6 @@ app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
 app.use("/overtime_requests", overtimeRequestRoutes);
 
 
-
-
 // db.connect(err => {
 //     if (err) {
 //         console.error('Database connection failed:', err);
@@ -91,9 +113,24 @@ app.use("/overtime_requests", overtimeRequestRoutes);
 // });
 
 
+// Handle WebSocket connections
+io.on('connection', (socket) => {
+    console.log('a user connected');
+  
+    // Handle incoming messages
+    socket.on('message', (msg) => {
+      console.log('message received: ' + msg);
+      // Broadcast the message to all connected clients
+      io.emit('message', msg);
+    });
+  
+    // Handle disconnection
+    socket.on('disconnect', () => {
+      console.log('user disconnected');
+    });
+});
+  
 
-
-// Start the server
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
