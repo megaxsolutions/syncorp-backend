@@ -123,5 +123,26 @@ export const get_all_user_attendance = asyncHandler(async (req, res) => {
 });
 
 
+export const get_all_attendance = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+
+    try {
+        const sql = `SELECT 
+                    DATE_FORMAT(timeIN, '%Y-%m-%d %H:%i:%s') AS timeIN,
+                    DATE_FORMAT(timeOUT, '%Y-%m-%d %H:%i:%s') AS timeOUT, 
+                    DATE_FORMAT(date, '%Y-%m-%d') AS date, 
+                    clusterID FROM attendance`; // Use a parameterized query
+
+
+        const [attendance] = await db.promise().query(sql);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: attendance });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+
   
   
