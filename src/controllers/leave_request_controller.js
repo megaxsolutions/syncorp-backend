@@ -48,9 +48,13 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
 export const create_leave_request = asyncHandler(async (req, res) => {
     const { leave_type, emp_ID, details} = req.body;
-    
     const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
     const filename_insert = `leave_requests/${filename}`; 
+    const { leave_type_id } = req.params; // Assuming department_id is passed as a URL parameter
+    
+    if(leave_type_id == 1 && !req.file) {
+        return res.status(400).json({ error: 'Image file is required.' });
+    }
 
     try {
         const sql = 'INSERT INTO leave_request (date, leave_type, emp_ID, details, file_uploaded) VALUES (?, ?, ?, ?, ?)';

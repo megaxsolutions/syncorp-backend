@@ -5,27 +5,6 @@ import db from './../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
 
 
-
-// Function to get the current date and time in Asia/Manila and store it in the database
-function storeCurrentDateTime(expirationAmount, expirationUnit) {
-    // Get the current date and time in Asia/Manila timezone
-    const currentDateTime = moment.tz("Asia/Manila");
-
-    // Calculate the expiration date and time
-    const expirationDateTime = currentDateTime.clone().add(expirationAmount, expirationUnit);
-
-    // Format the current date and expiration date
-    const formattedCurrentDateTime = currentDateTime.format('YYYY-MM-DD HH:mm:ss');
-    const formattedExpirationDateTime = expirationDateTime.format('YYYY-MM-DD HH:mm:ss');
-
-    // Return both current and expiration date-time
-    return formattedExpirationDateTime;
-    // return {
-    //     currentDateTime: formattedCurrentDateTime,
-    //     expirationDateTime: formattedExpirationDateTime
-    // };
-}
-
 export const create_leave_type = asyncHandler(async (req, res) => {
     const { leave_type } = req.body;
 
