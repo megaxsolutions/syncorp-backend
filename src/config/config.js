@@ -25,6 +25,7 @@ function handleDisconnect() {
 
   db.on('error', (err) => {
     console.error('Database error:', err);
+
     setTimeout(handleDisconnect, 2000); // Retry connection after 2 seconds
     // if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ECONNRESET') {
     //   handleDisconnect(); // Reconnect if connection is lost

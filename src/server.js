@@ -29,7 +29,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 
 import { authenticateToken } from "./middleware/auth.js";
-
+//j
 
 import path from 'path'; // Import the path module
 import fs from 'fs'; // Import fs to check if the directory exists
