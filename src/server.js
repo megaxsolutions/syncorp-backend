@@ -25,14 +25,11 @@ import overtimeTypeRoutes from "./routes/overtime_type_routes.js";
 import overtimeRequestRoutes from "./routes/overtime_request_routes.js";
 
 
-
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 
 import { authenticateToken } from "./middleware/auth.js";
 //j
-
-
 
 import path from 'path'; // Import the path module
 import fs from 'fs'; // Import fs to check if the directory exists
@@ -40,23 +37,13 @@ import { fileURLToPath } from 'url'; // Import fileURLToPath
 import { dirname, join } from 'path'; // Import dirname
 
 
-
 import { Server } from 'socket.io';
 import { createServer } from 'node:http';
 
-
-// Get the current directory name
-//const __filename = fileURLToPath(import.meta.url);
-//const __dirname = dirname(__filename);
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-
-
-
-
 dotenv.config();
 
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const port = process.env.PORT;
 
 const app = express();
