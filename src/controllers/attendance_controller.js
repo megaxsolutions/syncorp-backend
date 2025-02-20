@@ -37,8 +37,11 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
 
     try {
         const sql = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date ) VALUES (?, ?, ?, ?)';
+        const sql2 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
+
         const [insert_data_site] = await db.promise().query(sql, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours') ]);
-      
+        const [update_data_clock_state] = await db.promise().query(sql2, [1, emp_id]);
+
         // Return the merged results in the response
         return res.status(200).json({ success: 'Attendance successfully created.' });
     } catch (error) {
@@ -53,15 +56,28 @@ export const update_attendance_time_out = asyncHandler(async (req, res) => {
     try {
         const sql  = 'SELECT * FROM attendance WHERE emp_ID = ? ORDER BY id DESC LIMIT 1';
         const sql2 = 'UPDATE attendance SET timeOUT = ? WHERE id = ?';
+        const sql3 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
+
 
         const [attendance] = await db.promise().query(sql, [emp_id]);
         const [update_data_attendance] = await db.promise().query(sql2, [storeCurrentDateTime(0, 'hours'),  attendance[0]['id']]);
-      
+        const [update_data_clock_state] = await db.promise().query(sql3, [0, emp_id]);
+
+
         // Return the merged results in the response
         return res.status(200).json({ success: 'Attendance successfully updated.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to update attendance.' });
     }
+});
+
+export const get_user_clock_state = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+    const sql  = 'SELECT emp_ID, state FROM clock_state WHERE emp_ID = ? ORDER BY id DESC LIMIT 1';
+
+    const [clock_statedance] = await db.promise().query(sql, [emp_id]); // Use 'sql' instead of 'sql2'
+
+    return res.status(200).json({ data: clock_statedance });
 });
 
 

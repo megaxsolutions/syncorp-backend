@@ -7,10 +7,19 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import sendEmail from "../utils/mailer.js";
 
+import path from 'path'; // Import the path module
+import fs from 'fs'; // Import fs to check if the directory exists
+import { fileURLToPath } from 'url'; // Import fileURLToPath
+import { dirname, join } from 'path'; // Import dirname
+
 
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET; // Replace with your own secret key
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const uploadsDir = path.join(__dirname, '../../uploads/');
+
 
 
 
@@ -107,6 +116,7 @@ export const create_employee = asyncHandler(async (req, res) => {
             const sql3 = 'INSERT INTO employee_profile (emp_ID, fName, mName, lName, bDate, date_hired, departmentID, clusterID, siteID, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, photo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const sql4 = 'INSERT INTO employee_profile_benefits (emp_ID, sss, pagibig, philhealth, tin, basic_pay, healthcare) VALUES (?, ?, ?, ?, ?, ?, ?)';
             const sql5 = 'INSERT INTO employee_profile_standing (emp_ID, employee_status, positionID, date_added, datetime_updated) VALUES (?, ?, ?, ?, ?)';
+            const sql6 = 'INSERT INTO clock_state (emp_ID, state) VALUES (?, ?)';
 
 
             const [insert_data_id_generator] = await db.promise().query(sql, [storeCurrentDateTime(0, 'hours')]);
@@ -114,7 +124,8 @@ export const create_employee = asyncHandler(async (req, res) => {
             const [insert_data_employee_profile] = await db.promise().query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : null]);
             const [insert_data_employee_profile_benefits] = await db.promise().query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay, healthcare]);
             const [insert_data_employee_profile_standing] = await db.promise().query(sql5, [insert_data_id_generator['insertId'], employee_status, positionID, storeCurrentDateTime(0, 'months'), storeCurrentDateTime(0, 'months')]);
-        
+            const [insert_data_clock_state] = await db.promise().query(sql6, [insert_data_id_generator['insertId'], 0]);
+
 
         return res.status(200).json({ success: 'Account successfully created.' });
     } catch (error) {
@@ -267,13 +278,26 @@ export const update_employee = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: 'Invalid date hired format. Please use YYYY-MM-DD.' });
     }
     try {
+        const sql0 = 'SELECT * FROM employee_profile WHERE emp_ID = ?'; // Use a parameterized query
         const sql  = 'UPDATE employee_profile SET fName = ?, mName = ?, lName = ?, bDate = ?, date_hired = ?, departmentID = ?, clusterID = ?, siteID = ?, email = ?, phone = ?, address = ?, emergency_contact_person = ?, emergency_contact_number = ?, employee_level = ?, photo = ? WHERE emp_ID = ?';
         const sql2 = 'UPDATE employee_profile_benefits SET sss = ?, pagibig = ?, philhealth = ?, tin = ?, basic_pay = ?, healthcare = ? WHERE emp_ID = ?';
         const sql3 = 'UPDATE employee_profile_standing SET employee_status = ?, positionID = ?, datetime_updated = ? WHERE emp_ID = ?';
 
-        const [insert_data_employee_profile] = await db.promise().query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : null, emp_id]);
+        const [employee_profile] = await db.promise().query(sql0, [emp_id]);
+        const [insert_data_employee_profile] = await db.promise().query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : employee_profile[0]['photo'], emp_id]);
         const [insert_data_employee_profile_benefits] = await db.promise().query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, emp_id]);
         const [insert_data_employee_profile_standing] = await db.promise().query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
+
+
+         if(req.file) {
+            const filePath = path.join(uploadsDir, employee_profile[0]['photo']);
+        
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error('Error deleting file:', err);
+                }
+            });
+        }
 
         return res.status(200).json({ success: 'Employee successfully updated.' });
     } catch (error) {
@@ -302,7 +326,15 @@ export const get_all_employee = asyncHandler(async (req, res) => {
         FROM login LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
         LEFT JOIN employee_profile_benefits ON employee_profile.emp_ID = employee_profile_benefits.emp_ID 
         LEFT JOIN employee_profile_standing ON employee_profile.emp_ID = employee_profile_standing.emp_ID`;
+
+       // const sql2 = 'INSERT INTO clock_state (emp_ID, state) VALUES (?, ?)';
+       
         const [users] = await db.promise().query(sql);
+
+        // for (const user of users) {
+        //     const [insert_data_clock_state] = await db.promise().query(sql2, [`${user.emp_ID}`, 0]);
+        //     // You can process insert_data_clock_state here if needed
+        // }
 
         return res.status(200).json({ data: users });
     } catch (error) {
