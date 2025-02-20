@@ -45,7 +45,7 @@ adminRoutes.put('/update_admin_login/:emp_id', authenticateToken, AdminControlle
 adminRoutes.put('/update_admin/:emp_id', authenticateToken, upload.single('file_uploaded'), AdminController.update_admin);
 adminRoutes.post('/add_admin', authenticateToken,  AdminController.create_admin);
 adminRoutes.get('/get_all_admin', authenticateToken, AdminController.get_all_admin);
-adminRoutes.delete('/delete_admin/:admin_id', authenticateToken, AdminController.delete_admin);
+adminRoutes.delete('/delete_admin/:admin_emp_id', AdminController.delete_admin);
 
 
 
