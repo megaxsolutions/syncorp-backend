@@ -50,8 +50,8 @@ export const create_overtime_request = asyncHandler(async (req, res) => {
     const { ot_type, hrs, emp_ID} = req.body;
 
     try {
-        const sql = 'INSERT INTO overtime_request (date, hrs, ot_type, emp_ID ) VALUES (?, ?, ?, ?)';
-        const [insert_data_overtime_request] = await db.promise().query(sql, [storeCurrentDate(0, 'hours'), hrs, ot_type, emp_ID]);
+        const sql = 'INSERT INTO overtime_request (date, hrs, ot_type, emp_ID, status) VALUES (?, ?, ?, ?, ?)';
+        const [insert_data_overtime_request] = await db.promise().query(sql, [storeCurrentDate(0, 'hours'), hrs, ot_type, emp_ID, 'pending']);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Overtime request successfully created.' });
@@ -87,9 +87,9 @@ export const update_approval_overtime_request = asyncHandler(async (req, res) =>
 
     
     try {
-        const sql  = 'UPDATE overtime_request SET approved_by = ?, date_approved = ? WHERE id = ?';
+        const sql  = 'UPDATE overtime_request SET approved_by = ?, date_approved = ?, status = ? WHERE id = ?';
 
-        const [update_data_overtime_request] = await db.promise().query(sql, [emp_id_approved_by, storeCurrentDate(0, 'hours'), overtime_request_id]);
+        const [update_data_overtime_request] = await db.promise().query(sql, [emp_id_approved_by, storeCurrentDate(0, 'hours'), 'approved', overtime_request_id]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Overtime request successfully updated.' });
@@ -116,7 +116,7 @@ export const update_status_overtime_request = asyncHandler(async (req, res) => {
 });
 
 
-export const get_all_overtime_request = asyncHandler(async (req, res) => {
+export const get_all_user_overtime_request = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
@@ -135,6 +135,26 @@ export const get_all_overtime_request = asyncHandler(async (req, res) => {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
+
+
+export const get_all_overtime_request = asyncHandler(async (req, res) => {
+    try {
+        const sql  = `SELECT 
+        id,
+        DATE_FORMAT(date, '%Y-%m-%d') AS date, 
+        hrs, ot_type, emp_ID, approved_by, 
+        DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved, 
+        status FROM overtime_request`; // Use a parameterized query
+
+        const [overtime_request] = await db.promise().query(sql, [emp_id]);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: overtime_request });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
 
 
 export const delete_overtime_request = asyncHandler(async (req, res) => {

@@ -52,7 +52,7 @@ export const create_leave_request = asyncHandler(async (req, res) => {
     const filename_insert = `leave_requests/${filename}`; 
     const { leave_type_id } = req.params; // Assuming department_id is passed as a URL parameter
     
-    if(leave_type_id == 1 && !req.file) {
+    if(leave_type_id == 3 && !req.file) {
         return res.status(400).json({ error: 'Image file is required.' });
     }
 

@@ -27,9 +27,11 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 }
 
 export const create_break = asyncHandler(async (req, res) => {
+    const { emp_id } = req.body;
+
     try {
-        const sql = 'INSERT INTO breaks (breakIN) VALUES (?)';
-        const [insert_data_break] = await db.promise().query(sql, [storeCurrentDateTime(0, 'hours')]);
+        const sql = 'INSERT INTO breaks (breakIN, emp_ID) VALUES (?, ?)';
+        const [insert_data_break] = await db.promise().query(sql, [storeCurrentDateTime(0, 'hours'), emp_id]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Break successfully created.' });
@@ -39,18 +41,41 @@ export const create_break = asyncHandler(async (req, res) => {
 });
 
 
+
 export const update_break_break_out = asyncHandler(async (req, res) => {
-    const { break_id } = req.params; // Assuming department_id is passed as a URL parameter
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
 
     try {
-        const sql = 'UPDATE breaks SET breakOUT = ? WHERE id = ?';
-        const [update_data_break] = await db.promise().query(sql, [storeCurrentDateTime(0, 'hours'), break_id]);
+        const sql  = 'SELECT * FROM breaks WHERE emp_ID = ? ORDER BY id DESC LIMIT 1';
+        const sql2 = 'UPDATE breaks SET timeOUT = ? WHERE id = ?';
+
+        const [breaks] = await db.promise().query(sql, [emp_id]);
+        const [update_data_breaks] = await db.promise().query(sql2, [storeCurrentDateTime(0, 'hours'),  breaks[0]['id']]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Break successfully updated.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to update break.' });
+    }
+});
+
+
+export const get_all_user_break = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+
+    try {
+        const sql  = `SELECT id,
+        DATE_FORMAT(breakIN, '%Y-%m-%d %H:%i:%s') AS breakIN,  
+        DATE_FORMAT(breakOUT, '%Y-%m-%d %H:%i:%s') AS breakOUT
+        FROM breaks WHERE emp_ID = ?`; // Use a parameterized query
+                                  
+        const [breaks] = await db.promise().query(sql, [emp_id]);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: breaks });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
 
