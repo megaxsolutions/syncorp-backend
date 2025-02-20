@@ -29,6 +29,7 @@ function handleDisconnect() {
    // if (err.code === 'PROTOCOL_CONNECTION_LOST') {
       handleDisconnect(); // Reconnect if connection is lost
     } else {
+      handleDisconnect(); // Reconnect if connection is lost
       throw err; // Throw other errors
     }
   });
