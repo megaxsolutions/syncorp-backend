@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 let db;
-
+//try
 function handleDisconnect() {
   db = mysql.createConnection({
     host: process.env.DB_HOST,
