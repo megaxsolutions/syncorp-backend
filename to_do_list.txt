@@ -5,7 +5,3 @@ emp_id
 
 data for department, site, cluster, position
 
-
-
-multiple level admin
-switch users button
