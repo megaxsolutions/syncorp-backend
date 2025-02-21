@@ -100,7 +100,7 @@ export const remove_user_level_admin = asyncHandler(async (req, res) => {
         const sql   = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
         const sql2  = 'UPDATE admin_login SET user_level = ? WHERE emp_ID = ?';
 
-        const [user] = await db.promise().query(sql, [emp_id]);
+        const [user] = await db.query(sql, [emp_id]);
 
         if (user.length == 0) {
             return res.status(404).json({ error: 'No user found.' });
@@ -115,7 +115,7 @@ export const remove_user_level_admin = asyncHandler(async (req, res) => {
                 return res.status(404).send('No record found');
             } 
            
-            const [update_data_admin_login] = await db.promise().query(sql2, [updatedArrayString, emp_id]);    
+            const [update_data_admin_login] = await db.query(sql2, [updatedArrayString, emp_id]);    
 
             return res.status(200).json({ success: 'User level successfully updated.' });
         }
@@ -140,10 +140,10 @@ export const update_admin_user_level = asyncHandler(async (req, res) => {
         const sql2  = 'INSERT INTO admin_login (emp_ID, expiry_date, user_level) VALUES (?, ?, ?)';
         const sql3  = 'UPDATE admin_login SET user_level = ? WHERE emp_ID = ?';
 
-        const [user] = await db.promise().query(sql, [emp_id]);
+        const [user] = await db.query(sql, [emp_id]);
 
         if (user.length == 0) {
-            const [insert_data_admin_login] = await db.promise().query(sql2, [emp_id, storeCurrentDate(3, 'months'), arrayString]);    
+            const [insert_data_admin_login] = await db.query(sql2, [emp_id, storeCurrentDate(3, 'months'), arrayString]);    
             return res.status(200).json({ success: 'Account successfully created.' });
         } else {
             const existingArrayString = user[0]['user_level']; 
@@ -157,7 +157,7 @@ export const update_admin_user_level = asyncHandler(async (req, res) => {
                 return res.status(400).json({ error: 'User level already exists.' });
             } 
            
-            const [update_data_admin_login] = await db.promise().query(sql3, [updatedArrayString, emp_id]);    
+            const [update_data_admin_login] = await db.query(sql3, [updatedArrayString, emp_id]);    
 
             return res.status(200).json({ success: 'User level successfully updated.' });
         }
@@ -181,10 +181,10 @@ export const create_admin = asyncHandler(async (req, res) => {
         const sql   = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
         const sql2  = 'INSERT INTO admin_login (emp_ID, password, expiry_date, user_level) VALUES (?, ?, ?, ?)';
 
-        const [user] = await db.promise().query(sql, [emp_id]);
+        const [user] = await db.query(sql, [emp_id]);
 
         if (user.length == 0) {
-            const [insert_data_admin_login] = await db.promise().query(sql2, [emp_id, hashConverterMD5(password), storeCurrentDate(3, 'months'), arrayString]);    
+            const [insert_data_admin_login] = await db.query(sql2, [emp_id, hashConverterMD5(password), storeCurrentDate(3, 'months'), arrayString]);    
             return res.status(200).json({ success: 'Account successfully created.' });
         } 
 
@@ -225,7 +225,7 @@ export const login_admin = asyncHandler(async (req, res) => {
         const sql2 = 'INSERT INTO tokens (emp_ID, token, expiry_datetime) VALUES (?, ?, ?)';
         const sql3 = 'UPDATE admin_login SET login_attempts = ? WHERE emp_ID = ?';
 
-        const [login] = await db.promise().query(sql, [emp_ID]);
+        const [login] = await db.query(sql, [emp_ID]);
 
         const dateObject = new Date(login[0]['expiry_date']);
         const expiryDate = dateObject.toISOString().split('T')[0];
@@ -245,13 +245,13 @@ export const login_admin = asyncHandler(async (req, res) => {
             });
 
             const hashToken = hashConverterMD5(token);
-            const [data_token] = await db.promise().query(sql2, [emp_ID, token, storeCurrentDate(1, 'hours')]);
-            const [data_admin_login] = await db.promise().query(sql3, [0, emp_ID]);
+            const [data_token] = await db.query(sql2, [emp_ID, token, storeCurrentDate(1, 'hours')]);
+            const [data_admin_login] = await db.query(sql3, [0, emp_ID]);
 
             return res.status(200).json({ data: token, emp_id: login[0]['emp_ID'] });
         }
 
-        const [data_admin_login] = await db.promise().query(sql3, [login[0]['login_attempts'] + 1, emp_ID]);
+        const [data_admin_login] = await db.query(sql3, [login[0]['login_attempts'] + 1, emp_ID]);
 
         return res.status(400).json({ error: 'Failed to login wrong password.' });
     } catch (error) {
@@ -276,7 +276,7 @@ export const update_admin_expiration = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: 'Invalid expiry date format. Please use "<number> hours", "<number> months", or "<number> years".' });
         }
 
-        const [update_admin_expiration ] = await db.promise().query(sql, [storeCurrentDate(match[1], match[2]), emp_id]);
+        const [update_admin_expiration ] = await db.query(sql, [storeCurrentDate(match[1], match[2]), emp_id]);
             
         if (update_admin_expiration.affectedRows === 0) {
             return res.status(404).json({ error: 'Admin not found.' });
@@ -303,12 +303,12 @@ export const update_admin_login = asyncHandler(async (req, res) => {
  
 
         if(!password) {
-            const [update_login_no_password] = await db.promise().query(sql, [login_attempts, emp_id, user_level]);
+            const [update_login_no_password] = await db.query(sql, [login_attempts, emp_id, user_level]);
             if (update_login_no_password.affectedRows === 0) {
                 return res.status(404).json({ error: 'Admin not found.' });
             }
         } else {
-            const [update_login_password] = await db.promise().query(sql2, [login_attempts, hash_password, emp_id, user_level]);
+            const [update_login_password] = await db.query(sql2, [login_attempts, hash_password, emp_id, user_level]);
             
             if (update_login_password.affectedRows === 0) {
                 return res.status(404).json({ error: 'Admin not found.' });
@@ -350,10 +350,10 @@ export const update_admin = asyncHandler(async (req, res) => {
         const sql2 = 'UPDATE employee_profile_benefits SET sss = ?, pagibig = ?, philhealth = ?, tin = ?, basic_pay = ?, healthcare = ? WHERE emp_ID = ?';
         const sql3 = 'UPDATE employee_profile_standing SET employee_status = ?, positionID = ?, datetime_updated = ? WHERE emp_ID = ?';
 
-        const [employee_profile] = await db.promise().query(sql0, [emp_id]);
-        const [insert_data_employee_profile] = await db.promise().query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : employee_profile[0]['photo'], emp_id]);
-        const [insert_data_employee_profile_benefits] = await db.promise().query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, emp_id]);
-        const [insert_data_employee_profile_standing] = await db.promise().query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
+        const [employee_profile] = await db.query(sql0, [emp_id]);
+        const [insert_data_employee_profile] = await db.query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : employee_profile[0]['photo'], emp_id]);
+        const [insert_data_employee_profile_benefits] = await db.query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, emp_id]);
+        const [insert_data_employee_profile_standing] = await db.query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
 
         if(req.file) {
             const filePath = path.join(uploadsDir, employee_profile[0]['photo']);
@@ -393,7 +393,7 @@ export const get_all_admin = asyncHandler(async (req, res) => {
         LEFT JOIN employee_profile_benefits ON employee_profile.emp_ID = employee_profile_benefits.emp_ID 
         LEFT JOIN employee_profile_standing ON employee_profile.emp_ID = employee_profile_standing.emp_ID`;
 
-        const [users] = await db.promise().query(sql);
+        const [users] = await db.query(sql);
 
         return res.status(200).json({ data: users });
     } catch (error) {
@@ -407,7 +407,7 @@ export const delete_admin = asyncHandler(async (req, res) => {
 
     try {
         const sql = 'DELETE FROM admin_login WHERE emp_ID = ?';
-        const [result] = await db.promise().query(sql, [admin_emp_id]);
+        const [result] = await db.query(sql, [admin_emp_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Admin not found.' });

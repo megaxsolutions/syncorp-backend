@@ -4,30 +4,27 @@ import jwt from 'jsonwebtoken';
 import db from './../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
 
-
 export const create_department = asyncHandler(async (req, res) => {
     const { department_name, site_id } = req.body;
 
     try {
         const sql = 'INSERT INTO departments (departmentName, siteID) VALUES (?, ?)';
-        const [insert_data_department] = await db.promise().query(sql, [department_name, site_id]);
+        const [insert_data_department] = await db.query(sql, [department_name, site_id]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Department successfully created.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to get all user.' });
+        return res.status(500).json({ error: 'Failed to create department.' });
     }
 });
-
 
 export const update_department = asyncHandler(async (req, res) => {
     const { department_name, site_id } = req.body;
     const { department_id } = req.params; // Assuming department_id is passed as a URL parameter
 
-
     try {
         const sql = 'UPDATE departments SET departmentName = ?, siteID = ? WHERE id = ?';
-        const [result] = await db.promise().query(sql, [department_name, site_id, department_id]);
+        const [result] = await db.query(sql, [department_name, site_id, department_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Department not found.' });
@@ -39,14 +36,12 @@ export const update_department = asyncHandler(async (req, res) => {
     }
 });
 
-
-
 export const delete_department = asyncHandler(async (req, res) => {
     const { department_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
         const sql = 'DELETE FROM departments WHERE id = ?';
-        const [result] = await db.promise().query(sql, [department_id]);
+        const [result] = await db.query(sql, [department_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Department not found.' });
@@ -57,6 +52,3 @@ export const delete_department = asyncHandler(async (req, res) => {
         return res.status(500).json({ error: 'Failed to delete department.' });
     }
 });
-
-  
-  
