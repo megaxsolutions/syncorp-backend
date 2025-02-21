@@ -4,6 +4,21 @@ import jwt from 'jsonwebtoken';
 import db from './../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
 
+import db2 from './../config/db_config.js'; // Import the database connection
+
+
+
+export const test_result = asyncHandler(async (req, res) => {
+
+    try {
+        const sql  = 'SELECT * FROM departments'; // Use a parameterized query
+        const [departments] = await db2.query(sql);
+
+        return res.status(200).json({ data: departments });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
 
 export const get_all_dropdown_data = asyncHandler(async (req, res) => {
     try {

@@ -74,7 +74,7 @@ app.use("/admins", adminRoutes);
 app.use("/employees", employeeRoutes);
 app.use("/recovery", recoveryRoutes);
 
-app.use("/main", authenticateToken, mainRoutes);
+app.use("/main", mainRoutes);
 app.use("/departments", authenticateToken, departmentRoutes);
 app.use("/sites", authenticateToken, siteRoutes);
 app.use("/clusters", authenticateToken, clusterRoutes);
@@ -83,14 +83,14 @@ app.use("/employee_levels", authenticateToken, employeeLevelRoutes);
 app.use("/admin_levels", authenticateToken, adminLevelRoutes);
 app.use("/holidays", authenticateToken, holidayRoutes);
 app.use("/cutoffs", authenticateToken, cutOffRoutes);
-app.use("/attendances", attendanceRoutes);
+app.use("/attendances", authenticateToken, attendanceRoutes);
 app.use("/dtr", authenticateToken, dtrRoutes);
 app.use("/breaks", authenticateToken, breakRoutes);
 app.use("/leave_requests", authenticateToken, leaveRequestRoutes);
 app.use("/leave_types", authenticateToken, leaveTypeRoutes);
 app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
 app.use("/overtime_requests", authenticateToken, overtimeRequestRoutes);
-app.use("/bulletins", bulletinRoutes);
+app.use("/bulletins", authenticateToken, bulletinRoutes);
 
 
 // db.connect(err => {
