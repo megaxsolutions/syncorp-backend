@@ -12,7 +12,6 @@ import fs from 'fs'; // Import fs to check if the directory exists
 import { fileURLToPath } from 'url'; // Import fileURLToPath
 import { dirname, join } from 'path'; // Import dirname
 
-
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET; // Replace with your own secret key
@@ -140,7 +139,6 @@ export const login_employee = asyncHandler(async (req, res) => {
 
     try {
         const hash = hashConverterMD5(password);
-
         const sql = `SELECT login.emp_ID, login.password, login.login_attempts, 
         DATE_FORMAT(login.expiry_date, '%Y-%m-%d') AS expiry_date,
         employee_profile.fName, employee_profile.mName, employee_profile.lName, 
@@ -168,7 +166,7 @@ export const login_employee = asyncHandler(async (req, res) => {
         if(storeCurrentDate(0, 'months') > login[0]['expiry_date']) {
             return res.status(400).json({ error: 'Your account has expired. Please contact the administrator for assistance.' });        
         }
-
+      
         if(login[0]['login_attempts'] == 5) {
             return res.status(400).json({ error: 'Please contact the admin.' });
         }
@@ -190,7 +188,7 @@ export const login_employee = asyncHandler(async (req, res) => {
 
         return res.status(400).json({ error: 'Failed to login wrong password.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to login ' });
+        return res.status(500).json({ error: 'Failed to login' + error.stack});
     }
 });
 
