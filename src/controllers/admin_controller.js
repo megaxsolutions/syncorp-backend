@@ -84,6 +84,38 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 }
 
 
+export const remove_user_level_admin = asyncHandler(async (req, res) => {
+    const { user_level, emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+
+    try {
+        const sql   = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+        const sql2  = 'UPDATE admin_login SET user_level = ? WHERE emp_ID = ?';
+
+        const [user] = await db.promise().query(sql, [emp_id]);
+
+        if (user.length == 0) {
+            return res.status(404).json({ error: 'No user found.' });
+        } else {
+            const existingArrayString = user[0]['user_level']; 
+            const existingArray = JSON.parse(existingArrayString); 
+            const exists = existingArray.includes(Number(user_level)); // Check if the value exists
+            const updatedArray = existingArray.filter(level => level !== Number(user_level)); // Remove the specified user_level
+            const updatedArrayString = JSON.stringify(updatedArray); // This will produce the updated array string
+
+            if (!exists) {
+                return res.status(404).send('No record found');
+            } 
+           
+            const [update_data_admin_login] = await db.promise().query(sql2, [updatedArrayString, emp_id]);    
+
+            return res.status(200).json({ success: 'User level successfully updated.' });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update admin' });
+    }
+});
+
+
 export const create_admin = asyncHandler(async (req, res) => {
     const { emp_id, password, user_level } = req.body;
 
