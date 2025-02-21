@@ -8,6 +8,21 @@ import db2 from './../config/db_config.js'; // Import the database connection
 
 
 
+export const test_create_break = asyncHandler(async (req, res) => {
+    const { emp_id } = req.body;
+
+    try {
+        const sql = 'INSERT INTO breaks (emp_ID) VALUES (?)';
+        const [insert_data_break] = await db2.query(sql, [emp_id]);
+      
+        // Return the merged results in the response
+        return res.status(200).json({ success: 'Break successfully created.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to create break.' });
+    }
+});
+
+
 export const test_result = asyncHandler(async (req, res) => {
 
     try {

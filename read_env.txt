@@ -4,9 +4,6 @@ DB_NAME=sync_db
 DB_USER=sync_admin
 DB_PASS=Kk9566678@!
 
-#EMAIL_USER=projectqr00@gmail.com
-#EMAIL_PASS=jalrejeyeajpvzge
-
 EMAIL_USER=megaxsolutions@gmail.com
 EMAIL_PASS=oiwibzbgbokxmwwg
 
