@@ -47,6 +47,8 @@ adminRoutes.post('/add_admin', authenticateToken, AdminController.create_admin);
 adminRoutes.get('/get_all_admin', authenticateToken, AdminController.get_all_admin);
 adminRoutes.delete('/delete_admin/:admin_emp_id', authenticateToken, AdminController.delete_admin);
 adminRoutes.get('/remove_user_level_admin/:emp_id/:user_level', authenticateToken, AdminController.remove_user_level_admin);
+adminRoutes.post('/update_admin_user_level', authenticateToken, AdminController.update_admin_user_level);
+
 
 
 

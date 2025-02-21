@@ -4,6 +4,14 @@ import jwt from 'jsonwebtoken';
 import db from './../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
 
+import path from 'path'; // Import the path module
+import fs from 'fs'; // Import fs to check if the directory exists
+import { fileURLToPath } from 'url'; // Import fileURLToPath
+import { dirname, join } from 'path'; // Import dirname
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const uploadsDir = path.join(__dirname, '../../uploads/');
+
 
 
 // Function to get the current date and time in Asia/Manila and store it in the database
@@ -48,9 +56,10 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
 export const create_leave_request = asyncHandler(async (req, res) => {
     const { leave_type, emp_ID, details} = req.body;
+    const { leave_type_id } = req.params; // Assuming department_id is passed as a URL parameter
+
     const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
     const filename_insert = `leave_requests/${filename}`; 
-    const { leave_type_id } = req.params; // Assuming department_id is passed as a URL parameter
     
     if(leave_type_id == 3 && !req.file) {
         return res.status(400).json({ error: 'Image file is required.' });
@@ -70,12 +79,15 @@ export const create_leave_request = asyncHandler(async (req, res) => {
 
 export const update_user_leave_request = asyncHandler(async (req, res) => {
     const { leave_type, details} = req.body;
+    const { leave_request_id, leave_type_id } = req.params; // Assuming department_id is passed as a URL parameter
+
     const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
-    const filename_insert = `leave_request/${filename}`; 
-    const { leave_request_id } = req.params; // Assuming department_id is passed as a URL parameter
-
-
+    const filename_insert = `leave_requests/${filename}`; 
     
+    if(leave_type_id == 3 && !req.file) {
+        return res.status(400).json({ error: 'Image file is required.' });
+    }
+
     try {
         const sql  = 'SELECT * FROM leave_request WHERE id = ?'; // Use a parameterized query
         const sql2 = 'UPDATE leave_request SET leave_type = ?, details = ?, file_uploaded = ? WHERE id = ?';
@@ -83,6 +95,16 @@ export const update_user_leave_request = asyncHandler(async (req, res) => {
         const [leave_request] = await db.promise().query(sql, [leave_request_id]);
         const [update_data_leave_request] = await db.promise().query(sql2, [leave_type, details, req.file ? filename_insert : leave_request[0]['file_uploaded'], leave_request_id]);
       
+
+         if(req.file) {
+            const filePath = path.join(uploadsDir, leave_request[0]['file_uploaded']);
+        
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error('Error deleting file:', err);
+                }
+            });
+        }
         // Return the merged results in the response
         return res.status(200).json({ success: 'Leave request successfully updated.' });
     } catch (error) {
@@ -154,12 +176,24 @@ export const delete_leave_request = asyncHandler(async (req, res) => {
     const { leave_request_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
-        const sql = 'DELETE FROM leave_request WHERE id = ?';
-        const [result] = await db.promise().query(sql, [leave_request_id]);
+
+        const sql  = 'SELECT * FROM leave_request WHERE id = ?'; // Use a parameterized query
+        const sql2 = 'DELETE FROM leave_request WHERE id = ?';
+
+        const [leave_request] = await db.promise().query(sql, [bulletin_id]);
+        const [result] = await db.promise().query(sql2, [leave_request_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Leave request not found.' });
         }
+
+        const filePath = path.join(uploadsDir, leave_request[0]['file_uploaded']);
+        
+        fs.unlink(filePath, (err) => {
+            if (err) {
+                console.error('Error deleting file:', err);
+            }
+        });
 
         return res.status(200).json({ success: 'Leave request successfully deleted.' });
     } catch (error) {

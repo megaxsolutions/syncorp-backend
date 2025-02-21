@@ -7,6 +7,15 @@ import dotenv from 'dotenv';
 
 import { jwtDecode} from "jwt-decode";
 
+import path from 'path'; // Import the path module
+import fs from 'fs'; // Import fs to check if the directory exists
+import { fileURLToPath } from 'url'; // Import fileURLToPath
+import { dirname, join } from 'path'; // Import dirname
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const uploadsDir = path.join(__dirname, '../../uploads/');
+
+
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET; // Replace with your own secret key
@@ -116,8 +125,9 @@ export const remove_user_level_admin = asyncHandler(async (req, res) => {
 });
 
 
-export const create_admin = asyncHandler(async (req, res) => {
-    const { emp_id, password, user_level } = req.body;
+
+export const update_admin_user_level = asyncHandler(async (req, res) => {
+    const { emp_id, user_level } = req.body;
 
     const array = [Number(user_level)];
     
@@ -127,13 +137,13 @@ export const create_admin = asyncHandler(async (req, res) => {
 
     try {
         const sql   = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
-        const sql2  = 'INSERT INTO admin_login (emp_ID, password, expiry_date, user_level) VALUES (?, ?, ?, ?)';
+        const sql2  = 'INSERT INTO admin_login (emp_ID, expiry_date, user_level) VALUES (?, ?, ?)';
         const sql3  = 'UPDATE admin_login SET user_level = ? WHERE emp_ID = ?';
 
         const [user] = await db.promise().query(sql, [emp_id]);
 
         if (user.length == 0) {
-            const [insert_data_admin_login] = await db.promise().query(sql2, [emp_id, hashConverterMD5(password), storeCurrentDate(3, 'months'), arrayString]);    
+            const [insert_data_admin_login] = await db.promise().query(sql2, [emp_id, storeCurrentDate(3, 'months'), arrayString]);    
             return res.status(200).json({ success: 'Account successfully created.' });
         } else {
             const existingArrayString = user[0]['user_level']; 
@@ -151,6 +161,34 @@ export const create_admin = asyncHandler(async (req, res) => {
 
             return res.status(200).json({ success: 'User level successfully updated.' });
         }
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to create admin entry' });
+    }
+});
+
+
+
+export const create_admin = asyncHandler(async (req, res) => {
+    const { emp_id, password, user_level } = req.body;
+
+    const array = [Number(user_level)];
+    
+    // Convert the array to a JSON string
+    const arrayString = JSON.stringify(array); // or array.join(',') for a comma-separated string
+
+
+    try {
+        const sql   = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+        const sql2  = 'INSERT INTO admin_login (emp_ID, password, expiry_date, user_level) VALUES (?, ?, ?, ?)';
+
+        const [user] = await db.promise().query(sql, [emp_id]);
+
+        if (user.length == 0) {
+            const [insert_data_admin_login] = await db.promise().query(sql2, [emp_id, hashConverterMD5(password), storeCurrentDate(3, 'months'), arrayString]);    
+            return res.status(200).json({ success: 'Account successfully created.' });
+        } 
+
+        return res.status(400).json({ error: 'User already exist..' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create admin entry' });
     }
@@ -307,13 +345,25 @@ export const update_admin = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: 'Invalid date hired format. Please use YYYY-MM-DD.' });
     }
     try {
+        const sql0 = 'SELECT * FROM employee_profile WHERE emp_ID = ?'; // Use a parameterized query
         const sql  = 'UPDATE employee_profile SET fName = ?, mName = ?, lName = ?, bDate = ?, date_hired = ?, departmentID = ?, clusterID = ?, siteID = ?, email = ?, phone = ?, address = ?, emergency_contact_person = ?, emergency_contact_number = ?, employee_level = ?, photo = ? WHERE emp_ID = ?';
         const sql2 = 'UPDATE employee_profile_benefits SET sss = ?, pagibig = ?, philhealth = ?, tin = ?, basic_pay = ?, healthcare = ? WHERE emp_ID = ?';
         const sql3 = 'UPDATE employee_profile_standing SET employee_status = ?, positionID = ?, datetime_updated = ? WHERE emp_ID = ?';
 
-        const [insert_data_employee_profile] = await db.promise().query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : null, emp_id]);
+        const [employee_profile] = await db.promise().query(sql0, [emp_id]);
+        const [insert_data_employee_profile] = await db.promise().query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : employee_profile[0]['photo'], emp_id]);
         const [insert_data_employee_profile_benefits] = await db.promise().query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, emp_id]);
         const [insert_data_employee_profile_standing] = await db.promise().query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
+
+        if(req.file) {
+            const filePath = path.join(uploadsDir, employee_profile[0]['photo']);
+        
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error('Error deleting file:', err);
+                }
+            });
+        }
 
         return res.status(200).json({ success: 'Employee successfully updated.' });
     } catch (error) {
