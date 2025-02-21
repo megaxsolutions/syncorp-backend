@@ -75,9 +75,9 @@ export const get_user_clock_state = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
     const sql  = 'SELECT emp_ID, state FROM clock_state WHERE emp_ID = ? ORDER BY id DESC LIMIT 1';
 
-    const [clock_statedance] = await db.promise().query(sql, [emp_id]); // Use 'sql' instead of 'sql2'
+    const [clock_state] = await db.promise().query(sql, [emp_id]); // Use 'sql' instead of 'sql2'
 
-    return res.status(200).json({ data: clock_statedance });
+    return res.status(200).json({ data: clock_state });
 });
 
 
