@@ -4,16 +4,16 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 let db;
-//try
+
 function handleDisconnect() {
   db = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
-    database: process.env.DB_NAME
+    database: process.env.DB_NAME,
+    port: 3306
   });
   
- // port: 3306,
 
   db.connect((err) => {
     if (err) {
@@ -26,7 +26,6 @@ function handleDisconnect() {
 
   db.on('error', (err) => {
     console.error('Database error:', err);
-
     setTimeout(handleDisconnect, 2000); // Retry connection after 2 seconds
     // if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ECONNRESET') {
     //   handleDisconnect(); // Reconnect if connection is lost
