@@ -9,7 +9,7 @@ export const get_all_dtr = asyncHandler(async (req, res) => {
     try {
         const sql  = 'SELECT * FROM dtr'; // Use a parameterized query
 
-        const [dtr] = await db.promise().query(sql);
+        const [dtr] = await db.query(sql);
 
         // Return the merged results in the response
         return res.status(200).json({ data: dtr });

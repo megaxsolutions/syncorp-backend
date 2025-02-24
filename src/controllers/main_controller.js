@@ -54,13 +54,13 @@ export const get_all_dropdown_data = asyncHandler(async (req, res) => {
 
 
 
-        const [departments] = await db.promise().query(sql);
-        const [clusters] = await db.promise().query(sql2);
-        const [sites] = await db.promise().query(sql3);
-        const [positions] = await db.promise().query(sql4);
-        const [employee_levels] = await db.promise().query(sql5);
-        const [admin_level] = await db.promise().query(sql6);
-        const [cutoff] = await db.promise().query(sql7);
+        const [departments] = await db.query(sql);
+        const [clusters] = await db.query(sql2);
+        const [sites] = await db.query(sql3);
+        const [positions] = await db.query(sql4);
+        const [employee_levels] = await db.query(sql5);
+        const [admin_level] = await db.query(sql6);
+        const [cutoff] = await db.query(sql7);
 
 
 

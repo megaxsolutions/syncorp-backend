@@ -1,45 +1,39 @@
-import mysql from 'mysql2';
+// db.js
+import mysql from 'mysql2/promise'; // Use promise-based version for async/await
 import dotenv from 'dotenv';
+import { parentPort, workerData } from 'worker_threads';
+
 
 dotenv.config();
 
-let db;
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port: 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
-function handleDisconnect() {
-  db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    port: 3306,
-    waitForConnections: true,
-    connectionLimit: 100, 
-    queueLimit: 0
-  });
-  
+// Function to check database connection
+const checkDatabaseConnection = async () => {
+  try {
+    const connection = await db.getConnection();
+    connection.query('SELECT 1');
+    console.log('Database connected successfully');
+    connection.release(); // Release the connection back to the pool
+  } catch (error) {
+    console.error('Error connecting to the database:', error);
+  }
+};
 
-  db.connect((err) => {
-    if (err) {
-      console.error('Error connecting to the database:', err);
-      setTimeout(handleDisconnect, 2000); // Retry connection after 2 seconds
-    } else {
-      console.log('Database connected successfully');
-    }
-  });
+// Check the database connection when the application starts
+checkDatabaseConnection();
 
-  db.on('error', (err) => {
-    console.error('Database error:', err);
-    setTimeout(handleDisconnect, 2000); // Retry connection after 2 seconds
-    // if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ECONNRESET') {
-    //   handleDisconnect(); // Reconnect if connection is lost
-    // } else {
-    //   throw err; // Throw other errors
-    // }
-  });
-}
 
-// Initialize the connection
-handleDisconnect();
 
-// Export the database connection
+
+// Export the pool for use in your application
 export default db;

@@ -11,6 +11,8 @@ npm install nodemailer
 npm install multer
 npm install socket.io 
 npm install express ws
+npm install mysql2
+npm install worker_threads
 
 npm install express-async-handler express mysql2 sequelize cors -g nodemon body-parser jsonwebtoken
 

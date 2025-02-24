@@ -118,12 +118,12 @@ export const create_employee = asyncHandler(async (req, res) => {
             const sql6 = 'INSERT INTO clock_state (emp_ID, state) VALUES (?, ?)';
 
 
-            const [insert_data_id_generator] = await db.promise().query(sql, [storeCurrentDateTime(0, 'hours')]);
-            const [insert_data_login] = await db.promise().query(sql2, [insert_data_id_generator['insertId'], hash, storeCurrentDate(3, 'months')]);
-            const [insert_data_employee_profile] = await db.promise().query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : null]);
-            const [insert_data_employee_profile_benefits] = await db.promise().query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay, healthcare]);
-            const [insert_data_employee_profile_standing] = await db.promise().query(sql5, [insert_data_id_generator['insertId'], employee_status, positionID, storeCurrentDateTime(0, 'months'), storeCurrentDateTime(0, 'months')]);
-            const [insert_data_clock_state] = await db.promise().query(sql6, [insert_data_id_generator['insertId'], 0]);
+            const [insert_data_id_generator] = await db.query(sql, [storeCurrentDateTime(0, 'hours')]);
+            const [insert_data_login] = await db.query(sql2, [insert_data_id_generator['insertId'], hash, storeCurrentDate(3, 'months')]);
+            const [insert_data_employee_profile] = await db.query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : null]);
+            const [insert_data_employee_profile_benefits] = await db.query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay, healthcare]);
+            const [insert_data_employee_profile_standing] = await db.query(sql5, [insert_data_id_generator['insertId'], employee_status, positionID, storeCurrentDateTime(0, 'months'), storeCurrentDateTime(0, 'months')]);
+            const [insert_data_clock_state] = await db.query(sql6, [insert_data_id_generator['insertId'], 0]);
 
 
         return res.status(200).json({ success: 'Account successfully created.' });
@@ -161,7 +161,7 @@ export const login_employee = asyncHandler(async (req, res) => {
         const sql2 = 'INSERT INTO tokens (emp_ID, token, expiry_datetime) VALUES (?, ?, ?)';
         const sql3 = 'UPDATE login SET login_attempts = ? WHERE emp_ID = ?';
 
-        const [login] = await db.promise().query(sql, [emp_ID]);
+        const [login] = await db.query(sql, [emp_ID]);
 
         if(storeCurrentDate(0, 'months') > login[0]['expiry_date']) {
             return res.status(400).json({ error: 'Your account has expired. Please contact the administrator for assistance.' });        
@@ -178,13 +178,13 @@ export const login_employee = asyncHandler(async (req, res) => {
             });
 
             //const hashTokenBCRYPT = hashConverterBCRYPT(token);
-            const [data_token] = await db.promise().query(sql2, [emp_ID, token, storeCurrentDateTime(1, 'hours')]);
-            const [data_admin_login] = await db.promise().query(sql3, [0, emp_ID]);
+            const [data_token] = await db.query(sql2, [emp_ID, token, storeCurrentDateTime(1, 'hours')]);
+            const [data_admin_login] = await db.query(sql3, [0, emp_ID]);
 
             return res.status(200).json({ data: token, emp_id: login[0]['emp_ID'] });
         }
 
-        const [data_admin_login] = await db.promise().query(sql3, [login[0]['login_attempts'] + 1, emp_ID]);
+        const [update_admin_login] = await db.query(sql3, [login[0]['login_attempts'] + 1, emp_ID]);
 
         return res.status(400).json({ error: 'Failed to login wrong password.' });
     } catch (error) {
@@ -208,7 +208,7 @@ export const update_employee_expiration = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: 'Invalid expiry date format. Please use "<number> hours", "<number> months", or "<number> years".' });
         }
 
-        const [update_admin_expiration ] = await db.promise().query(sql, [storeCurrentDate(match[1], match[2]), emp_id]);
+        const [update_admin_expiration ] = await db.query(sql, [storeCurrentDate(match[1], match[2]), emp_id]);
             
         if (update_admin_expiration.affectedRows === 0) {
             return res.status(404).json({ error: 'Employee not found.' });
@@ -233,12 +233,12 @@ export const update_employee_login = asyncHandler(async (req, res) => {
 
 
         if(!password) {
-            const [update_login_no_password] = await db.promise().query(sql, [login_attempts, emp_id]);
+            const [update_login_no_password] = await db.query(sql, [login_attempts, emp_id]);
             if (update_login_no_password.affectedRows === 0) {
                 return res.status(404).json({ error: 'Employee not found.' });
             }
         } else {
-            const [update_login_password] = await db.promise().query(sql2, [login_attempts, hash_password, emp_id]);
+            const [update_login_password] = await db.query(sql2, [login_attempts, hash_password, emp_id]);
             
             if (update_login_password.affectedRows === 0) {
                 return res.status(404).json({ error: 'Employee not found.' });
