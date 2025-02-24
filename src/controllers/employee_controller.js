@@ -283,10 +283,10 @@ export const update_employee = asyncHandler(async (req, res) => {
         const sql2 = 'UPDATE employee_profile_benefits SET sss = ?, pagibig = ?, philhealth = ?, tin = ?, basic_pay = ?, healthcare = ? WHERE emp_ID = ?';
         const sql3 = 'UPDATE employee_profile_standing SET employee_status = ?, positionID = ?, datetime_updated = ? WHERE emp_ID = ?';
 
-        const [employee_profile] = await db.promise().query(sql0, [emp_id]);
-        const [insert_data_employee_profile] = await db.promise().query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : employee_profile[0]['photo'], emp_id]);
-        const [insert_data_employee_profile_benefits] = await db.promise().query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, emp_id]);
-        const [insert_data_employee_profile_standing] = await db.promise().query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
+        const [employee_profile] = await db.query(sql0, [emp_id]);
+        const [insert_data_employee_profile] = await db.query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : employee_profile[0]['photo'], emp_id]);
+        const [insert_data_employee_profile_benefits] = await db.query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, emp_id]);
+        const [insert_data_employee_profile_standing] = await db.query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
 
 
          if(req.file) {
@@ -329,7 +329,7 @@ export const get_all_employee = asyncHandler(async (req, res) => {
 
        // const sql2 = 'INSERT INTO clock_state (emp_ID, state) VALUES (?, ?)';
        
-        const [users] = await db.promise().query(sql);
+        const [users] = await db.query(sql);
 
         // for (const user of users) {
         //     const [insert_data_clock_state] = await db.promise().query(sql2, [`${user.emp_ID}`, 0]);
