@@ -116,7 +116,7 @@ export const create_employee = asyncHandler(async (req, res) => {
             const sql3 = 'INSERT INTO employee_profile (emp_ID, fName, mName, lName, bDate, date_hired, departmentID, clusterID, siteID, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, photo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const sql4 = 'INSERT INTO employee_profile_benefits (emp_ID, sss, pagibig, philhealth, tin, basic_pay, healthcare) VALUES (?, ?, ?, ?, ?, ?, ?)';
             const sql5 = 'INSERT INTO employee_profile_standing (emp_ID, employee_status, positionID, date_added, datetime_updated) VALUES (?, ?, ?, ?, ?)';
-            const sql6 = 'INSERT INTO clock_state (emp_ID, state) VALUES (?, ?)';
+            const sql6 = 'INSERT INTO clock_state (emp_ID, state, break_state) VALUES (?, ?, ?)';
 
 
             const [insert_data_id_generator] = await db.query(sql, [storeCurrentDateTime(0, 'hours')]);
@@ -124,7 +124,7 @@ export const create_employee = asyncHandler(async (req, res) => {
             const [insert_data_employee_profile] = await db.query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : null]);
             const [insert_data_employee_profile_benefits] = await db.query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay, healthcare]);
             const [insert_data_employee_profile_standing] = await db.query(sql5, [insert_data_id_generator['insertId'], employee_status, positionID, storeCurrentDateTime(0, 'months'), storeCurrentDateTime(0, 'months')]);
-            const [insert_data_clock_state] = await db.query(sql6, [insert_data_id_generator['insertId'], 0]);
+            const [insert_data_clock_state] = await db.query(sql6, [insert_data_id_generator['insertId'], 0, 0]);
 
 
         return res.status(200).json({ success: 'Account successfully created.' });
