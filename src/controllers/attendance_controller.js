@@ -67,7 +67,7 @@ export const update_attendance_time_out = asyncHandler(async (req, res) => {
 
 export const get_user_clock_state = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
-    const sql = 'SELECT emp_ID, state FROM clock_state WHERE emp_ID = ? ORDER BY id DESC LIMIT 1';
+    const sql = 'SELECT emp_ID, state, break_state FROM clock_state WHERE emp_ID = ? ORDER BY id DESC LIMIT 1';
 
     const [clock_state] = await db.query(sql, [emp_id]); // Use 'sql' instead of 'sql2'
 
