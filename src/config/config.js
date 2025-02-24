@@ -1,6 +1,8 @@
 // db.js
 import mysql from 'mysql2/promise'; // Use promise-based version for async/await
 import dotenv from 'dotenv';
+import { parentPort, workerData } from 'worker_threads';
+
 
 dotenv.config();
 
@@ -19,7 +21,7 @@ const db = mysql.createPool({
 const checkDatabaseConnection = async () => {
   try {
     const connection = await db.getConnection();
-    await connection.query('SELECT 1'); // Simple query to check connection
+    connection.query('SELECT 1');
     console.log('Database connected successfully');
     connection.release(); // Release the connection back to the pool
   } catch (error) {
@@ -29,6 +31,9 @@ const checkDatabaseConnection = async () => {
 
 // Check the database connection when the application starts
 checkDatabaseConnection();
+
+
+
 
 // Export the pool for use in your application
 export default db;

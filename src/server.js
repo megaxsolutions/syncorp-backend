@@ -24,6 +24,7 @@ import leaveTypeRoutes from "./routes/leave_type_routes.js";
 import overtimeTypeRoutes from "./routes/overtime_type_routes.js";
 import overtimeRequestRoutes from "./routes/overtime_request_routes.js";
 import bulletinRoutes from "./routes/bulletin_routes.js";
+import shiftscheduleRoutes from "./routes/shift_schedule_routes.js";
 
 
 import bodyParser from 'body-parser';
@@ -74,7 +75,7 @@ app.use("/admins", adminRoutes);
 app.use("/employees", employeeRoutes);
 app.use("/recovery", recoveryRoutes);
 
-app.use("/main", authenticateToken, mainRoutes);
+app.use("/main", mainRoutes);
 app.use("/departments", authenticateToken, departmentRoutes);
 app.use("/sites", authenticateToken, siteRoutes);
 app.use("/clusters", authenticateToken, clusterRoutes);
@@ -90,7 +91,8 @@ app.use("/leave_requests", authenticateToken, leaveRequestRoutes);
 app.use("/leave_types", authenticateToken, leaveTypeRoutes);
 app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
 app.use("/overtime_requests", authenticateToken, overtimeRequestRoutes);
-app.use("/bulletins", bulletinRoutes);
+app.use("/bulletins", authenticateToken, bulletinRoutes);
+app.use("/shift_schedules", shiftscheduleRoutes);
 
 
 // db.connect(err => {
