@@ -24,7 +24,10 @@ export const create_break = asyncHandler(async (req, res) => {
 
     try {
         const sql = 'INSERT INTO breaks (breakIN, emp_ID) VALUES (?, ?)';
+        const sql2 = 'UPDATE clock_state SET break_state = ? WHERE emp_ID = ?';
         const [insert_data_break] = await db.query(sql, [storeCurrentDateTime(0, 'hours'), emp_id]);
+        const [update_data_clock_break_state] = await db.query(sql2, [1, emp_id]);
+
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Break successfully created.' });
@@ -39,9 +42,12 @@ export const update_break_break_out = asyncHandler(async (req, res) => {
     try {
         const sql  = 'SELECT * FROM breaks WHERE emp_ID = ? ORDER BY id DESC LIMIT 1';
         const sql2 = 'UPDATE breaks SET breakOUT = ? WHERE id = ?';
+        const sql3 = 'UPDATE clock_state SET break_state = ? WHERE emp_ID = ?';
 
         const [breaks] = await db.query(sql, [emp_id]);
         const [update_data_breaks] = await db.query(sql2, [storeCurrentDateTime(0, 'hours'), breaks[0]['id']]);
+        const [update_data_clock_break_state] = await db.query(sql3, [0, emp_id]);
+
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Break successfully updated.' });
