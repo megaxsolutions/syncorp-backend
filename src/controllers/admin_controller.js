@@ -217,8 +217,8 @@ export const login_admin = asyncHandler(async (req, res) => {
         employee_profile_standing.datetime_updated, employee_profile_standing.positionID
         FROM admin_login  
         LEFT JOIN employee_profile ON admin_login.emp_ID = employee_profile.emp_ID 
-        LEFT JOIN employee_profile_benefits ON employee_profile.emp_ID = employee_profile_benefits.emp_ID 
-        LEFT JOIN employee_profile_standing ON employee_profile.emp_ID = employee_profile_standing.emp_ID 
+        LEFT JOIN employee_profile_benefits ON admin_login.emp_ID = employee_profile_benefits.emp_ID 
+        LEFT JOIN employee_profile_standing ON admin_login.emp_ID = employee_profile_standing.emp_ID 
         WHERE admin_login.emp_ID = ?`;
 
 
@@ -226,6 +226,9 @@ export const login_admin = asyncHandler(async (req, res) => {
         const sql3 = 'UPDATE admin_login SET login_attempts = ? WHERE emp_ID = ?';
 
         const [login] = await db.query(sql, [emp_ID]);
+
+
+        return res.status(200).json({ data: login });
 
         const dateObject = new Date(login[0]['expiry_date']);
         const expiryDate = dateObject.toISOString().split('T')[0];
