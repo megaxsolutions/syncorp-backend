@@ -47,7 +47,9 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
             return res.status(200).json({ success: 'Attendance successfully created.' }); 
        // }
        
+
       //  return res.status(400).json({ success: 'Please contact the admin for scheduling.' });
+
         // Return the merged results in the response
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create attendance.' });
