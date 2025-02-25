@@ -6,3 +6,11 @@ emp_id
 data for department, site, cluster, position
 
 notification
+
+employee notification after created
+0 regular
+1 preshift
+2 post shift
+3 rd
+
+attendance names

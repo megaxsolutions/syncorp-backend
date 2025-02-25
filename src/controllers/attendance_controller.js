@@ -40,14 +40,14 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
         const [shift_schedule] = await db.query(sql, [emp_id, storeCurrentDate(0, 'hours')]);
  
 
-        if(shift_schedule.length > 0) {
+        //if(shift_schedule.length > 0) {
             const [insert_data_site] = await db.query(sql2, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours')]);
             const [update_data_clock_state] = await db.query(sql3, [1, emp_id]);   
 
             return res.status(200).json({ success: 'Attendance successfully created.' }); 
-        }
+       // }
        
-        return res.status(400).json({ success: 'Please contact the admin for scheduling.' });
+      //  return res.status(400).json({ success: 'Please contact the admin for scheduling.' });
         // Return the merged results in the response
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create attendance.' });
@@ -118,11 +118,16 @@ export const get_all_user_attendance = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
-        const sql = `SELECT 
-                    DATE_FORMAT(timeIN, '%Y-%m-%d %H:%i:%s') AS timeIN,
-                    DATE_FORMAT(timeOUT, '%Y-%m-%d %H:%i:%s') AS timeOUT, 
-                    DATE_FORMAT(date, '%Y-%m-%d') AS date, 
-                    clusterID FROM attendance WHERE emp_ID = ?`; // Use a parameterized query
+        const sql = `
+        SELECT 
+            DATE_FORMAT(attendance.timeIN, '%Y-%m-%d %H:%i:%s') AS timeIN,
+            DATE_FORMAT(attendance.timeOUT, '%Y-%m-%d %H:%i:%s') AS timeOUT, 
+            DATE_FORMAT(attendance.date, '%Y-%m-%d') AS date, 
+            attendance.clusterID,
+            CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
+        FROM attendance
+        LEFT JOIN employee_profile ON attendance.emp_ID = employee_profile.emp_ID
+        WHERE attendance.emp_ID = ?`;
 
         const [attendance] = await db.query(sql, [emp_id]);
 
@@ -135,11 +140,16 @@ export const get_all_user_attendance = asyncHandler(async (req, res) => {
 
 export const get_all_attendance = asyncHandler(async (req, res) => {
     try {
-        const sql = `SELECT 
-                    DATE_FORMAT(timeIN, '%Y-%m-%d %H:%i:%s') AS timeIN,
-                    DATE_FORMAT(timeOUT, '%Y-%m-%d %H:%i:%s') AS timeOUT, 
-                    DATE_FORMAT(date, '%Y-%m-%d') AS date, 
-                    clusterID FROM attendance`; // Use a parameterized query
+        const sql = `
+        SELECT 
+            DATE_FORMAT(attendance.timeIN, '%Y-%m-%d %H:%i:%s') AS timeIN,
+            DATE_FORMAT(attendance.timeOUT, '%Y-%m-%d %H:%i:%s') AS timeOUT, 
+            DATE_FORMAT(attendance.date, '%Y-%m-%d') AS date, 
+            attendance.clusterID,
+            CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
+        FROM attendance
+        LEFT JOIN employee_profile ON attendance.emp_ID = employee_profile.emp_ID`;
+
 
         const [attendance] = await db.query(sql);
 

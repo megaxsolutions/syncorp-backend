@@ -5,7 +5,8 @@ import db from '../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
-import sendEmail from "../utils/mailer.js";
+import welcome_mailer from "../utils/welcome_mailer.js";
+
 
 import path from 'path'; // Import the path module
 import fs from 'fs'; // Import fs to check if the directory exists
@@ -117,6 +118,7 @@ export const create_employee = asyncHandler(async (req, res) => {
             const sql4 = 'INSERT INTO employee_profile_benefits (emp_ID, sss, pagibig, philhealth, tin, basic_pay, healthcare, tranpo_allowance, food_allowance) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const sql5 = 'INSERT INTO employee_profile_standing (emp_ID, employee_status, positionID, date_added, datetime_updated) VALUES (?, ?, ?, ?, ?)';
             const sql6 = 'INSERT INTO clock_state (emp_ID, state, break_state) VALUES (?, ?, ?)';
+            const sql7 = 'SELECT * FROM employee_profile WHERE emp_ID = ?'; // Use a parameterized query
 
 
             const [insert_data_id_generator] = await db.query(sql, [storeCurrentDateTime(0, 'hours')]);
@@ -125,6 +127,9 @@ export const create_employee = asyncHandler(async (req, res) => {
             const [insert_data_employee_profile_benefits] = await db.query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay, healthcare, tranpo_allowance, food_allowance]);
             const [insert_data_employee_profile_standing] = await db.query(sql5, [insert_data_id_generator['insertId'], employee_status, positionID, storeCurrentDateTime(0, 'months'), storeCurrentDateTime(0, 'months')]);
             const [insert_data_clock_state] = await db.query(sql6, [insert_data_id_generator['insertId'], 0, 0]);
+            const [employee_profile] = await db.query(sql7, [insert_data_id_generator['insertId']]);
+
+            welcome_mailer(`${employee_profile[0]['fName']} ${employee_profile[0]['lName']}`, employee_profile[0]['email'], 'Welcome to syncorp – Your Login Credentials', insert_data_id_generator['insertId'], dateConverter(birthdate));
 
 
         return res.status(200).json({ success: 'Account successfully created.' });
@@ -324,8 +329,8 @@ export const get_all_employee = asyncHandler(async (req, res) => {
         employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
         employee_profile_standing.datetime_updated, employee_profile_standing.positionID
         FROM login LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
-        LEFT JOIN employee_profile_benefits ON employee_profile.emp_ID = employee_profile_benefits.emp_ID 
-        LEFT JOIN employee_profile_standing ON employee_profile.emp_ID = employee_profile_standing.emp_ID`;
+        LEFT JOIN employee_profile_benefits ON login.emp_ID = employee_profile_benefits.emp_ID 
+        LEFT JOIN employee_profile_standing ON login.emp_ID = employee_profile_standing.emp_ID`;
 
        // const sql2 = 'INSERT INTO clock_state (emp_ID, state) VALUES (?, ?)';
        

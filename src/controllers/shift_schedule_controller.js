@@ -82,25 +82,22 @@ function getCurrentMonthWeekdays() {
 
 
 export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (req, res) => {
-    const { array_employee_emp_id, admin_emp_id, shift_in, shift_out, array_selected_days } = req.body;
+    const { array_employee_emp_id, admin_emp_id, shift_in, shift_out, array_selected_days, schedule_type_id } = req.body;
 
     try {
         const sql  = 'SELECT * FROM login'; // Use a parameterized query
 
-        const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by) VALUES ?';
+        const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by, schedule_type, is_overtime) VALUES ?';
 
         const sqlSelect = `SELECT emp_ID, 
         DATE_FORMAT(day, '%Y-%m-%d') AS day, 
         DATE_FORMAT(shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in,
         DATE_FORMAT(shift_out, '%Y-%m-%d %H:%i:%s') AS shift_out  
-        FROM shift_schedule WHERE emp_ID = ? AND day IN (?) AND shift_in >= ? AND shift_out  <= ?`;
+        FROM shift_schedule WHERE emp_ID = ? AND day IN (?) AND schedule_type = ? AND is_overtime = ?`;
  
-        // Fetch all the existing shift schedules for the current employees and weekdays in one go
-       // const selected_days = [storeCurrentDate(0, 'hours')];
         const selected_days = array_selected_days;
 
         
-
         // Prepare data for batch insertion
         const insertValues = [];
         let employees_affected = 0;
@@ -116,11 +113,24 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
         // We need to check for each emp_id and day
         const shift_schedules = await Promise.all(
             emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlSelect, [emp_id, days, shift_in, shift_out]);
+                const [result] = await db.query(sqlSelect, [emp_id, days, schedule_type_id, 1]);
                 return result;
             })
         );
+
         
+        // const shift_schedules = await Promise.all(
+        //     emp_ids.map(async (emp_id) => {
+        //         // Use Promise.all to wait for all day queries to complete
+        //         const results = await Promise.all(
+        //             days.map(async (day) => {
+        //                 const [result] = await db.query(sqlSelect, [emp_id, day, schedule_type_id, 1]);
+        //                 return result; // Return the first object directly
+        //             })
+        //         );
+        //         return results.flat(); // Flatten the results for each employee
+        //     })
+        // );
         // The result is a 2D array: each emp_id will have an array of results for their days.
         
         // Populate the map with the shift schedule data
@@ -135,10 +145,11 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
 
             for (const day of selected_days) {
                 const key = `${emp_id}-${day}`;
+
                 // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
                 if (!existingSchedulesMap.has(key)) {
                     // If the schedule doesn't exist, prepare for insertion
-                    insertValues.push([emp_id, shift_in, shift_out, day, admin_emp_id]);
+                    insertValues.push([emp_id, `${day} ${shift_in}`, `${day} ${shift_out}`, day, admin_emp_id, schedule_type_id, 1]);
                     count_employees++;
                 }
             }
@@ -171,15 +182,15 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
 
 
 export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) => {
-    const { array_employee_emp_id, admin_emp_id, shift_in, shift_out, array_selected_days } = req.body;
+    const { array_employee_emp_id, admin_emp_id, shift_in, shift_out, array_selected_days, schedule_type_id } = req.body;
 
     try {
         const sql  = 'SELECT * FROM login'; // Use a parameterized query
 
-        const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by) VALUES ?';
+        const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by, schedule_type, is_overtime) VALUES ?';
 
         // Fix for the SQL query with the IN clause:
-        const sqlSelect = `SELECT emp_ID, DATE_FORMAT(day, '%Y-%m-%d') AS day FROM shift_schedule WHERE emp_ID = ? AND day IN (?)`;
+        const sqlSelect = `SELECT emp_ID, DATE_FORMAT(day, '%Y-%m-%d') AS day FROM shift_schedule WHERE emp_ID = ? AND day IN (?) AND schedule_type = ? AND  is_overtime = ?`;
 
         // Fetch all the existing shift schedules for the current employees and weekdays in one go
        // const selected_days = [storeCurrentDate(0, 'hours')];
@@ -202,184 +213,12 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
         // We need to check for each emp_id and day
         const shift_schedules = await Promise.all(
             emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlSelect, [emp_id, days]);
+                const [result] = await db.query(sqlSelect, [emp_id, days, schedule_type_id, 0]);
                 return result;
             })
         );
-        
-        // The result is a 2D array: each emp_id will have an array of results for their days.
-        
-        // Populate the map with the shift schedule data
-        shift_schedules.flat().forEach(schedule => {
-            const key = `${schedule.emp_ID}-${schedule.day}`;
-            existingSchedulesMap.set(key, true);
-        });
 
-        // Loop through each employee and day to prepare the insertion data
-        for (const emp_id of emp_ids) {
-            let count_employees = 0;
-
-            for (const day of selected_days) {
-                const key = `${emp_id}-${day}`;
-                // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
-                if (!existingSchedulesMap.has(key)) {
-                    // If the schedule doesn't exist, prepare for insertion
-                    insertValues.push([emp_id, shift_in, shift_out, day, admin_emp_id]);
-                    count_employees++;
-                }
-            }
-
-            // If at least one schedule was added for this employee, increment the affected count
-            if (count_employees > 0) {
-                employees_affected++;
-            }
-        }
-
-        // If there are any values to insert, perform a batch insert
-        if (insertValues.length > 0) {
-            await db.query(sqlInsert, [insertValues]);
-        }
-
-        // Check the length of users
-        const [users] = await db.query(sql);
-
-        if (users.length === array_employee_emp_id.length) {
-            return res.status(200).json({ success: 'Shift schedule for all employees has been updated.' });
-        }
-
-        return res.status(200).json({ success: `Shift schedule for ${employees_affected} employees has been updated.` });
-
-    } catch (error) {
-        console.error(error); // Log the error for debugging
-        return res.status(500).json({ error: 'Failed to update shift schedule.' });
-    }
-});
-
-
-
-
-export const create_shift_schedule_weekday = asyncHandler(async (req, res) => {
-    const { array_employee_emp_id, admin_emp_id, shift_in, shift_out, array_selected_days } = req.body;
-
-    try {
-        const sql  = 'SELECT * FROM login'; // Use a parameterized query
-
-        const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by) VALUES ?';
-
-        // Fix for the SQL query with the IN clause:
-        const sqlSelect = `SELECT emp_ID, DATE_FORMAT(day, '%Y-%m-%d') AS day FROM shift_schedule WHERE emp_ID = ? AND day IN (?)`;
-
-        // Fetch all the existing shift schedules for the current employees and weekdays in one go
-        //const weekdays = getCurrentWeekdays();
-        const selected_days = array_selected_days;
-
-        // Prepare data for batch insertion
-        const insertValues = [];
-        let employees_affected = 0;
-
-        // Create a Map to store existing schedules
-        const existingSchedulesMap = new Map();
-
-        // Get all the schedules at once
-        const emp_ids = array_employee_emp_id;
-        const days = selected_days;
-
-        // Execute a single query to get all the existing schedules for the employees and days
-        // We need to check for each emp_id and day
-        const shift_schedules = await Promise.all(
-            emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlSelect, [emp_id, days]);
-                return result;
-            })
-        );
-        
-        // The result is a 2D array: each emp_id will have an array of results for their days.
-        
-        // Populate the map with the shift schedule data
-        shift_schedules.flat().forEach(schedule => {
-            const key = `${schedule.emp_ID}-${schedule.day}`;
-            existingSchedulesMap.set(key, true);
-        });
-
-        // Loop through each employee and day to prepare the insertion data
-        for (const emp_id of emp_ids) {
-            let count_employees = 0;
-
-            for (const day of selected_days) {
-                const key = `${emp_id}-${day}`;
-                // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
-                if (!existingSchedulesMap.has(key)) {
-                    // If the schedule doesn't exist, prepare for insertion
-                    insertValues.push([emp_id, shift_in, shift_out, day, admin_emp_id]);
-                    count_employees++;
-                }
-            }
-
-            // If at least one schedule was added for this employee, increment the affected count
-            if (count_employees > 0) {
-                employees_affected++;
-            }
-        }
-
-        // If there are any values to insert, perform a batch insert
-        if (insertValues.length > 0) {
-            await db.query(sqlInsert, [insertValues]);
-        }
-
-        // Check the length of users
-        const [users] = await db.query(sql);
-
-        if (users.length === array_employee_emp_id.length) {
-            return res.status(200).json({ success: 'Shift schedule for all employees has been updated.' });
-        }
-
-        return res.status(200).json({ success: `Shift schedule for ${employees_affected} employees has been updated.` });
-
-    } catch (error) {
-        console.error(error); // Log the error for debugging
-        return res.status(500).json({ error: 'Failed to update shift schedule.' });
-    }
-});
-
-
-export const create_shift_schedule_month_weekday = asyncHandler(async (req, res) => {
-    const { array_employee_emp_id, admin_emp_id, shift_in, shift_out, array_selected_days } = req.body;
-
-    try {
-        const sql  = 'SELECT * FROM login'; // Use a parameterized query
-
-        const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by) VALUES ?';
-
-        // Fix for the SQL query with the IN clause:
-        const sqlSelect = `SELECT emp_ID, DATE_FORMAT(day, '%Y-%m-%d') AS day FROM shift_schedule WHERE emp_ID = ? AND day IN (?)`;
-
-
-        // Fetch all the existing shift schedules for the current employees and weekdays in one go
-        //const selected_days = getCurrentMonthWeekdays();
-        const selected_days = array_selected_days;
-
-
-        // Prepare data for batch insertion
-        const insertValues = [];
-        let employees_affected = 0;
-
-        // Create a Map to store existing schedules
-        const existingSchedulesMap = new Map();
-
-        // Get all the schedules at once
-        const emp_ids = array_employee_emp_id;
-        const days = selected_days;
-
-        // Execute a single query to get all the existing schedules for the employees and days
-        // We need to check for each emp_id and day
-
-        const shift_schedules = await Promise.all(
-            emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlSelect, [emp_id, days]);
-                return result;
-            })
-        );
-        // const shift_schedules = await Promise.all(
+             // const shift_schedules = await Promise.all(
         //     emp_ids.map(async (emp_id) => {
         //         // Use Promise.all to wait for all day queries to complete
         //         const results = await Promise.all(
@@ -392,7 +231,9 @@ export const create_shift_schedule_month_weekday = asyncHandler(async (req, res)
         //     })
         // );
 
-
+          
+        
+        // The result is a 2D array: each emp_id will have an array of results for their days.
         
         // Populate the map with the shift schedule data
         shift_schedules.flat().forEach(schedule => {
@@ -409,7 +250,7 @@ export const create_shift_schedule_month_weekday = asyncHandler(async (req, res)
                 // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
                 if (!existingSchedulesMap.has(key)) {
                     // If the schedule doesn't exist, prepare for insertion
-                    insertValues.push([emp_id, shift_in, shift_out, day, admin_emp_id]);
+                    insertValues.push([emp_id, `${day} ${shift_in}`, `${day} ${shift_out}`, day, admin_emp_id, schedule_type_id, 0]);
                     count_employees++;
                 }
             }
@@ -440,14 +281,68 @@ export const create_shift_schedule_month_weekday = asyncHandler(async (req, res)
     }
 });
 
+
+
+export const delete_shift_schedule_multiple_day_overtime = asyncHandler(async (req, res) => {
+    const { array_employee_emp_id, array_selected_days } = req.body;
+    const { schedule_type_id } = req.params; // Assuming emp_id is passed as a URL parameter
+
+    try {
+        const sql  = 'SELECT * FROM login'; // Use a parameterized query
+
+        const sqlDelete = `DELETE FROM shift_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') IN (?) AND schedule_type = ? AND is_overtime = ?`;
+
+        const selected_days = array_selected_days;
+
+
+        const insertValues = [];
+        let employees_affected = 0;
+
+
+        // Get all the schedules at once
+        const emp_ids = array_employee_emp_id;
+        const days = selected_days;
+
+
+        const delete_shift_schedules = await Promise.all(
+            emp_ids.map(async (emp_id) => {
+                const [result] = await db.query(sqlDelete, [emp_id, days, schedule_type_id, 1]);
+                if(result.affectedRows > 0) {
+                    employees_affected++;
+                }
+                return result;
+            })
+        );
+
+        // Count the total affected rows
+        const totalAffectedRows = delete_shift_schedules.reduce((total, result) => {
+            return total + result.affectedRows; // Sum the affectedRows from each result
+        }, 0);
+
+
+        // Check the length of users
+        const [users] = await db.query(sql);
+
+        if (users.length === array_employee_emp_id.length) {
+            return res.status(200).json({ success: 'Shift schedule for all employees has been updated.' });
+        }
+
+        return res.status(200).json({ success: `Shift schedule for ${employees_affected} employees has been updated.` });
+    } catch (error) {
+        console.error(error); // Log the error for debugging
+        return res.status(500).json({ error: 'Failed to delete shift schedule.' });
+    }
+});
+
+
 export const delete_shift_schedule_multiple_day = asyncHandler(async (req, res) => {
     const { array_employee_emp_id, array_selected_days } = req.body;
+    const { schedule_type_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
         const sql  = 'SELECT * FROM login'; // Use a parameterized query
 
-        const sqlSelect = `SELECT emp_ID, DATE_FORMAT(day, '%Y-%m-%d') AS day FROM shift_schedule WHERE emp_ID = ? AND day IN (?)`;
-        const sqlDelete = `DELETE FROM shift_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') IN (?) AND DATE_FORMAT(day, '%Y-%m-%d') > ?`;
+        const sqlDelete = `DELETE FROM shift_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') IN (?) AND schedule_type = ? AND is_overtime = ?`;
 
         const selected_days = array_selected_days;
 
@@ -463,7 +358,7 @@ export const delete_shift_schedule_multiple_day = asyncHandler(async (req, res) 
 
         const delete_shift_schedules = await Promise.all(
             emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlDelete, [emp_id, days, storeCurrentDate(0, 'hours')]);
+                const [result] = await db.query(sqlDelete, [emp_id, days, schedule_type_id, 0]);
                 if(result.affectedRows > 0) {
                     employees_affected++;
                 }
@@ -492,108 +387,28 @@ export const delete_shift_schedule_multiple_day = asyncHandler(async (req, res) 
 });
 
 
-export const delete_shift_schedule_weekday = asyncHandler(async (req, res) => {
-    const { array_employee_emp_id, array_selected_days } = req.body;
+export const get_shift_schedule_day = asyncHandler(async (req, res) => {
+    const sql = 'SELECT * FROM shift_schedule WHERE is_overtime = ?'; // Use a parameterized query
 
     try {
-        const sql  = 'SELECT * FROM login'; // Use a parameterized query
+        const [result] = await db.query(sql, [0]);
 
-        const sqlSelect = `SELECT emp_ID, DATE_FORMAT(day, '%Y-%m-%d') AS day FROM shift_schedule WHERE emp_ID = ? AND day IN (?)`;
-        const sqlDelete = `DELETE FROM shift_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') IN (?) AND DATE_FORMAT(day, '%Y-%m-%d') > ?`;
-
-        const selected_days = array_selected_days;
-
-        const insertValues = [];
-        let employees_affected = 0;
-
-
-        // Get all the schedules at once
-        const emp_ids = array_employee_emp_id;
-        const days = selected_days;
-
-
-        const delete_shift_schedules = await Promise.all(
-            emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlDelete, [emp_id, days, storeCurrentDate(0, 'hours')]);
-                if(result.affectedRows > 0) {
-                    employees_affected++;
-                }
-                return result;
-            })
-        );
-
-        // Count the total affected rows
-        const totalAffectedRows = delete_shift_schedules.reduce((total, result) => {
-            return total + result.affectedRows; // Sum the affectedRows from each result
-        }, 0);
-
-
-        // Check the length of users
-        const [users] = await db.query(sql);
-
-        if (users.length === array_employee_emp_id.length) {
-            return res.status(200).json({ success: 'Shift schedule for all employees has been updated.' });
-        }
-
-        return res.status(200).json({ success: `Shift schedule for ${employees_affected} employees has been updated.` });
+        return res.status(200).json({ data: result });
     } catch (error) {
         console.error(error); // Log the error for debugging
         return res.status(500).json({ error: 'Failed to delete shift schedule.' });
     }
 });
 
-
-
-export const delete_shift_schedule_month_weekday = asyncHandler(async (req, res) => {
-    const { array_employee_emp_id, array_selected_days } = req.body;
+export const get_shift_schedule_day_overtime = asyncHandler(async (req, res) => {
+    const sql = 'SELECT * FROM shift_schedule WHERE is_overtime = ?'; // Use a parameterized query
 
     try {
-        const sql  = 'SELECT * FROM login'; // Use a parameterized query
+        const [result] = await db.query(sql, [1]);
 
-        const sqlSelect = `SELECT emp_ID, DATE_FORMAT(day, '%Y-%m-%d') AS day FROM shift_schedule WHERE emp_ID = ? AND day IN (?)`;
-        const sqlDelete = `DELETE FROM shift_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') IN (?) AND DATE_FORMAT(day, '%Y-%m-%d') > ?`;
-
-        const selected_days = array_selected_days;
-        //const selected_days = getCurrentMonthWeekdays();
-
-
-        const insertValues = [];
-        let employees_affected = 0;
-
-
-        // Get all the schedules at once
-        const emp_ids = array_employee_emp_id;
-        const days = selected_days;
-
-
-        const delete_shift_schedules = await Promise.all(
-            emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlDelete, [emp_id, days, storeCurrentDate(0, 'hours')]);
-                if(result.affectedRows > 0) {
-                    employees_affected++;
-                }
-                return result;
-            })
-        );
-
-        // Count the total affected rows
-        const totalAffectedRows = delete_shift_schedules.reduce((total, result) => {
-            return total + result.affectedRows; // Sum the affectedRows from each result
-        }, 0);
-
-
-        // Check the length of users
-        const [users] = await db.query(sql);
-
-        if (users.length === array_employee_emp_id.length) {
-            return res.status(200).json({ success: 'Shift schedule for all employees has been updated.' });
-        }
-
-        return res.status(200).json({ success: `Shift schedule for ${employees_affected} employees has been updated.` });
+        return res.status(200).json({ data: result });
     } catch (error) {
         console.error(error); // Log the error for debugging
         return res.status(500).json({ error: 'Failed to delete shift schedule.' });
     }
 });
-
-
