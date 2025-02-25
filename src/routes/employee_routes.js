@@ -43,7 +43,7 @@ employeeRoutes.post('/login_employee', UserController.login_employee);
 employeeRoutes.put('/update_employee_expiration/:emp_id', authenticateToken, UserController.update_employee_expiration);
 employeeRoutes.put('/update_employee_login/:emp_id', authenticateToken, UserController.update_employee_login);
 employeeRoutes.put('/update_employee/:emp_id', authenticateToken,  upload.single('file_uploaded'), UserController.update_employee);
-employeeRoutes.post('/add_employee', authenticateToken, upload.single('file_uploaded'), UserController.create_employee);
+employeeRoutes.post('/add_employee', upload.single('file_uploaded'), UserController.create_employee);
 employeeRoutes.get('/get_all_employee', authenticateToken, UserController.get_all_employee);
 
 

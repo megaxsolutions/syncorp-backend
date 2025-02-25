@@ -114,8 +114,10 @@ io.on('connection', (socket) => {
 
   
     // Handle incoming messages
-    socket.on('message', (msg) => {
+    socket.on('message', (msg, id) => {
       console.log('message received: ' + msg);
+      console.log('ID: ' + id);
+
       // Broadcast the message to all connected clients
       io.emit('message', msg);
     });
