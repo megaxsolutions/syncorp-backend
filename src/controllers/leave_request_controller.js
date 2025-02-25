@@ -116,6 +116,26 @@ export const get_all_leave_request = asyncHandler(async (req, res) => {
             leave_type, emp_ID, approved_by, 
             DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved,
             status, details, file_uploaded
+            FROM leave_request`; // Use a parameterized query
+
+        const [leave_request] = await db.query(sql, [emp_id]);
+
+        return res.status(200).json({ data: leave_request });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+
+export const get_all_user_leave_request = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
+
+    try {
+        const sql = `SELECT 
+            DATE_FORMAT(date, '%Y-%m-%d') AS date, 
+            leave_type, emp_ID, approved_by, 
+            DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved,
+            status, details, file_uploaded
             FROM leave_request WHERE emp_ID = ?`; // Use a parameterized query
 
         const [leave_request] = await db.query(sql, [emp_id]);

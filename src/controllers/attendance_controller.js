@@ -33,14 +33,22 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
     const { emp_id, cluster_id } = req.body;
 
     try {
-        const sql = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date ) VALUES (?, ?, ?, ?)';
-        const sql2 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
+        const sql  = `SELECT day FROM shift_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') = ?`; // Use a parameterized query
+        const sql2 = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date ) VALUES (?, ?, ?, ?)';
+        const sql3 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
 
-        const [insert_data_site] = await db.query(sql, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours')]);
-        const [update_data_clock_state] = await db.query(sql2, [1, emp_id]);
+        const [shift_schedule] = await db.query(sql, [emp_id, storeCurrentDate(0, 'hours')]);
+ 
 
+        if(shift_schedule.length > 0) {
+            const [insert_data_site] = await db.query(sql2, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours')]);
+            const [update_data_clock_state] = await db.query(sql3, [1, emp_id]);   
+
+            return res.status(200).json({ success: 'Attendance successfully created.' }); 
+        }
+       
+        return res.status(400).json({ success: 'Please contact the admin for scheduling.' });
         // Return the merged results in the response
-        return res.status(200).json({ success: 'Attendance successfully created.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create attendance.' });
     }

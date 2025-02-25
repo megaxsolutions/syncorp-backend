@@ -104,10 +104,14 @@ app.use("/shift_schedules", authenticateToken, shiftscheduleRoutes);
 //     console.log('Connected to MySQL database.');
 // });
 
+let connectedUsers = 0;
 
 // Handle WebSocket connections
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    connectedUsers++;
+    console.log('A user connected. Total connected users: ' + connectedUsers);
+    console.log('socket ID: ' + socket.id);
+
   
     // Handle incoming messages
     socket.on('message', (msg) => {
@@ -118,7 +122,8 @@ io.on('connection', (socket) => {
   
     // Handle disconnection
     socket.on('disconnect', () => {
-      console.log('user disconnected');
+      connectedUsers--;  // Decrement the counter when a user disconnects
+      console.log('User disconnected. Total connected users: ' + connectedUsers);
     });
 });
   
