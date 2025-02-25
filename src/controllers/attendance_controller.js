@@ -40,14 +40,14 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
         const [shift_schedule] = await db.query(sql, [emp_id, storeCurrentDate(0, 'hours')]);
  
 
-        if(shift_schedule.length > 0) {
+        //if(shift_schedule.length > 0) {
             const [insert_data_site] = await db.query(sql2, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours')]);
             const [update_data_clock_state] = await db.query(sql3, [1, emp_id]);   
 
             return res.status(200).json({ success: 'Attendance successfully created.' }); 
-        }
+       // }
        
-        return res.status(400).json({ success: 'Please contact the admin for scheduling.' });
+       // return res.status(400).json({ success: 'Please contact the admin for scheduling.' });
         // Return the merged results in the response
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create attendance.' });
