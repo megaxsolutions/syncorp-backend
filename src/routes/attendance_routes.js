@@ -13,6 +13,10 @@ attendanceRoutes.get('/get_all_user_attendance/:emp_id', AttendanceController.ge
 attendanceRoutes.get('/get_all_attendance', AttendanceController.get_all_attendance);
 attendanceRoutes.get('/get_user_clock_state/:emp_id', AttendanceController.get_user_clock_state);
 
+attendanceRoutes.put('/update_user_attendance/:emp_id/:attendance_id', AttendanceController.update_user_attendance);
+attendanceRoutes.delete('/delete_attendance/:emp_id/:attendance_id', AttendanceController.delete_attendance);
+
+
 
 //attendanceRoutes.get('/get_user_latest_attendance/:emp_id', AttendanceController.get_user_latest_attendance);
 
