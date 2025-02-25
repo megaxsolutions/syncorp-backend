@@ -47,9 +47,7 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
             return res.status(200).json({ success: 'Attendance successfully created.' }); 
        // }
        
-
       //  return res.status(400).json({ success: 'Please contact the admin for scheduling.' });
-
         // Return the merged results in the response
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create attendance.' });
@@ -159,5 +157,43 @@ export const get_all_attendance = asyncHandler(async (req, res) => {
         return res.status(200).json({ data: attendance });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+
+
+
+export const update_user_attendance = asyncHandler(async (req, res) => {
+    const { time_in, time_out } = req.body;
+    const { emp_id, attendance_id } = req.params; // Assuming cluster_id is passed as a URL parameter
+
+    try {
+        const sql = 'UPDATE attendance SET timeIN = ?, timeOUT = ? WHERE emp_ID = ? AND id = ?';
+        const [result] = await db.query(sql, [time_in, time_out, emp_id, attendance_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Attendance not found.' });
+        }
+
+        return res.status(200).json({ success: 'Attendance successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update attendance.' });
+    }
+});
+
+export const delete_attendance = asyncHandler(async (req, res) => {
+    const { attendance_id, emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter
+
+    try {
+        const sql = 'DELETE FROM attendance WHERE id = ? AND emp_ID = ?';
+        const [result] = await db.query(sql, [attendance_id, emp_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Attendance not found.' });
+        }
+
+        return res.status(200).json({ success: 'Attendance successfully deleted.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to delete attendance.' });
     }
 });
