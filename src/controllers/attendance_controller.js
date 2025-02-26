@@ -33,22 +33,30 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
     const { emp_id, cluster_id } = req.body;
 
     try {
-        const sql  = `SELECT day FROM shift_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') = ?`; // Use a parameterized query
-        const sql2 = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date ) VALUES (?, ?, ?, ?)';
-        const sql3 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
+        const sql   = `SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date FROM attendance WHERE emp_ID = ? AND date = ?`;
+        const sql2  = `SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date FROM attendance WHERE emp_ID = ? AND date = ? AND timeOUT IS NOT NULL`;
+        const sql3 = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date ) VALUES (?, ?, ?, ?)';
+        const sql4 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
 
-        const [shift_schedule] = await db.query(sql, [emp_id, storeCurrentDate(0, 'hours')]);
- 
+        const [attendance] = await db.query(sql, [emp_id, storeCurrentDate(0, 'hours')]);
+        const [attendance_overtime] = await db.query(sql2, [emp_id, storeCurrentDate(0, 'hours')]);
 
-        //if(shift_schedule.length > 0) {
-            const [insert_data_site] = await db.query(sql2, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours')]);
-            const [update_data_clock_state] = await db.query(sql3, [1, emp_id]);   
+
+        if(attendance.length == 0) {
+            const [insert_data_site] = await db.query(sql3, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours')]);
+            const [update_data_clock_state] = await db.query(sql4, [1, emp_id]);   
 
             return res.status(200).json({ success: 'Attendance successfully created.' }); 
-       // }
-       
-      //  return res.status(400).json({ success: 'Please contact the admin for scheduling.' });
-        // Return the merged results in the response
+        }
+
+        if(attendance_overtime.length == 1) {
+            const [insert_data_site] = await db.query(sql3, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours')]);
+            const [update_data_clock_state] = await db.query(sql4, [1, emp_id]);   
+
+            return res.status(200).json({ success: 'Attendance successfully created for overtime.' }); 
+        }
+
+        return res.status(400).json({ error: 'You have already marked your attendance for today.' });        
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create attendance.' });
     }
