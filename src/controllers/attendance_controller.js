@@ -46,14 +46,13 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
             const [insert_data_site] = await db.query(sql3, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours')]);
             const [update_data_clock_state] = await db.query(sql4, [1, emp_id]);   
 
-            return res.status(200).json({ success: 'Attendance successfully created.' }); 
-        }
+            return res.status(200).json({ success: 'Attendance recorded successfully.' });        }
 
         if(attendance_overtime.length == 1) {
             const [insert_data_site] = await db.query(sql3, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours')]);
             const [update_data_clock_state] = await db.query(sql4, [1, emp_id]);   
 
-            return res.status(200).json({ success: 'Attendance successfully created for overtime.' }); 
+            return res.status(200).json({ success: 'Your recorded time has been classified as overtime.' });        
         }
 
         return res.status(400).json({ error: 'You have already marked your attendance for today.' });        
