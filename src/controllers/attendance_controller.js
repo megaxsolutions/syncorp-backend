@@ -119,7 +119,7 @@ export const get_all_user_attendance = asyncHandler(async (req, res) => {
 
     try {
         const sql = `
-        SELECT id, emp_ID,
+        SELECT attendance.id, attendance.emp_ID,
             DATE_FORMAT(attendance.timeIN, '%Y-%m-%d %H:%i:%s') AS timeIN,
             DATE_FORMAT(attendance.timeOUT, '%Y-%m-%d %H:%i:%s') AS timeOUT, 
             DATE_FORMAT(attendance.date, '%Y-%m-%d') AS date, 
@@ -141,7 +141,7 @@ export const get_all_user_attendance = asyncHandler(async (req, res) => {
 export const get_all_attendance = asyncHandler(async (req, res) => {
     try {
         const sql = `
-        SELECT id, emp_ID,
+        SELECT attendance.id, attendance.emp_ID,
             DATE_FORMAT(attendance.timeIN, '%Y-%m-%d %H:%i:%s') AS timeIN,
             DATE_FORMAT(attendance.timeOUT, '%Y-%m-%d %H:%i:%s') AS timeOUT, 
             DATE_FORMAT(attendance.date, '%Y-%m-%d') AS date, 
