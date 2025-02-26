@@ -60,7 +60,8 @@ export const get_all_user_break = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
-        const sql  = `SELECT id,
+        const sql  = `SELECT id, 
+        emp_ID,
         DATE_FORMAT(breakIN, '%Y-%m-%d %H:%i:%s') AS breakIN,  
         DATE_FORMAT(breakOUT, '%Y-%m-%d %H:%i:%s') AS breakOUT
         FROM breaks WHERE emp_ID = ?`; // Use a parameterized query
@@ -77,6 +78,7 @@ export const get_all_user_break = asyncHandler(async (req, res) => {
 export const get_all_break = asyncHandler(async (req, res) => {
     try {
         const sql  = `SELECT id,
+        emp_ID,
         DATE_FORMAT(breakIN, '%Y-%m-%d %H:%i:%s') AS breakIN,  
         DATE_FORMAT(breakOUT, '%Y-%m-%d %H:%i:%s') AS breakOUT
         FROM breaks`; // Use a parameterized query
