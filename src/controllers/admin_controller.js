@@ -228,7 +228,6 @@ export const login_admin = asyncHandler(async (req, res) => {
         const [login] = await db.query(sql, [emp_ID]);
 
 
-        return res.status(200).json({ data: login });
 
         const dateObject = new Date(login[0]['expiry_date']);
         const expiryDate = dateObject.toISOString().split('T')[0];
