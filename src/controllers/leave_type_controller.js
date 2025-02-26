@@ -50,14 +50,24 @@ export const delete_leave_type = asyncHandler(async (req, res) => {
     const { leave_type_id } = req.params; // Assuming leave_type_id is passed as a URL parameter
 
     try {
-        const sql = 'DELETE FROM leave_type WHERE id = ?';
-        const [result] = await db.query(sql, [leave_type_id]);
+        const sql = 'SELECT * FROM leave_request WHERE leave_type = ?'; // Use a parameterized query
+        const sql2 = 'DELETE FROM leave_type WHERE id = ?';
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Leave type not found.' });
+        const [data_leave_request] = await db.query(sql, [leave_type_id]);
+
+        if(data_leave_request.length >= 1) {
+            return res.status(400).json({ error: `Cannot be deleted ${data_leave_request.length == 1 ? `${ data_leave_request.length } row has` : `${ data_leave_request.length } rows have` } been affected.` });
         }
 
-        return res.status(200).json({ success: 'Leave type successfully deleted.' });
+        if(data_leave_request.length == 0) {
+            const [result] = await db.query(sql2, [leave_type_id]);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Leave type not found.' });
+            }
+
+            return res.status(200).json({ success: 'Leave type successfully deleted.' });
+        }
     } catch (error) {
         return res.status(500).json({ error: 'Failed to delete leave type.' });
     }

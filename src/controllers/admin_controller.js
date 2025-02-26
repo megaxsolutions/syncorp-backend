@@ -188,7 +188,7 @@ export const create_admin = asyncHandler(async (req, res) => {
             return res.status(200).json({ success: 'Account successfully created.' });
         } 
 
-        return res.status(400).json({ error: 'User already exist..' });
+        return res.status(400).json({ error: 'User already exist.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create admin entry' });
     }
@@ -228,7 +228,6 @@ export const login_admin = asyncHandler(async (req, res) => {
         const [login] = await db.query(sql, [emp_ID]);
 
 
-        return res.status(200).json({ data: login });
 
         const dateObject = new Date(login[0]['expiry_date']);
         const expiryDate = dateObject.toISOString().split('T')[0];

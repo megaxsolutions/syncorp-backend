@@ -40,14 +40,27 @@ export const delete_cluster = asyncHandler(async (req, res) => {
     const { cluster_id } = req.params; // Assuming cluster_id is passed as a URL parameter
 
     try {
-        const sql = 'DELETE FROM clusters WHERE id = ?';
-        const [result] = await db.query(sql, [cluster_id]);
+        const sql  = 'SELECT * FROM employee_profile WHERE clusterID = ?'; // Use a parameterized query
+        const sql2 = 'DELETE FROM clusters WHERE id = ?';
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Cluster not found.' });
+
+
+        const [data_employee_profile] = await db.query(sql, [cluster_id]);
+
+        if(data_employee_profile.length >= 1) {
+            return res.status(400).json({ error: `Cannot be deleted ${data_employee_profile.length == 1 ? `${ data_employee_profile.length } row has` : `${ data_employee_profile.length } rows have` } been affected.` });
         }
 
-        return res.status(200).json({ success: 'Cluster successfully deleted.' });
+
+        if(data_employee_profile.length == 0) {
+            const [result] = await db.query(sql2, [cluster_id]);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Cluster not found.' });
+            }
+
+            return res.status(200).json({ success: 'Cluster successfully deleted.' });
+        }
     } catch (error) {
         return res.status(500).json({ error: 'Failed to delete cluster.' });
     }

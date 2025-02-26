@@ -54,14 +54,24 @@ export const delete_overtime_type = asyncHandler(async (req, res) => {
     const { overtime_type_id } = req.params; // Assuming overtime_type_id is passed as a URL parameter
     
     try {
-        const sql = 'DELETE FROM overtime_type WHERE id = ?';
-        const [result] = await db.query(sql, [overtime_type_id]);
+        const sql  = 'SELECT * FROM overtime_request WHERE ot_type = ?'; // Use a parameterized query
+        const sql2 = 'DELETE FROM overtime_type WHERE id = ?';
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Overtime type not found.' });
+        const [data_overtime_request] = await db.query(sql, [overtime_type_id]);
+
+        if(data_overtime_request.length >= 1) {
+            return res.status(400).json({ error: `Cannot be deleted ${data_overtime_request.length == 1 ? `${ data_overtime_request.length } row has` : `${ data_overtime_request.length } rows have` } been affected.` });
         }
 
-        return res.status(200).json({ success: 'Overtime type successfully deleted.' });
+        if(data_overtime_request.length == 0) {
+            const [result] = await db.query(sql2, [overtime_type_id]);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Overtime type not found.' });
+            }
+
+            return res.status(200).json({ success: 'Overtime type successfully deleted.' });
+        }
     } catch (error) {
         return res.status(500).json({ error: 'Failed to delete overtime type.' });
     }
