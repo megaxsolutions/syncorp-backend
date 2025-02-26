@@ -192,12 +192,14 @@ export const delete_attendance = asyncHandler(async (req, res) => {
     const { attendance_id, emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter
 
     try {
-        const sql = 'DELETE FROM attendance WHERE id = ? AND emp_ID = ?';
+        const sql  = 'DELETE FROM attendance WHERE id = ? AND emp_ID = ?';
+        const sql2 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
         const [result] = await db.query(sql, [attendance_id, emp_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Attendance not found.' });
         }
+        const [update_data_clock_state] = await db.query(sql2, [0, emp_id]);   
 
         return res.status(200).json({ success: 'Attendance successfully deleted.' });
     } catch (error) {
