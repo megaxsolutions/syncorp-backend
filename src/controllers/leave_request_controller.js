@@ -111,7 +111,7 @@ export const get_all_leave_request = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
-        const sql = `SELECT 
+        const sql = `SELECT id,
             DATE_FORMAT(date, '%Y-%m-%d') AS date, 
             leave_type, emp_ID, approved_by, 
             DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved,
@@ -131,7 +131,7 @@ export const get_all_user_leave_request = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
-        const sql = `SELECT 
+        const sql = `SELECT id,
             DATE_FORMAT(date, '%Y-%m-%d') AS date, 
             leave_type, emp_ID, approved_by, 
             DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved,
