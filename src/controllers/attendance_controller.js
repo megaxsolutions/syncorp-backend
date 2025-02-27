@@ -46,7 +46,8 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
             const [insert_data_site] = await db.query(sql3, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours')]);
             const [update_data_clock_state] = await db.query(sql4, [1, emp_id]);   
 
-            return res.status(200).json({ success: 'Attendance recorded successfully.' });        }
+            return res.status(200).json({ success: 'Attendance recorded successfully.' });        
+        }
 
         if(attendance_overtime.length == 1) {
             const [insert_data_site] = await db.query(sql3, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours')]);
@@ -194,20 +195,20 @@ export const delete_attendance = asyncHandler(async (req, res) => {
     try {
         const sql  = `SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date FROM attendance WHERE id = ? AND emp_ID = ? AND date = ?`; // Use a parameterized query
         const sql2 = 'DELETE FROM attendance WHERE id = ? AND emp_ID = ?';
-        const sql3 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
+       // const sql3 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
 
         const [data_attendance] = await db.query(sql, [attendance_id, emp_id, storeCurrentDate(0, 'hours')]);
+
+        if(data_attendance.length >= 1) {
+            return res.status(400).json({ error: 'Unable to delete attendance: This record is protected and cannot be removed.' });
+          //  const [update_data_clock_state] = await db.query(sql3, [0, emp_id]);   
+        }
 
         const [result] = await db.query(sql2, [attendance_id, emp_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Attendance not found.' });
         }
-
-        if(data_attendance.length >= 1) {
-            const [update_data_clock_state] = await db.query(sql3, [0, emp_id]);   
-        }
-
 
         return res.status(200).json({ success: 'Attendance successfully deleted.' });
     } catch (error) {
