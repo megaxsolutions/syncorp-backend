@@ -40,18 +40,25 @@ export const delete_site = asyncHandler(async (req, res) => {
     const { site_id } = req.params; // Assuming site_id is passed as a URL parameter
 
     try {
-        const sql = 'SELECT * FROM employee_profile WHERE siteID = ?'; // Use a parameterized query
-        const sql2 = 'DELETE FROM sites WHERE id = ?';
+        const sql  = 'SELECT * FROM employee_profile WHERE siteID = ?'; // Use a parameterized query
+        const sql2 = 'SELECT * FROM departments WHERE siteID = ?'; // Use a parameterized query
+        const sql3 = 'DELETE FROM sites WHERE id = ?';
 
 
         const [data_employee_profile] = await db.query(sql, [site_id]);
+        const [data_departments] = await db.query(sql2, [site_id]);
+
 
         if(data_employee_profile.length >= 1) {
             return res.status(400).json({ error: `Cannot be deleted ${data_employee_profile.length == 1 ? `${ data_employee_profile.length } row has` : `${ data_employee_profile.length } rows have` } been affected.` });
         }
 
+        if(data_departments.length >= 1) {
+            return res.status(400).json({ error: `Cannot be deleted ${data_departments.length == 1 ? `${ data_departments.length } row has` : `${ data_departments.length } rows have` } been affected.` });
+        }
+
         if(data_employee_profile.length == 0) {
-            const [result] = await db.query(sql2, [site_id]);
+            const [result] = await db.query(sql3, [site_id]);
 
             if (result.affectedRows === 0) {
                 return res.status(404).json({ error: 'Site not found.' });

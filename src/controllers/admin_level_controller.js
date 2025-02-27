@@ -45,14 +45,25 @@ export const delete_admin_level = asyncHandler(async (req, res) => {
     const { admin_level_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
-        const sql = 'DELETE FROM admin_level WHERE id = ?';
-        const [result] = await db.query(sql, [admin_level_id]);
+        const sql  = 'SELECT * FROM admin_login WHERE user_level = ?'; // Use a parameterized query
+        const sql2 = 'DELETE FROM admin_level WHERE id = ?';
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Admin level not found.' });
+
+        const [data_admin_login] = await db.query(sql, [admin_level_id]);
+
+        if(data_admin_login.length >= 1) {
+            return res.status(400).json({ error: `Cannot be deleted ${data_admin_login.length == 1 ? `${ data_admin_login.length } row has` : `${ data_admin_login.length } rows have` } been affected.` });
         }
 
-        return res.status(200).json({ success: 'Admin level successfully deleted.' });
+        if(data_admin_login.length == 0) {
+            const [result] = await db.query(sql2, [admin_level_id]);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Admin level not found.' });
+            }
+
+            return res.status(200).json({ success: 'Admin level successfully deleted.' });
+        }
     } catch (error) {
         return res.status(500).json({ error: 'Failed to delete admin level.' });
     }
