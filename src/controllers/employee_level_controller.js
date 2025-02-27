@@ -40,14 +40,24 @@ export const delete_employee_level = asyncHandler(async (req, res) => {
     const { e_level_id } = req.params; // Assuming e_level_id is passed as a URL parameter
 
     try {
-        const sql = 'DELETE FROM employee_levels WHERE id = ?';
-        const [result] = await db.query(sql, [e_level_id]);
+        const sql = 'SELECT * FROM employee_profile WHERE employee_level = ?'; // Use a parameterized query
+        const sql2 = 'DELETE FROM employee_levels WHERE id = ?';
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Employee level not found.' });
+        const [data_employee_profile] = await db.query(sql, [e_level_id]);
+
+        if(data_employee_profile.length >= 1) {
+            return res.status(400).json({ error: `Cannot be deleted ${data_employee_profile.length == 1 ? `${ data_employee_profile.length } row has` : `${ data_employee_profile.length } rows have` } been affected.` });
         }
 
-        return res.status(200).json({ success: 'Employee level successfully deleted.' });
+        if(data_employee_profile_standing.length == 0) {
+            const [result] = await db.query(sql2, [e_level_id]);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Employee level not found.' });
+            }
+
+            return res.status(200).json({ success: 'Employee level successfully deleted.' });
+        }
     } catch (error) {
         return res.status(500).json({ error: 'Failed to delete employee level.' });
     }

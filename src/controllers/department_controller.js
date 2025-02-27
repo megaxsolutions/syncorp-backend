@@ -40,14 +40,26 @@ export const delete_department = asyncHandler(async (req, res) => {
     const { department_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
-        const sql = 'DELETE FROM departments WHERE id = ?';
-        const [result] = await db.query(sql, [department_id]);
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Department not found.' });
+        const sql = 'SELECT * FROM employee_profile WHERE departmentID = ?'; // Use a parameterized query
+        const sql2 = 'DELETE FROM departments WHERE id = ?';
+
+        const [data_employee_profile] = await db.query(sql, [department_id]);
+
+
+        if(data_employee_profile.length >= 1) {
+            return res.status(400).json({ error: `Cannot be deleted ${data_employee_profile.length == 1 ? `${ data_employee_profile.length } row has` : `${ data_employee_profile.length } rows have` } been affected.` });
         }
 
-        return res.status(200).json({ success: 'Department successfully deleted.' });
+        if(data_employee_profile.length == 0) {
+            const [result] = await db.query(sql2, [department_id]);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Department not found.' });
+            }
+
+            return res.status(200).json({ success: 'Department successfully deleted.' });
+        }
     } catch (error) {
         return res.status(500).json({ error: 'Failed to delete department.' });
     }
