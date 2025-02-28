@@ -25,6 +25,9 @@ import overtimeTypeRoutes from "./routes/overtime_type_routes.js";
 import overtimeRequestRoutes from "./routes/overtime_request_routes.js";
 import bulletinRoutes from "./routes/bulletin_routes.js";
 import shiftscheduleRoutes from "./routes/shift_schedule_routes.js";
+import coachingTypeRoutes from "./routes/coaching_type_routes.js";
+import coachingRoutes from "./routes/coaching_routes.js";
+
 
 
 import bodyParser from 'body-parser';
@@ -75,11 +78,11 @@ app.use("/admins", adminRoutes);
 app.use("/employees", employeeRoutes);
 app.use("/recovery", recoveryRoutes);
 
-app.use("/main", mainRoutes);
+app.use("/main", authenticateToken, mainRoutes);
 app.use("/departments", authenticateToken, departmentRoutes);
 app.use("/sites", authenticateToken, siteRoutes);
 app.use("/clusters", authenticateToken, clusterRoutes);
-app.use("/positions", positionRoutes);
+app.use("/positions", authenticateToken, positionRoutes);
 app.use("/employee_levels", authenticateToken, employeeLevelRoutes);
 app.use("/admin_levels", authenticateToken, adminLevelRoutes);
 app.use("/holidays", authenticateToken, holidayRoutes);
@@ -87,12 +90,14 @@ app.use("/cutoffs", authenticateToken, cutOffRoutes);
 app.use("/attendances", authenticateToken, attendanceRoutes);
 app.use("/dtr", authenticateToken, dtrRoutes);
 app.use("/breaks", authenticateToken, breakRoutes);
-app.use("/leave_requests", leaveRequestRoutes);
+app.use("/leave_requests", authenticateToken, leaveRequestRoutes);
 app.use("/leave_types", authenticateToken, leaveTypeRoutes);
 app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
 app.use("/overtime_requests", authenticateToken, overtimeRequestRoutes);
 app.use("/bulletins", authenticateToken, bulletinRoutes);
 app.use("/shift_schedules", authenticateToken, shiftscheduleRoutes);
+app.use("/coaching_types", authenticateToken, coachingTypeRoutes);
+app.use("/coaching_types", authenticateToken, coachingRoutes);
 
 
 
@@ -104,31 +109,30 @@ app.use("/shift_schedules", authenticateToken, shiftscheduleRoutes);
 //     console.log('Connected to MySQL database.');
 // });
 
-let connectedUsers = 0;
+
+async function fetchLatestBulletins() {
+  const sql = 'SELECT * FROM bulletin ORDER BY id DESC LIMIT 50'; // Adjust the order by column as needed
+  const [bulletins] = await db.query(sql);
+  return bulletins;
+}
 
 // Handle WebSocket connections
-io.on('connection', (socket) => {
-    connectedUsers++;
-    console.log('A user connected. Total connected users: ' + connectedUsers);
-    console.log('socket ID: ' + socket.id);
+io.on('connection', async (socket) => {
+  console.log('A user connected');
 
-  
-    // Handle incoming messages
-    socket.on('message', (msg, id) => {
-      console.log('message received: ' + msg);
-      console.log('ID: ' + id);
+  io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
 
-      // Broadcast the message to all connected clients
-      io.emit('message', msg);
-    });
-  
-    // Handle disconnection
-    socket.on('disconnect', () => {
-      connectedUsers--;  // Decrement the counter when a user disconnects
-      console.log('User disconnected. Total connected users: ' + connectedUsers);
-    });
+  // Handle incoming messages from clients
+  socket.on('refetch_all_bulletins', async (msg) => {
+    io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
+  });
+
+  // Handle disconnection
+  socket.on('disconnect', () => {
+      console.log('User  disconnected');
+  });
 });
-  
+
 
 server.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
