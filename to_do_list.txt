@@ -14,3 +14,15 @@ employee notification after created
 3 rd
 
 attendance names
+
+
+
+crud notification add update delete
+
+admin 1
+supervisor 2
+HR 10
+Training 12
+
+employee 0
+
