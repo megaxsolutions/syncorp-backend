@@ -34,7 +34,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 
 import { authenticateToken } from "./middleware/auth.js";
-
+//j
 
 import path from 'path'; // Import the path module
 import fs from 'fs'; // Import fs to check if the directory exists
@@ -98,6 +98,7 @@ app.use("/bulletins", authenticateToken, bulletinRoutes);
 app.use("/shift_schedules", authenticateToken, shiftscheduleRoutes);
 app.use("/coaching_types", authenticateToken, coachingTypeRoutes);
 app.use("/coaching_types", authenticateToken, coachingRoutes);
+
 
 
 // db.connect(err => {
