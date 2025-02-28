@@ -115,14 +115,19 @@ async function fetchLatestBulletins() {
   return bulletins;
 }
 
+
+async function fetchLatestNotifications() {
+  const sql = 'SELECT * FROM logs ORDER BY id DESC LIMIT 50'; // Adjust the order by column as needed
+  const [logs] = await db.query(sql);
+  return logs;
+}
+
 // Handle WebSocket connections
 io.on('connection', async (socket) => {
   console.log('A user connected');
 
-  io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
-
   // Handle incoming messages from clients
-  socket.on('refetch_all_bulletins', async (msg) => {
+  socket.on('refresh_all_bulletins', async (msg) => {
     io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
   });
 
@@ -131,6 +136,12 @@ io.on('connection', async (socket) => {
       console.log('User  disconnected');
   });
 });
+
+
+setInterval(async () => {
+  io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
+  io.emit('get_all_notifications', await fetchLatestNotifications()); // Broadcast updated bulletins to all clients
+}, 1000); // Adjust the interval as needed
 
 
 server.listen(port, () => {
