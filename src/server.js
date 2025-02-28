@@ -123,7 +123,7 @@ io.on('connection', async (socket) => {
   io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
 
   // Handle incoming messages from clients
-  socket.on('refetch_all_bulletins', async (msg) => {
+  socket.on('refresh_all_bulletins', async (msg) => {
     io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
   });
 
