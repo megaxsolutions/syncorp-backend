@@ -10,7 +10,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: process.env.CLIENT_BASE_URL, // Adjust this to your React app's URL
+        origin: [process.env.CLIENT_BASE_URL, 'http://localhost:5173'], // Adjust this to your React app's URL
         methods: ["GET", "POST"],
         allowedHeaders: ["my-custom-header"],
         credentials: true
@@ -43,6 +43,7 @@ const checkDatabaseConnection = async () => {
 
 // Check the database connection when the application starts
 checkDatabaseConnection();
+
 
 
 
