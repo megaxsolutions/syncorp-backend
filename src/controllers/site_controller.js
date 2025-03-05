@@ -9,7 +9,20 @@ export const create_site = asyncHandler(async (req, res) => {
 
     try {
         const sql = 'INSERT INTO sites (siteName) VALUES (?)';
+        const sql2 = 'SELECT * FROM admin_login WHERE JSON_CONTAINS(user_level, ?)';
+        const sql3 = 'INSERT INTO logs (details, datetime, user_level, emp_ID, is_read) VALUES (?, ?, ?, ?, ?)';
+
+
         const [insert_data_site] = await db.query(sql, [site_name]);
+        const [data_admin_login] = await db.query(sql2, [JSON.stringify(1)]);
+
+        const insert_logs_admin_level = await Promise.all(
+            data_admin_login.map(async (admin_login) => {
+                await db.query(sql3, ['New site added: ' + site_name, storeCurrentDateTime(0, 'hours'), 1, admin_login.emp_ID, 0]);
+                return admin_login.emp_ID;
+            })
+        );
+   
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Site successfully created.' });
@@ -23,12 +36,28 @@ export const update_site = asyncHandler(async (req, res) => {
     const { site_id } = req.params; // Assuming site_id is passed as a URL parameter
 
     try {
-        const sql = 'UPDATE sites SET siteName = ? WHERE id = ?';
-        const [result] = await db.query(sql, [site_name, site_id]);
+        const sql  = 'SELECT * FROM sites WHERE id = ?';
+        const sql2 = 'SELECT * FROM admin_login WHERE JSON_CONTAINS(user_level, ?)';
+        const sql3 = 'INSERT INTO logs (details, datetime, user_level, emp_ID, is_read) VALUES (?, ?, ?, ?, ?)';
+        const sql4 = 'UPDATE sites SET siteName = ? WHERE id = ?';
 
-        if (result.affectedRows === 0) {
+
+        const [data_site] = await db.query(sql, [site_id]);
+        const [data_admin_login] = await db.query(sql2, [JSON.stringify(1)]);
+
+        if (data_site.length === 0) {
             return res.status(404).json({ error: 'Site not found.' });
         }
+
+        const insert_logs_admin_level = await Promise.all(
+            data_admin_login.map(async (admin_login) => {
+                await db.query(sql3, ['Site updated from: ' + data_site[0]['siteName'] + ' to: ' + site_name, storeCurrentDateTime(0, 'hours'), 1, admin_login.emp_ID, 0]);
+                return admin_login.emp_ID;
+            })
+        );
+
+
+        const [result] = await db.query(sql4, [site_name, site_id]);
 
         return res.status(200).json({ success: 'Site successfully updated.' });
     } catch (error) {

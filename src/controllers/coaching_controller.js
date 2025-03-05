@@ -35,12 +35,12 @@ export const create_coaching = asyncHandler(async (req, res) => {
 });
 
 export const update_coaching = asyncHandler(async (req, res) => {
-    const { coaching_type, coached_emp_id, metrix_1, metrix_2, metrix_3, metrix_4 } = req.body;
+    const { emp_id, coaching_type, coached_emp_id, metrix_1, metrix_2, metrix_3, metrix_4 } = req.body;
     const { coaching_id } = req.params; // Assuming cluster_id is passed as a URL parameter
 
     try {
-        const sql = 'UPDATE coaching SET coaching_type = ?, coached_by = ?, metrix_1 = ?, metrix_2 = ?, metrix_3 = ?, metrix_4 = ? WHERE id = ?';
-        const [result] = await db.query(sql, [coaching_type, coached_emp_id, metrix_1, metrix_2, metrix_3, metrix_4, coaching_id]);
+        const sql = 'UPDATE coaching SET emp_ID = ?, coached_by = ?, coaching_type = ?, metrix_1 = ?, metrix_2 = ?, metrix_3 = ?, metrix_4 = ? WHERE id = ?';
+        const [result] = await db.query(sql, [emp_id, coached_emp_id, coaching_type, metrix_1, metrix_2, metrix_3, metrix_4, coaching_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Coaching type not found.' });
