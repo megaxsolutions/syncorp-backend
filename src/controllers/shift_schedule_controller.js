@@ -122,11 +122,21 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
 
         const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by, schedule_type, is_overtime) VALUES ?';
 
+        // const sqlSelect = `SELECT emp_ID, 
+        // DATE_FORMAT(day, '%Y-%m-%d') AS day, 
+        // DATE_FORMAT(shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in,
+        // DATE_FORMAT(shift_out, '%Y-%m-%d %H:%i:%s') AS shift_out  
+        // FROM shift_schedule WHERE emp_ID = ? AND day IN (?) AND schedule_type = ? AND is_overtime = ?`;
+
         const sqlSelect = `SELECT emp_ID, 
-        DATE_FORMAT(day, '%Y-%m-%d') AS day, 
-        DATE_FORMAT(shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in,
-        DATE_FORMAT(shift_out, '%Y-%m-%d %H:%i:%s') AS shift_out  
-        FROM shift_schedule WHERE emp_ID = ? AND day IN (?) AND schedule_type = ? AND is_overtime = ?`;
+        DATE_FORMAT(day, '%Y-%m-%d') AS day
+        FROM shift_schedule 
+        WHERE emp_ID = ? 
+        AND day IN (?) 
+        AND schedule_type = ? 
+        AND is_overtime = ? 
+        AND DATE_FORMAT(shift_in, '%H:%i') = ? 
+        AND DATE_FORMAT(shift_out, '%H:%i') = ?;`;
  
         const selected_days = array_selected_days;
 
@@ -146,7 +156,7 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
         // We need to check for each emp_id and day
         const shift_schedules = await Promise.all(
             emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlSelect, [emp_id, days, schedule_type_id, 1]);
+                const [result] = await db.query(sqlSelect, [emp_id, days, schedule_type_id, 1, shift_in, shift_out]);
                 return result;
             })
         );
@@ -222,7 +232,15 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
         const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by, schedule_type, is_overtime) VALUES ?';
 
         // Fix for the SQL query with the IN clause:
-        const sqlSelect = `SELECT emp_ID, DATE_FORMAT(day, '%Y-%m-%d') AS day FROM shift_schedule WHERE emp_ID = ? AND day IN (?) AND schedule_type = ? AND  is_overtime = ?`;
+        const sqlSelect = `SELECT emp_ID, 
+        DATE_FORMAT(day, '%Y-%m-%d') AS day
+        FROM shift_schedule 
+        WHERE emp_ID = ? 
+        AND day IN (?) 
+        AND schedule_type = ? 
+        AND is_overtime = ? 
+        AND DATE_FORMAT(shift_in, '%H:%i') = ? 
+        AND DATE_FORMAT(shift_out, '%H:%i') = ?;`;
 
         // Fetch all the existing shift schedules for the current employees and weekdays in one go
        // const selected_days = [storeCurrentDate(0, 'hours')];
@@ -243,7 +261,7 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
         // We need to check for each emp_id and day
         const shift_schedules = await Promise.all(
             emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlSelect, [emp_id, days, schedule_type_id, 0]);
+                const [result] = await db.query(sqlSelect, [emp_id, days, schedule_type_id, 0, shift_in, shift_out]);
                 return result;
             })
         );
