@@ -10,5 +10,6 @@ DB_PASS=Kk9566678@!
 EMAIL_USER=megaxsolutions@gmail.com
 EMAIL_PASS=oiwibzbgbokxmwwg
 
+JWT_SECRET=test
 
 
