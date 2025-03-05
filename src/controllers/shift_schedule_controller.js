@@ -5,6 +5,21 @@ import db from './../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
 import { Worker } from 'worker_threads';
 
+function extendDateByOneDay(dateString) {
+    // Create a Date object from the input string
+    const date = new Date(dateString);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+        throw new Error('Invalid date format. Please use YYYY-MM-DD.');
+    }
+
+    // Extend the date by one day
+    date.setDate(date.getDate() + 1);
+
+    // Get the new date in the desired format (YYYY-MM-DD)
+    return date.toISOString().split('T')[0];
+}
 
 
 function check_shift_type(shiftIn, shiftOut) {
@@ -280,21 +295,7 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
     }
 });
 
-function extendDateByOneDay(dateString) {
-    // Create a Date object from the input string
-    const date = new Date(dateString);
-    
-    // Check if the date is valid
-    if (isNaN(date.getTime())) {
-        throw new Error('Invalid date format. Please use YYYY-MM-DD.');
-    }
 
-    // Extend the date by one day
-    date.setDate(date.getDate() + 1);
-
-    // Get the new date in the desired format (YYYY-MM-DD)
-    return date.toISOString().split('T')[0];
-}
 
 export const delete_shift_schedule_multiple_day_overtime = asyncHandler(async (req, res) => {
     const { array_employee_emp_id, array_selected_days } = req.body;
