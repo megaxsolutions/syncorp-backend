@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
-import db from './../config/config.js'; // Import the database connection
+import { db } from '../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
 
 export const create_site = asyncHandler(async (req, res) => {

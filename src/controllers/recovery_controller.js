@@ -1,7 +1,8 @@
 import crypto from 'crypto';
 import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
-import db from './../config/config.js'; // Import the database connection
+import { db } from '../config/config.js'; // Import the database connection
+
 import mailer from './../utils/mailer.js'; // Import the mailer utility
 import moment from 'moment-timezone';
 
