@@ -108,10 +108,12 @@ io.on('connection', async (socket) => {
   console.log('A user connected');
   console.log(socket.id);
 
+  io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
+
   // // Handle incoming messages from clients
-  socket.on('send_bulletins', async (msg) => {
-    io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
-  });
+  //socket.on('send_bulletins', async (msg) => {
+   // io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
+  //});
 
   // Handle disconnection
   socket.on('disconnect', () => {
