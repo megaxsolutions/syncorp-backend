@@ -421,14 +421,17 @@ export const delete_shift_schedule_multiple_day = asyncHandler(async (req, res) 
 
 export const get_shift_schedule_day = asyncHandler(async (req, res) => {
     const sql = `SELECT 
-    emp_ID,
-    DATE_FORMAT(shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in, 
-    DATE_FORMAT(shift_out, '%Y-%m-%d %H:%i:%s') AS shift_out,
-    DATE_FORMAT(day, '%Y-%m-%d') AS day,
-    plotted_by,
-    schedule_type,
-    is_overtime
-    FROM shift_schedule WHERE is_overtime = ?`; // Use a parameterized query
+    shift_schedule.emp_ID,
+    DATE_FORMAT(shift_schedule.shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in, 
+    DATE_FORMAT(shift_schedule.shift_out, '%Y-%m-%d %H:%i:%s') AS shift_out,
+    DATE_FORMAT(shift_schedule.day, '%Y-%m-%d') AS day,
+    shift_schedule.plotted_by,
+    shift_schedule.schedule_type,
+    shift_schedule.is_overtime,
+    CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
+    FROM shift_schedule 
+    LEFT JOIN employee_profile ON shift_schedule.emp_ID = employee_profile.emp_ID
+    WHERE shift_schedule.is_overtime = ?`; // Use a parameterized query
 
     try {
         const [result] = await db.query(sql, [0]);
@@ -442,14 +445,17 @@ export const get_shift_schedule_day = asyncHandler(async (req, res) => {
 
 export const get_shift_schedule_day_overtime = asyncHandler(async (req, res) => {
     const sql = `SELECT 
-    emp_ID,
-    DATE_FORMAT(shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in, 
-    DATE_FORMAT(shift_out, '%Y-%m-%d %H:%i:%s') AS shift_out,
-    DATE_FORMAT(day, '%Y-%m-%d') AS day,
-    plotted_by,
-    schedule_type,
-    is_overtime
-    FROM shift_schedule WHERE is_overtime = ?`; // Use a parameterized query
+    shift_schedule.emp_ID,
+    DATE_FORMAT(shift_schedule.shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in, 
+    DATE_FORMAT(shift_schedule.shift_out, '%Y-%m-%d %H:%i:%s') AS shift_out,
+    DATE_FORMAT(shift_schedule.day, '%Y-%m-%d') AS day,
+    shift_schedule.plotted_by,
+    shift_schedule.schedule_type,
+    shift_schedule.is_overtime,
+    CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
+    FROM shift_schedule 
+    LEFT JOIN employee_profile ON shift_schedule.emp_ID = employee_profile.emp_ID
+    WHERE shift_schedule.is_overtime = ?`; // Use a parameterized query
 
     try {
         const [result] = await db.query(sql, [1]);
