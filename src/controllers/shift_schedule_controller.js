@@ -7,6 +7,24 @@ import { Worker } from 'worker_threads';
 
 
 
+function check_shift_type(shiftIn, shiftOut) {
+    const timeZone = 'Asia/Manila';
+
+    // Get the current date
+    const currentDate = moment.tz(timeZone).startOf('day');
+
+    // Create moment objects for shiftIn and shiftOut in the specified timezone
+    const shiftInTime = moment.tz(`${currentDate.format('YYYY-MM-DD')} ${shiftIn}`, timeZone);
+    const shiftOutTime = moment.tz(`${currentDate.format('YYYY-MM-DD')} ${shiftOut}`, timeZone);
+
+    // If shiftOut is less than or equal to shiftIn, it means it goes to the next day
+    if (shiftOutTime.isSameOrBefore(shiftInTime)) {
+        return false; // Invalid shift, as it overlaps within the same day
+    }
+    return true; // Valid shift
+}
+
+
 function storeCurrentDate(expirationAmount, expirationUnit) {
     const currentDateTime = moment.tz("Asia/Manila");
     const expirationDateTime = currentDateTime.clone().add(expirationAmount, expirationUnit);
@@ -132,10 +150,9 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
         //     })
         // );
         // The result is a 2D array: each emp_id will have an array of results for their days.
-        
         // Populate the map with the shift schedule data
         shift_schedules.flat().forEach(schedule => {
-            const key = `${schedule.emp_ID}-${schedule.day}`;
+            const key = `${schedule.emp_ID}-${check_shift_type (shift_in, shift_out) === true ? schedule.day : extendDateByOneDay(schedule.day)}`;
             existingSchedulesMap.set(key, true);
         });
 
@@ -144,12 +161,12 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
             let count_employees = 0;
 
             for (const day of selected_days) {
-                const key = `${emp_id}-${day}`;
+                const key = `${emp_id}-${check_shift_type (shift_in, shift_out) === true ? day : extendDateByOneDay(day)}`;
 
                 // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
                 if (!existingSchedulesMap.has(key)) {
                     // If the schedule doesn't exist, prepare for insertion
-                    insertValues.push([emp_id, `${day} ${shift_in}`, `${day} ${shift_out}`, day, admin_emp_id, schedule_type_id, 1]);
+                    insertValues.push([emp_id, `${day} ${shift_in}`, `${check_shift_type (shift_in, shift_out) === true ? day : extendDateByOneDay(day)} ${shift_out}`, day, admin_emp_id, schedule_type_id, 1]);
                     count_employees++;
                 }
             }
@@ -182,7 +199,7 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
 
 
 export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) => {
-    const { array_employee_emp_id, admin_emp_id, shift_in, shift_out, array_selected_days, schedule_type_id } = req.body;
+    const { array_employee_emp_id, admin_emp_id, shift_in, shift_out, array_selected_days, schedule_type_id, shift_type } = req.body;
 
     try {
         const sql  = 'SELECT * FROM login'; // Use a parameterized query
@@ -195,8 +212,6 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
         // Fetch all the existing shift schedules for the current employees and weekdays in one go
        // const selected_days = [storeCurrentDate(0, 'hours')];
         const selected_days = array_selected_days;
-
-        
 
         // Prepare data for batch insertion
         const insertValues = [];
@@ -217,27 +232,11 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
                 return result;
             })
         );
-
-             // const shift_schedules = await Promise.all(
-        //     emp_ids.map(async (emp_id) => {
-        //         // Use Promise.all to wait for all day queries to complete
-        //         const results = await Promise.all(
-        //             days.map(async (day) => {
-        //                 const [result] = await db.query(sqlSelect, [emp_id, day]);
-        //                 return result; // Return the first object directly
-        //             })
-        //         );
-        //         return results.flat(); // Flatten the results for each employee
-        //     })
-        // );
-
-          
-        
-        // The result is a 2D array: each emp_id will have an array of results for their days.
-        
+        //shift_type === 0 means night shift
+        //shift_type === 1 means day shift
         // Populate the map with the shift schedule data
         shift_schedules.flat().forEach(schedule => {
-            const key = `${schedule.emp_ID}-${schedule.day}`;
+            const key = `${schedule.emp_ID}-${check_shift_type (shift_in, shift_out) === true ? schedule.day : extendDateByOneDay(schedule.day)}`;
             existingSchedulesMap.set(key, true);
         });
 
@@ -246,11 +245,11 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
             let count_employees = 0;
 
             for (const day of selected_days) {
-                const key = `${emp_id}-${day}`;
+                const key = `${emp_id}-${check_shift_type (shift_in, shift_out) === true ? day : extendDateByOneDay(day)}`;
                 // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
                 if (!existingSchedulesMap.has(key)) {
                     // If the schedule doesn't exist, prepare for insertion
-                    insertValues.push([emp_id, `${day} ${shift_in}`, `${day} ${shift_out}`, day, admin_emp_id, schedule_type_id, 0]);
+                    insertValues.push([emp_id, `${day} ${shift_in}`, `${check_shift_type (shift_in, shift_out) === true ? day : extendDateByOneDay(day)} ${shift_out}`, day, admin_emp_id, schedule_type_id, 0]);
                     count_employees++;
                 }
             }
@@ -281,7 +280,21 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
     }
 });
 
+function extendDateByOneDay(dateString) {
+    // Create a Date object from the input string
+    const date = new Date(dateString);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+        throw new Error('Invalid date format. Please use YYYY-MM-DD.');
+    }
 
+    // Extend the date by one day
+    date.setDate(date.getDate() + 1);
+
+    // Get the new date in the desired format (YYYY-MM-DD)
+    return date.toISOString().split('T')[0];
+}
 
 export const delete_shift_schedule_multiple_day_overtime = asyncHandler(async (req, res) => {
     const { array_employee_emp_id, array_selected_days } = req.body;
