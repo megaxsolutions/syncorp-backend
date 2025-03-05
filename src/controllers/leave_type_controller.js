@@ -10,7 +10,19 @@ export const create_leave_type = asyncHandler(async (req, res) => {
 
     try {
         const sql = 'INSERT INTO leave_type (type) VALUES (?)';
+        const sql2 = 'SELECT * FROM admin_login WHERE JSON_CONTAINS(user_level, ?)';
+        const sql3 = 'INSERT INTO logs (details, datetime, user_level, emp_ID, is_read) VALUES (?, ?, ?, ?, ?)';
+
         const [insert_data_leave_type] = await db.query(sql, [leave_type]);
+        const [data_admin_login] = await db.query(sql2, [JSON.stringify(1)]);
+   
+        const insert_logs_admin_level = await Promise.all(
+            data_admin_login.map(async (admin_login) => {
+                await db.query(sql3, ['New leave type added: ' + leave_type, storeCurrentDateTime(0, 'hours'), 1, admin_login.emp_ID, 0]);
+                return admin_login.emp_ID;
+            })
+        );
+
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Leave type successfully created.' });
@@ -24,8 +36,26 @@ export const update_leave_type = asyncHandler(async (req, res) => {
     const { leave_type_id } = req.params; // Assuming leave_type_id is passed as a URL parameter
 
     try {
-        const sql = 'UPDATE leave_type SET type = ? WHERE id = ?';
-        const [update_data_leave_type] = await db.query(sql, [leave_type, leave_type_id]);
+        const sql  = 'SELECT * FROM leave_type WHERE id = ?';
+        const sql2 = 'SELECT * FROM admin_login WHERE JSON_CONTAINS(user_level, ?)';
+        const sql3 = 'INSERT INTO logs (details, datetime, user_level, emp_ID, is_read) VALUES (?, ?, ?, ?, ?)';
+        const sql4 = 'UPDATE leave_type SET type = ? WHERE id = ?';
+
+        const [data_leave_type] = await db.query(sql, [leave_type_id]);
+        const [data_admin_login] = await db.query(sql2, [JSON.stringify(1)]);
+
+        if (data_leave_type.length === 0) {
+            return res.status(404).json({ error: 'Leave type not found.' });
+        }
+
+        const insert_logs_admin_level = await Promise.all(
+            data_admin_login.map(async (admin_login) => {
+                await db.query(sql3, ['Leave type updated from: ' + data_leave_type[0]['type'] + ' to: ' + leave_type, storeCurrentDateTime(0, 'hours'), 1, admin_login.emp_ID, 0]);
+                return admin_login.emp_ID;
+            })
+        );
+
+        const [update_data_leave_type] = await db.query(sql4, [leave_type, leave_type_id]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Leave type successfully updated.' });
