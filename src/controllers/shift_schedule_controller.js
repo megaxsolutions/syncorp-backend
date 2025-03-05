@@ -5,6 +5,39 @@ import db from './../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
 import { Worker } from 'worker_threads';
 
+function extendDateByOneDay(dateString) {
+    // Create a Date object from the input string
+    const date = new Date(dateString);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+        throw new Error('Invalid date format. Please use YYYY-MM-DD.');
+    }
+
+    // Extend the date by one day
+    date.setDate(date.getDate() + 1);
+
+    // Get the new date in the desired format (YYYY-MM-DD)
+    return date.toISOString().split('T')[0];
+}
+
+
+function check_shift_type(shiftIn, shiftOut) {
+    const timeZone = 'Asia/Manila';
+
+    // Get the current date
+    const currentDate = moment.tz(timeZone).startOf('day');
+
+    // Create moment objects for shiftIn and shiftOut in the specified timezone
+    const shiftInTime = moment.tz(`${currentDate.format('YYYY-MM-DD')} ${shiftIn}`, timeZone);
+    const shiftOutTime = moment.tz(`${currentDate.format('YYYY-MM-DD')} ${shiftOut}`, timeZone);
+
+    // If shiftOut is less than or equal to shiftIn, it means it goes to the next day
+    if (shiftOutTime.isSameOrBefore(shiftInTime)) {
+        return false; // Invalid shift, as it overlaps within the same day
+    }
+    return true; // Valid shift
+}
 
 
 function storeCurrentDate(expirationAmount, expirationUnit) {
@@ -89,11 +122,21 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
 
         const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by, schedule_type, is_overtime) VALUES ?';
 
+        // const sqlSelect = `SELECT emp_ID, 
+        // DATE_FORMAT(day, '%Y-%m-%d') AS day, 
+        // DATE_FORMAT(shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in,
+        // DATE_FORMAT(shift_out, '%Y-%m-%d %H:%i:%s') AS shift_out  
+        // FROM shift_schedule WHERE emp_ID = ? AND day IN (?) AND schedule_type = ? AND is_overtime = ?`;
+
         const sqlSelect = `SELECT emp_ID, 
-        DATE_FORMAT(day, '%Y-%m-%d') AS day, 
-        DATE_FORMAT(shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in,
-        DATE_FORMAT(shift_out, '%Y-%m-%d %H:%i:%s') AS shift_out  
-        FROM shift_schedule WHERE emp_ID = ? AND day IN (?) AND schedule_type = ? AND is_overtime = ?`;
+        DATE_FORMAT(day, '%Y-%m-%d') AS day
+        FROM shift_schedule 
+        WHERE emp_ID = ? 
+        AND day IN (?) 
+        AND schedule_type = ? 
+        AND is_overtime = ? 
+        AND DATE_FORMAT(shift_in, '%H:%i') = ? 
+        AND DATE_FORMAT(shift_out, '%H:%i') = ?;`;
  
         const selected_days = array_selected_days;
 
@@ -113,7 +156,7 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
         // We need to check for each emp_id and day
         const shift_schedules = await Promise.all(
             emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlSelect, [emp_id, days, schedule_type_id, 1]);
+                const [result] = await db.query(sqlSelect, [emp_id, days, schedule_type_id, 1, shift_in, shift_out]);
                 return result;
             })
         );
@@ -132,10 +175,9 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
         //     })
         // );
         // The result is a 2D array: each emp_id will have an array of results for their days.
-        
         // Populate the map with the shift schedule data
         shift_schedules.flat().forEach(schedule => {
-            const key = `${schedule.emp_ID}-${schedule.day}`;
+            const key = `${schedule.emp_ID}-${check_shift_type (shift_in, shift_out) === true ? schedule.day : extendDateByOneDay(schedule.day)}`;
             existingSchedulesMap.set(key, true);
         });
 
@@ -144,12 +186,12 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
             let count_employees = 0;
 
             for (const day of selected_days) {
-                const key = `${emp_id}-${day}`;
+                const key = `${emp_id}-${check_shift_type (shift_in, shift_out) === true ? day : extendDateByOneDay(day)}`;
 
                 // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
                 if (!existingSchedulesMap.has(key)) {
                     // If the schedule doesn't exist, prepare for insertion
-                    insertValues.push([emp_id, `${day} ${shift_in}`, `${day} ${shift_out}`, day, admin_emp_id, schedule_type_id, 1]);
+                    insertValues.push([emp_id, `${day} ${shift_in}`, `${check_shift_type (shift_in, shift_out) === true ? day : extendDateByOneDay(day)} ${shift_out}`, day, admin_emp_id, schedule_type_id, 1]);
                     count_employees++;
                 }
             }
@@ -182,7 +224,7 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
 
 
 export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) => {
-    const { array_employee_emp_id, admin_emp_id, shift_in, shift_out, array_selected_days, schedule_type_id } = req.body;
+    const { array_employee_emp_id, admin_emp_id, shift_in, shift_out, array_selected_days, schedule_type_id, shift_type } = req.body;
 
     try {
         const sql  = 'SELECT * FROM login'; // Use a parameterized query
@@ -190,13 +232,19 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
         const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by, schedule_type, is_overtime) VALUES ?';
 
         // Fix for the SQL query with the IN clause:
-        const sqlSelect = `SELECT emp_ID, DATE_FORMAT(day, '%Y-%m-%d') AS day FROM shift_schedule WHERE emp_ID = ? AND day IN (?) AND schedule_type = ? AND  is_overtime = ?`;
+        const sqlSelect = `SELECT emp_ID, 
+        DATE_FORMAT(day, '%Y-%m-%d') AS day
+        FROM shift_schedule 
+        WHERE emp_ID = ? 
+        AND day IN (?) 
+        AND schedule_type = ? 
+        AND is_overtime = ? 
+        AND DATE_FORMAT(shift_in, '%H:%i') = ? 
+        AND DATE_FORMAT(shift_out, '%H:%i') = ?;`;
 
         // Fetch all the existing shift schedules for the current employees and weekdays in one go
        // const selected_days = [storeCurrentDate(0, 'hours')];
         const selected_days = array_selected_days;
-
-        
 
         // Prepare data for batch insertion
         const insertValues = [];
@@ -213,31 +261,15 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
         // We need to check for each emp_id and day
         const shift_schedules = await Promise.all(
             emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlSelect, [emp_id, days, schedule_type_id, 0]);
+                const [result] = await db.query(sqlSelect, [emp_id, days, schedule_type_id, 0, shift_in, shift_out]);
                 return result;
             })
         );
-
-             // const shift_schedules = await Promise.all(
-        //     emp_ids.map(async (emp_id) => {
-        //         // Use Promise.all to wait for all day queries to complete
-        //         const results = await Promise.all(
-        //             days.map(async (day) => {
-        //                 const [result] = await db.query(sqlSelect, [emp_id, day]);
-        //                 return result; // Return the first object directly
-        //             })
-        //         );
-        //         return results.flat(); // Flatten the results for each employee
-        //     })
-        // );
-
-          
-        
-        // The result is a 2D array: each emp_id will have an array of results for their days.
-        
+        //shift_type === 0 means night shift
+        //shift_type === 1 means day shift
         // Populate the map with the shift schedule data
         shift_schedules.flat().forEach(schedule => {
-            const key = `${schedule.emp_ID}-${schedule.day}`;
+            const key = `${schedule.emp_ID}-${check_shift_type (shift_in, shift_out) === true ? schedule.day : extendDateByOneDay(schedule.day)}`;
             existingSchedulesMap.set(key, true);
         });
 
@@ -246,11 +278,11 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
             let count_employees = 0;
 
             for (const day of selected_days) {
-                const key = `${emp_id}-${day}`;
+                const key = `${emp_id}-${check_shift_type (shift_in, shift_out) === true ? day : extendDateByOneDay(day)}`;
                 // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
                 if (!existingSchedulesMap.has(key)) {
                     // If the schedule doesn't exist, prepare for insertion
-                    insertValues.push([emp_id, `${day} ${shift_in}`, `${day} ${shift_out}`, day, admin_emp_id, schedule_type_id, 0]);
+                    insertValues.push([emp_id, `${day} ${shift_in}`, `${check_shift_type (shift_in, shift_out) === true ? day : extendDateByOneDay(day)} ${shift_out}`, day, admin_emp_id, schedule_type_id, 0]);
                     count_employees++;
                 }
             }
@@ -388,7 +420,18 @@ export const delete_shift_schedule_multiple_day = asyncHandler(async (req, res) 
 
 
 export const get_shift_schedule_day = asyncHandler(async (req, res) => {
-    const sql = 'SELECT * FROM shift_schedule WHERE is_overtime = ?'; // Use a parameterized query
+    const sql = `SELECT 
+    shift_schedule.emp_ID,
+    DATE_FORMAT(shift_schedule.shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in, 
+    DATE_FORMAT(shift_schedule.shift_out, '%Y-%m-%d %H:%i:%s') AS shift_out,
+    DATE_FORMAT(shift_schedule.day, '%Y-%m-%d') AS day,
+    shift_schedule.plotted_by,
+    shift_schedule.schedule_type,
+    shift_schedule.is_overtime,
+    CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
+    FROM shift_schedule 
+    LEFT JOIN employee_profile ON shift_schedule.emp_ID = employee_profile.emp_ID
+    WHERE shift_schedule.is_overtime = ?`; // Use a parameterized query
 
     try {
         const [result] = await db.query(sql, [0]);
@@ -401,7 +444,18 @@ export const get_shift_schedule_day = asyncHandler(async (req, res) => {
 });
 
 export const get_shift_schedule_day_overtime = asyncHandler(async (req, res) => {
-    const sql = 'SELECT * FROM shift_schedule WHERE is_overtime = ?'; // Use a parameterized query
+    const sql = `SELECT 
+    shift_schedule.emp_ID,
+    DATE_FORMAT(shift_schedule.shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in, 
+    DATE_FORMAT(shift_schedule.shift_out, '%Y-%m-%d %H:%i:%s') AS shift_out,
+    DATE_FORMAT(shift_schedule.day, '%Y-%m-%d') AS day,
+    shift_schedule.plotted_by,
+    shift_schedule.schedule_type,
+    shift_schedule.is_overtime,
+    CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
+    FROM shift_schedule 
+    LEFT JOIN employee_profile ON shift_schedule.emp_ID = employee_profile.emp_ID
+    WHERE shift_schedule.is_overtime = ?`; // Use a parameterized query
 
     try {
         const [result] = await db.query(sql, [1]);

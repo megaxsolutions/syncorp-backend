@@ -3,7 +3,6 @@ import cors from 'cors';
 
 import db from './config/config.js'; // Import the database connection
 
-
 import employeeRoutes from "./routes/employee_routes.js";
 import mainRoutes from "./routes/main_routes.js";
 import departmentRoutes from "./routes/department_routes.js";
@@ -27,7 +26,7 @@ import bulletinRoutes from "./routes/bulletin_routes.js";
 import shiftscheduleRoutes from "./routes/shift_schedule_routes.js";
 import coachingTypeRoutes from "./routes/coaching_type_routes.js";
 import coachingRoutes from "./routes/coaching_routes.js";
-
+import payslipRoutes from "./routes/payslip_routes.js";
 
 
 import bodyParser from 'body-parser';
@@ -82,9 +81,9 @@ app.use("/main", authenticateToken, mainRoutes);
 app.use("/departments", authenticateToken, departmentRoutes);
 app.use("/sites", authenticateToken, siteRoutes);
 app.use("/clusters", authenticateToken, clusterRoutes);
-app.use("/positions", authenticateToken, positionRoutes);
+app.use("/positions", positionRoutes);
 app.use("/employee_levels", authenticateToken, employeeLevelRoutes);
-app.use("/admin_levels", authenticateToken, adminLevelRoutes);
+app.use("/admin_levels", adminLevelRoutes);
 app.use("/holidays", authenticateToken, holidayRoutes);
 app.use("/cutoffs", authenticateToken, cutOffRoutes);
 app.use("/attendances", authenticateToken, attendanceRoutes);
@@ -95,9 +94,11 @@ app.use("/leave_types", authenticateToken, leaveTypeRoutes);
 app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
 app.use("/overtime_requests", authenticateToken, overtimeRequestRoutes);
 app.use("/bulletins", authenticateToken, bulletinRoutes);
-app.use("/shift_schedules", authenticateToken, shiftscheduleRoutes);
+app.use("/shift_schedules", shiftscheduleRoutes);
 app.use("/coaching_types", authenticateToken, coachingTypeRoutes);
-app.use("/coaching_types", authenticateToken, coachingRoutes);
+app.use("/coaching", authenticateToken, coachingRoutes);
+app.use("/payslips", authenticateToken, payslipRoutes);
+
 
 
 // db.connect(err => {
@@ -116,18 +117,25 @@ async function fetchLatestBulletins() {
 }
 
 
-async function fetchLatestNotifications() {
-  const sql = 'SELECT * FROM logs ORDER BY id DESC LIMIT 50'; // Adjust the order by column as needed
-  const [logs] = await db.query(sql);
-  return logs;
-}
+// io.on("connection", (socket) => {
+//   const userId = computeUserId(socket);
 
+//   socket.join(userId);
+
+//   socket.on("disconnect", async () => {
+//     const sockets = await io.in(userId).fetchSockets();
+//     if (sockets.length === 0) {
+//       // no more active connections for the given user
+//     }
+//   });
+// });
 // Handle WebSocket connections
 io.on('connection', async (socket) => {
   console.log('A user connected');
+  console.log(socket.id);
 
   // Handle incoming messages from clients
-  socket.on('refresh_all_bulletins', async (msg) => {
+  socket.on('send_bulletins', async (msg) => {
     io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
   });
 
@@ -137,11 +145,26 @@ io.on('connection', async (socket) => {
   });
 });
 
+function sendNotification(userId, message) {
+  // Emit notification to a specific user
+  io.to(userId).emit('notification', { message });
+}
 
-setInterval(async () => {
-  io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
-  io.emit('get_all_notifications', await fetchLatestNotifications()); // Broadcast updated bulletins to all clients
-}, 1000); // Adjust the interval as needed
+// Example function to trigger notifications
+function notifyUsers() {
+  const query = 'SELECT socket_id FROM users WHERE condition = true'; // Adjust condition as needed
+  db.query(query, (err, results) => {
+      if (err) throw err;
+      results.forEach(user => {
+          sendNotification(user.socket_id, 'You have a new message!');
+      });
+  });
+}
+
+
+// setInterval(async () => {
+//   io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
+// }, 1000); // Adjust the interval as needed
 
 
 server.listen(port, () => {

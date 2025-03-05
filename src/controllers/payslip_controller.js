@@ -5,9 +5,9 @@ import db from './../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
 
 
-export const get_all_dtr = asyncHandler(async (req, res) => {
+export const get_all_payslip = asyncHandler(async (req, res) => {
     try {
-        const sql  = 'SELECT * FROM dtr'; // Use a parameterized query
+        const sql  = 'SELECT * FROM payslip'; // Use a parameterized query
 
         const [dtr] = await db.query(sql);
 
@@ -17,4 +17,3 @@ export const get_all_dtr = asyncHandler(async (req, res) => {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
-

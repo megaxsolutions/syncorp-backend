@@ -3,10 +3,8 @@ import * as DTRController  from '../controllers/dtr_controller.js'; // Adjust th
 
 import { authenticateToken } from "../middleware/auth.js";
 
-
 const dtrRoutes = Router();
 
 dtrRoutes.get('/get_all_dtr', DTRController.get_all_dtr);
-
 
 export default dtrRoutes;
