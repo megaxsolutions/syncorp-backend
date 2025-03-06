@@ -25,13 +25,13 @@ export const create_coaching = asyncHandler(async (req, res) => {
     const { emp_id, coached_emp_id, coaching_type, metrix_1, metrix_2, metrix_3, metrix_4 } = req.body;
 
     try {
-        const sql = 'INSERT INTO coaching (emp_ID, coached_by, date_coached, coaching_type, metrix_1, metrix_2, metrix_3, metrix_4) VALUES (?)';
+        const sql = 'INSERT INTO coaching (emp_ID, coached_by, date_coached, coaching_type, metrix_1, metrix_2, metrix_3, metrix_4) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
         const [insert_data_coaching_types] = await db.query(sql, [emp_id, coached_emp_id, storeCurrentDate(0, 'hours'), coaching_type, metrix_1, metrix_2, metrix_3, metrix_4]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Coaching successfully created.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to create coaching.' });
+        return res.status(500).json({ error: 'Failed to create coaching.', data: error });
     }
 });
 
