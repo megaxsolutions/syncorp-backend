@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
-import { db } from '../config/config.js'; // Import the database connection
+import { db, io } from '../config/config.js'; // Import the database connection
 
 
 import moment from 'moment-timezone';
@@ -12,6 +12,12 @@ import { dirname, join } from 'path'; // Import dirname
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const uploadsDir = path.join(__dirname, '../../uploads/');
+
+function bulletin_websocket(data_bulletins) {
+    io.on('connection', async (socket) => {
+        io.emit('get_all_bulletins', data_bulletins); // Broadcast the latest bulletins to all clients
+    });
+}
 
 function storeCurrentDateTime(expirationAmount, expirationUnit) {
     // Get the current date and time in Asia/Manila timezone
@@ -32,8 +38,14 @@ export const create_bulletin = asyncHandler(async (req, res) => {
     const filename_insert = filename ? `bulletins/${filename}` : null; 
 
     try {
-        const sql = 'INSERT INTO bulletin (file_name, added_by, datetime_added) VALUES (?, ?, ?)';
+        const sql  = 'INSERT INTO bulletin (file_name, added_by, datetime_added) VALUES (?, ?, ?)';
+        const sql2 = 'SELECT * FROM bulletin ORDER BY id DESC LIMIT 50'; // Adjust the order by column as needed
+
+
         const [insert_data_cluster] = await db.query(sql, [filename_insert, emp_id, storeCurrentDateTime(0, 'hours')]);
+        const [bulletins] = await db.query(sql2);
+
+        bulletin_websocket(bulletins);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Bulletin successfully created.' });

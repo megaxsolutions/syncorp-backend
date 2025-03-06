@@ -242,6 +242,7 @@ export const login_admin = asyncHandler(async (req, res) => {
         }
 
         if(login[0]['password'] == hash) {
+
             // Generate a JWT token
             const token = jwt.sign({ login }, JWT_SECRET, {
                 expiresIn: '7d' // Token expiration time
