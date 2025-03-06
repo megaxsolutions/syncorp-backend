@@ -14,7 +14,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const uploadsDir = path.join(__dirname, '../../uploads/');
 
 function bulletin_websocket(data_bulletins) {
-        io.emit('get_all_bulletins', data_bulletins); // Broadcast the latest bulletins to all clients
+    io.emit('get_all_bulletins', data_bulletins); // Broadcast the latest bulletins to all clients
 }
 
 function storeCurrentDateTime(expirationAmount, expirationUnit) {
