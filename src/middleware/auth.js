@@ -34,14 +34,11 @@ export const authenticateToken = (req, res, next) => {
         if (err) {
             return res.sendStatus(403); // Forbidden
         }    
-        console.log(user.login[0]['emp_ID']);
-        console.log(emp_id);
-
+  
         if(user.login[0]['emp_ID'] != emp_id) {
             return res.sendStatus(401); // Unauthorized
         }
     
-
         req.user = user; // Save user info in request
         next(); // Proceed to the next middleware or route handler
     });

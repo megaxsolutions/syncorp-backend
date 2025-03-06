@@ -1,10 +1,22 @@
-// db.js
-import mysql from 'mysql2/promise'; // Use promise-based version for async/await
+import express from 'express';
+import { Server } from 'socket.io';
+import { createServer } from 'node:http';
 import dotenv from 'dotenv';
-import { parentPort, workerData } from 'worker_threads';
-
+import mysql from 'mysql2/promise';
 
 dotenv.config();
+
+const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: process.env.CLIENT_BASE_URL, // Adjust this to your React app's URL
+        methods: ["GET", "POST"],
+        allowedHeaders: ["my-custom-header"],
+        credentials: true
+    }
+});
+
 
 const db = mysql.createPool({
   host: process.env.DB_HOST,
@@ -34,6 +46,8 @@ checkDatabaseConnection();
 
 
 
+// Export the server and io
+export { server, io, app, db };
 
-// Export the pool for use in your application
-export default db;
+// Optionally, you can also export the app if needed
+export default app;

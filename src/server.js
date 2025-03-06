@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 
-import db from './config/config.js'; // Import the database connection
+import { app, server, io, db } from './config/config.js'; // Import the database connection
 
 import employeeRoutes from "./routes/employee_routes.js";
 import mainRoutes from "./routes/main_routes.js";
@@ -41,27 +41,11 @@ import { fileURLToPath } from 'url'; // Import fileURLToPath
 import { dirname, join } from 'path'; // Import dirname
 
 
-import { Server } from 'socket.io';
-import { createServer } from 'node:http';
-
 dotenv.config();
-
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const port = process.env.PORT;
 
-const app = express();
-const server = createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "http://localhost:5173", // Adjust this to your React app's URL
-        methods: ["GET", "POST"],
-        allowedHeaders: ["my-custom-header"],
-        credentials: true
-    }
-});
-
-  
 
 app.use(express.json());
 app.use(express.text()); 
@@ -81,9 +65,9 @@ app.use("/main", authenticateToken, mainRoutes);
 app.use("/departments", authenticateToken, departmentRoutes);
 app.use("/sites", authenticateToken, siteRoutes);
 app.use("/clusters", authenticateToken, clusterRoutes);
-app.use("/positions", positionRoutes);
+app.use("/positions", authenticateToken, positionRoutes);
 app.use("/employee_levels", authenticateToken, employeeLevelRoutes);
-app.use("/admin_levels", adminLevelRoutes);
+app.use("/admin_levels", authenticateToken, adminLevelRoutes);
 app.use("/holidays", authenticateToken, holidayRoutes);
 app.use("/cutoffs", authenticateToken, cutOffRoutes);
 app.use("/attendances", authenticateToken, attendanceRoutes);
@@ -94,20 +78,10 @@ app.use("/leave_types", authenticateToken, leaveTypeRoutes);
 app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
 app.use("/overtime_requests", authenticateToken, overtimeRequestRoutes);
 app.use("/bulletins", authenticateToken, bulletinRoutes);
-app.use("/shift_schedules", shiftscheduleRoutes);
+app.use("/shift_schedules", authenticateToken, shiftscheduleRoutes);
 app.use("/coaching_types", authenticateToken, coachingTypeRoutes);
 app.use("/coaching", authenticateToken, coachingRoutes);
 app.use("/payslips", authenticateToken, payslipRoutes);
-
-
-
-// db.connect(err => {
-//     if (err) {
-//         console.error('Database connection failed:', err);
-//         return;
-//     }
-//     console.log('Connected to MySQL database.');
-// });
 
 
 async function fetchLatestBulletins() {
@@ -134,7 +108,7 @@ io.on('connection', async (socket) => {
   console.log('A user connected');
   console.log(socket.id);
 
-  // Handle incoming messages from clients
+  // // Handle incoming messages from clients
   socket.on('send_bulletins', async (msg) => {
     io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
   });
@@ -145,21 +119,21 @@ io.on('connection', async (socket) => {
   });
 });
 
-function sendNotification(userId, message) {
-  // Emit notification to a specific user
-  io.to(userId).emit('notification', { message });
-}
+// function sendNotification(userId, message) {
+//   // Emit notification to a specific user
+//   io.to(userId).emit('notification', { message });
+// }
 
 // Example function to trigger notifications
-function notifyUsers() {
-  const query = 'SELECT socket_id FROM users WHERE condition = true'; // Adjust condition as needed
-  db.query(query, (err, results) => {
-      if (err) throw err;
-      results.forEach(user => {
-          sendNotification(user.socket_id, 'You have a new message!');
-      });
-  });
-}
+// function notifyUsers() {
+//   const query = 'SELECT socket_id FROM users WHERE condition = true'; // Adjust condition as needed
+//   db.query(query, (err, results) => {
+//       if (err) throw err;
+//       results.forEach(user => {
+//           sendNotification(user.socket_id, 'You have a new message!');
+//       });
+//   });
+// }
 
 
 // setInterval(async () => {
