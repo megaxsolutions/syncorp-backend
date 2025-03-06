@@ -107,7 +107,7 @@ async function fetchLatestBulletins() {
 io.on('connection', async (socket) => {
   console.log('A user connected');
   console.log(socket.id);
-
+  
   io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
 
   // // Handle incoming messages from clients
@@ -138,9 +138,9 @@ io.on('connection', async (socket) => {
 // }
 
 
-// setInterval(async () => {
-//   io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
-// }, 1000); // Adjust the interval as needed
+setInterval(async () => {
+  io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
+}, 1000); // Adjust the interval as needed
 
 
 server.listen(port, () => {
