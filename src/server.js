@@ -41,10 +41,16 @@ import { fileURLToPath } from 'url'; // Import fileURLToPath
 import { dirname, join } from 'path'; // Import dirname
 
 
+
 dotenv.config();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const port = process.env.PORT;
+
+
+// import { WebSocketServer } from 'ws'; // Use import syntax
+
+// const wss = new WebSocketServer({ port: 8001 });
 
 
 app.use(express.json());
@@ -61,7 +67,7 @@ app.use("/admins", adminRoutes);
 app.use("/employees", employeeRoutes);
 app.use("/recovery", recoveryRoutes);
 
-app.use("/main", mainRoutes);
+app.use("/main", authenticateToken, mainRoutes);
 app.use("/departments", authenticateToken, departmentRoutes);
 app.use("/sites", authenticateToken, siteRoutes);
 app.use("/clusters", authenticateToken, clusterRoutes);
@@ -79,16 +85,42 @@ app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
 app.use("/overtime_requests", authenticateToken, overtimeRequestRoutes);
 app.use("/bulletins", authenticateToken, bulletinRoutes);
 app.use("/shift_schedules", authenticateToken, shiftscheduleRoutes);
-app.use("/coaching_types", coachingTypeRoutes);
+app.use("/coaching_types", authenticateToken, coachingTypeRoutes);
 app.use("/coaching", coachingRoutes);
 app.use("/payslips", authenticateToken, payslipRoutes);
 
 
 async function fetchLatestBulletins() {
-  const sql = 'SELECT * FROM bulletin ORDER BY id DESC LIMIT 50'; // Adjust the order by column as needed
+  const sql  = 'SELECT * FROM bulletin ORDER BY id DESC LIMIT 50'; // Adjust the order by column as needed
   const [bulletins] = await db.query(sql);
   return bulletins;
 }
+
+
+
+io.on('connection', async (socket) => {
+  console.log('A user connected');
+  console.log('SOCKET ID: '+ socket.id);
+  
+  //io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
+
+
+  socket.on('disconnect', () => {
+      console.log('User  disconnected');
+  });
+});
+
+// Handle connection events
+// wss.on('connection', (ws) => {
+//   console.log('Client connected');
+
+//   ws.send(JSON.stringify(fetchLatestBulletins));
+
+//   // Handle client disconnection
+//   ws.on('close', () => {
+//       console.log('Client disconnected');
+//   });
+// });
 
 
 // io.on("connection", (socket) => {
@@ -104,11 +136,11 @@ async function fetchLatestBulletins() {
 //   });
 // });
 // Handle WebSocket connections
-io.on('connection', async (socket) => {
-  console.log('A user connected');
-  console.log(socket.id);
+// io.on('connection', async (socket) => {
+//   console.log('A user connected');
+//   console.log(socket.id);
   
-  io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
+//   io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
 
   // // Handle incoming messages from clients
   //socket.on('send_bulletins', async (msg) => {
@@ -116,10 +148,10 @@ io.on('connection', async (socket) => {
   //});
 
   // Handle disconnection
-  socket.on('disconnect', () => {
-      console.log('User  disconnected');
-  });
-});
+//   socket.on('disconnect', () => {
+//       console.log('User  disconnected');
+//   });
+// });
 
 // function sendNotification(userId, message) {
 //   // Emit notification to a specific user
@@ -138,11 +170,13 @@ io.on('connection', async (socket) => {
 // }
 
 
-setInterval(async () => {
-  io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
-}, 1000); // Adjust the interval as needed
+// setInterval(async () => {
+//   io.emit('get_all_bulletins', await fetchLatestBulletins()); // Broadcast the latest bulletins to all clients
+// }, 1000); // Adjust the interval as needed
 
 
 server.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
+
+
