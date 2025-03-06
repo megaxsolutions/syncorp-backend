@@ -7,15 +7,15 @@ logs
 npm-debug.log*
 
 # Environment variables
-.env
+#.env
 
 # Build output
-dist
-build
+#dist
+#build
 
 # Temporary files
-tmp
-temp
+#tmp
+#temp
 
 # IDE specific files
 .vscode/

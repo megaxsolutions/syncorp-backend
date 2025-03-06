@@ -61,6 +61,7 @@ export const get_all_user_break = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
+
         const sql  = `SELECT id,
         emp_ID,
         DATE_FORMAT(breakIN, '%Y-%m-%d %H:%i:%s') AS breakIN,  
