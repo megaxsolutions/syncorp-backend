@@ -10,14 +10,14 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: '*', // Adjust this to your React app's URL
+        origin: [process.env.CLIENT_BASE_URL, 'http://localhost:5173'], // Adjust this to your React app's URL
         methods: ["GET", "POST"],
         allowedHeaders: ["my-custom-header"],
         credentials: true
     }
 });
 
-//process.env.CLIENT_BASE_URL
+
 const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
