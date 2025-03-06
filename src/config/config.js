@@ -10,13 +10,14 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: [process.env.CLIENT_BASE_URL, 'http://localhost:5173', 'https://test-bulletin-one.vercel.app'], // Adjust this to your React app's URL
+        origin: 'https://test-bulletin-one.vercel.app', // Adjust this to your React app's URL
         methods: ["GET", "POST"],
         allowedHeaders: ["my-custom-header"],
         credentials: true
     }
 });
 
+     //   origin: [process.env.CLIENT_BASE_URL, 'http://localhost:5173', 'https://test-bulletin-one.vercel.app'], // Adjust this to your React app's URL
 
 const db = mysql.createPool({
   host: process.env.DB_HOST,
