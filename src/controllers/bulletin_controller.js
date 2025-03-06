@@ -14,9 +14,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const uploadsDir = path.join(__dirname, '../../uploads/');
 
 function bulletin_websocket(data_bulletins) {
-    io.on('connection', async (socket) => {
-        io.emit('get_all_bulletins', data_bulletins); // Broadcast the latest bulletins to all clients
-    });
+    io.emit('get_all_bulletins', data_bulletins); // Broadcast the latest bulletins to all clients
 }
 
 function storeCurrentDateTime(expirationAmount, expirationUnit) {
@@ -43,9 +41,9 @@ export const create_bulletin = asyncHandler(async (req, res) => {
 
 
         const [insert_data_cluster] = await db.query(sql, [filename_insert, emp_id, storeCurrentDateTime(0, 'hours')]);
-        const [bulletins] = await db.query(sql2);
+        const [data_bulletins] = await db.query(sql2);
 
-        bulletin_websocket(bulletins);
+        bulletin_websocket(data_bulletins);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Bulletin successfully created.' });
@@ -63,6 +61,8 @@ export const update_bulletin = asyncHandler(async (req, res) => {
     try {
         const sql  = 'SELECT * FROM bulletin WHERE added_by = ? AND id = ?'; // Use a parameterized query
         const sql2 = 'UPDATE bulletin SET file_name = ? WHERE id = ?';
+        const sql3 = 'SELECT * FROM bulletin ORDER BY id DESC LIMIT 50'; // Adjust the order by column as needed
+
 
         const [bulletin] = await db.query(sql, [emp_id, bulletin_id]);
 
@@ -85,6 +85,8 @@ export const update_bulletin = asyncHandler(async (req, res) => {
                 }
             });
         }
+        const [data_bulletins] = await db.query(sql3);
+        bulletin_websocket(data_bulletins);
 
         return res.status(200).json({ success: 'Bulletin successfully updated.' });
     } catch (error) {
@@ -98,6 +100,8 @@ export const delete_bulletin = asyncHandler(async (req, res) => {
     try {
         const sql  = 'SELECT * FROM bulletin WHERE id = ?'; // Use a parameterized query
         const sql2 = 'DELETE FROM bulletin WHERE id = ?';
+        const sql3 = 'SELECT * FROM bulletin ORDER BY id DESC LIMIT 50'; // Adjust the order by column as needed
+
 
         const [bulletin] = await db.query(sql, [bulletin_id]);
         const [result] = await db.query(sql2, [bulletin_id]);
@@ -113,6 +117,10 @@ export const delete_bulletin = asyncHandler(async (req, res) => {
                 console.error('Error deleting file:', err);
             }
         });
+
+        const [data_bulletins] = await db.query(sql3);
+
+        bulletin_websocket(data_bulletins);
 
         return res.status(200).json({ success: 'Bulletin successfully deleted.' });
     } catch (error) {
