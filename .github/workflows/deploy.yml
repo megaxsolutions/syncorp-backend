@@ -25,7 +25,11 @@ jobs:
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@13.229.75.55 << 'EOF'
             cd /home/ubuntu/sync-backend/syncorp-backend
             git clean -fd
+            git add .
+            git commit -m "update"
+            git pull --rebase
             git pull origin main
+            
             npm install
             pm2 restart all
           EOF
