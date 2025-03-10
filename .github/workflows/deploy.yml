@@ -24,6 +24,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@13.229.75.55 << 'EOF'
             cd /home/ubuntu/sync-backend/syncorp-backend
+            git clean -fd
             git pull origin main
             npm install
             pm2 restart all
