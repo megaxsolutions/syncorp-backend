@@ -27,6 +27,7 @@ import shiftscheduleRoutes from "./routes/shift_schedule_routes.js";
 import coachingTypeRoutes from "./routes/coaching_type_routes.js";
 import coachingRoutes from "./routes/coaching_routes.js";
 import payslipRoutes from "./routes/payslip_routes.js";
+import logRoutes from "./routes/log_routes.js";
 
 
 import bodyParser from 'body-parser';
@@ -70,7 +71,7 @@ app.use("/recovery", recoveryRoutes);
 app.use("/main", authenticateToken, mainRoutes);
 app.use("/departments", authenticateToken, departmentRoutes);
 app.use("/sites", authenticateToken, siteRoutes);
-app.use("/clusters", authenticateToken, clusterRoutes);
+app.use("/clusters", clusterRoutes);
 app.use("/positions", authenticateToken, positionRoutes);
 app.use("/employee_levels", authenticateToken, employeeLevelRoutes);
 app.use("/admin_levels", authenticateToken, adminLevelRoutes);
@@ -88,6 +89,8 @@ app.use("/shift_schedules", authenticateToken, shiftscheduleRoutes);
 app.use("/coaching_types", authenticateToken, coachingTypeRoutes);
 app.use("/coaching", coachingRoutes);
 app.use("/payslips", authenticateToken, payslipRoutes);
+app.use("/logs", authenticateToken, logRoutes);
+
 
 
 async function fetchLatestBulletins() {

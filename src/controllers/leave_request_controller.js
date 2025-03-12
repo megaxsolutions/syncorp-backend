@@ -85,8 +85,23 @@ export const update_approval_leave_request = asyncHandler(async (req, res) => {
     const { leave_request_id } = req.params; // Assuming leave_request_id is passed as a URL parameter
 
     try {
-        const sql = 'UPDATE leave_request SET approved_by = ?, date_approved = ? WHERE id = ?';
-        const [update_data_leave_request] = await db.query(sql, [emp_id_approved_by, storeCurrentDate(0, 'hours'), leave_request_id]);
+        const sql = 'UPDATE leave_request SET approved_by = ?, date_approved = ?, status = ? WHERE id = ?';
+        const [update_data_leave_request] = await db.query(sql, [emp_id_approved_by, storeCurrentDate(0, 'hours'), 'approved', leave_request_id]);
+      
+        return res.status(200).json({ success: 'Leave request successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update leave request.' });
+    }
+});
+
+
+export const update_approval_leave_request_admin = asyncHandler(async (req, res) => {
+    const { emp_id_approved_by } = req.body;
+    const { leave_request_id } = req.params; // Assuming leave_request_id is passed as a URL parameter
+
+    try {
+        const sql = 'UPDATE leave_request SET approved_by2 = ?, date_approved_by2 = ?, status2 = ? WHERE id = ?';
+        const [update_data_leave_request] = await db.query(sql, [emp_id_approved_by, storeCurrentDate(0, 'hours'), 'approved', leave_request_id]);
       
         return res.status(200).json({ success: 'Leave request successfully updated.' });
     } catch (error) {
@@ -100,6 +115,21 @@ export const update_status_leave_request = asyncHandler(async (req, res) => {
 
     try {
         const sql = 'UPDATE leave_request SET status = ? WHERE id = ?';
+        const [update_data_leave_request] = await db.query(sql, [status, leave_request_id]);
+      
+        return res.status(200).json({ success: 'Leave request successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update leave request.' });
+    }
+});
+
+
+export const update_status_leave_request_admin = asyncHandler(async (req, res) => {
+    const { status } = req.body;
+    const { leave_request_id } = req.params; // Assuming leave_request_id is passed as a URL parameter
+
+    try {
+        const sql = 'UPDATE leave_request SET status2 = ? WHERE id = ?';
         const [update_data_leave_request] = await db.query(sql, [status, leave_request_id]);
       
         return res.status(200).json({ success: 'Leave request successfully updated.' });

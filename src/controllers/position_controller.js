@@ -85,7 +85,7 @@ export const delete_position = asyncHandler(async (req, res) => {
     const { position_id } = req.params; // Assuming position_id is passed as a URL parameter
 
     try {
-        const sql = 'SELECT * FROM employee_profile_standing WHERE positionID = ?'; // Use a parameterized query
+        const sql  = 'SELECT * FROM employee_profile_standing WHERE positionID = ?'; // Use a parameterized query
         const sql2 = 'DELETE FROM positions WHERE id = ?';
 
         const [data_employee_profile_standing] = await db.query(sql, [position_id]);

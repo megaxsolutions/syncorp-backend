@@ -32,8 +32,7 @@ export const create_admin_level = asyncHandler(async (req, res) => {
 
         const [insert_data_site] = await db.query(sql, [admin_level]);
         const [data_admin_login] = await db.query(sql2, [JSON.stringify(1)]);
-   
-
+      
         const insert_logs_admin_level = await Promise.all(
             data_admin_login.map(async (admin_login) => {
                 await db.query(sql3, ['New admin level added: ' + admin_level, storeCurrentDateTime(0, 'hours'), 1, admin_login.emp_ID, 0]);
@@ -87,22 +86,36 @@ export const delete_admin_level = asyncHandler(async (req, res) => {
     const { admin_level_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
-        const sql  = 'SELECT * FROM admin_login WHERE user_level = ?'; // Use a parameterized query
-        const sql2 = 'DELETE FROM admin_level WHERE id = ?';
+        const sql  = 'SELECT * FROM admin_level WHERE id = ?';
+        const sql2 = 'SELECT * FROM admin_login WHERE JSON_CONTAINS(user_level, ?)';
+        const sql3 = 'INSERT INTO logs (details, datetime, user_level, emp_ID, is_read) VALUES (?, ?, ?, ?, ?)';
+        const sql4 = 'SELECT * FROM admin_login WHERE user_level = ?'; // Use a parameterized query
+        const sql5 = 'DELETE FROM admin_level WHERE id = ?';
+
+        const [data_admin_level] = await db.query(sql, [admin_level_id]);
+        const [select_data_admin_login] = await db.query(sql2, [JSON.stringify(1)]);
+
+        if (data_admin_level.length === 0) {
+            return res.status(404).json({ error: 'Admin level not found.' });
+        }
 
 
-        const [data_admin_login] = await db.query(sql, [admin_level_id]);
+
+        const [data_admin_login] = await db.query(sql4, [admin_level_id]);
 
         if(data_admin_login.length >= 1) {
             return res.status(400).json({ error: `Cannot be deleted ${data_admin_login.length == 1 ? `${ data_admin_login.length } row has` : `${ data_admin_login.length } rows have` } been affected.` });
         }
 
-        if(data_admin_login.length == 0) {
-            const [result] = await db.query(sql2, [admin_level_id]);
+        const insert_logs_admin_level = await Promise.all(
+            select_data_admin_login.map(async (admin_login) => {
+                await db.query(sql3, ['Admin level has been deleted: ' + data_admin_level[0]['level'], storeCurrentDateTime(0, 'hours'), 1, admin_login.emp_ID, 0]);
+                return admin_login.emp_ID;
+            })
+        );
 
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ error: 'Admin level not found.' });
-            }
+        if(data_admin_login.length == 0) {
+            const [result] = await db.query(sql5, [admin_level_id]);
 
             return res.status(200).json({ success: 'Admin level successfully deleted.' });
         }
