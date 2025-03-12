@@ -47,12 +47,12 @@ export const update_user_overtime_request = asyncHandler(async (req, res) => {
 });
 
 export const update_approval_overtime_request = asyncHandler(async (req, res) => {
-    const { emp_id_approved_by } = req.body;
+    const { emp_id_approved_by, status } = req.body;
     const { overtime_request_id } = req.params; // Assuming overtime_request_id is passed as a URL parameter
 
     try {
         const sql = 'UPDATE overtime_request SET approved_by = ?, date_approved = ?, status = ? WHERE id = ?';
-        const [update_data_overtime_request] = await db.query(sql, [emp_id_approved_by, storeCurrentDate(0, 'hours'), 'approved', overtime_request_id]);
+        const [update_data_overtime_request] = await db.query(sql, [emp_id_approved_by, storeCurrentDate(0, 'hours'), status, overtime_request_id]);
       
         return res.status(200).json({ success: 'Overtime request successfully updated.' });
     } catch (error) {
@@ -61,12 +61,12 @@ export const update_approval_overtime_request = asyncHandler(async (req, res) =>
 });
 
 export const update_approval_overtime_request_admin = asyncHandler(async (req, res) => {
-    const { emp_id_approved_by } = req.body;
+    const { emp_id_approved_by, status } = req.body;
     const { overtime_request_id } = req.params; // Assuming overtime_request_id is passed as a URL parameter
 
     try {
         const sql = 'UPDATE overtime_request SET approved_by2 = ?, date_approved_by2 = ?, status2 = ? WHERE id = ?';
-        const [update_data_overtime_request] = await db.query(sql, [emp_id_approved_by, storeCurrentDate(0, 'hours'), 'approved', overtime_request_id]);
+        const [update_data_overtime_request] = await db.query(sql, [emp_id_approved_by, storeCurrentDate(0, 'hours'), status, overtime_request_id]);
       
         return res.status(200).json({ success: 'Overtime request successfully updated.' });
     } catch (error) {
@@ -74,33 +74,7 @@ export const update_approval_overtime_request_admin = asyncHandler(async (req, r
     }
 });
 
-export const update_status_overtime_request = asyncHandler(async (req, res) => {
-    const { status } = req.body;
-    const { overtime_request_id } = req.params; // Assuming overtime_request_id is passed as a URL parameter
 
-    try {
-        const sql = 'UPDATE overtime_request SET status = ? WHERE id = ?';
-        const [update_data_overtime_request] = await db.query(sql, [status, overtime_request_id]);
-      
-        return res.status(200).json({ success: 'Overtime request successfully updated.' });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to update overtime request.' });
-    }
-});
-
-export const update_status_overtime_request_admin = asyncHandler(async (req, res) => {
-    const { status } = req.body;
-    const { overtime_request_id } = req.params; // Assuming overtime_request_id is passed as a URL parameter
-
-    try {
-        const sql = 'UPDATE overtime_request SET status2 = ? WHERE id = ?';
-        const [update_data_overtime_request] = await db.query(sql, [status, overtime_request_id]);
-      
-        return res.status(200).json({ success: 'Overtime request successfully updated.' });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to update overtime request.' });
-    }
-});
 
 export const get_all_user_overtime_request = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
