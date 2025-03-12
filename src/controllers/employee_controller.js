@@ -230,34 +230,45 @@ export const update_employee_expiration = asyncHandler(async (req, res) => {
 });
 
 export const update_employee_login = asyncHandler(async (req, res) => {
-    const { login_attempts, password } = req.body;
+    const { password } = req.body;
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
         const hash_password = hashConverterMD5(password);
+        const sql2 = 'UPDATE login SET password = ? WHERE emp_ID = ?';
 
-        const sql  = 'UPDATE login SET login_attempts = ? WHERE emp_ID = ?';
-        const sql2 = 'UPDATE login SET login_attempts = ?, password = ? WHERE emp_ID = ?';
-
-
-        if(!password) {
-            const [update_login_no_password] = await db.query(sql, [login_attempts, emp_id]);
-            if (update_login_no_password.affectedRows === 0) {
-                return res.status(404).json({ error: 'Employee not found.' });
-            }
-        } else {
-            const [update_login_password] = await db.query(sql2, [login_attempts, hash_password, emp_id]);
+        const [update_login_password] = await db.query(sql2, [hash_password, emp_id]);
             
-            if (update_login_password.affectedRows === 0) {
-                return res.status(404).json({ error: 'Employee not found.' });
-            }
+        if (update_login_password.affectedRows === 0) {
+            return res.status(404).json({ error: 'Employee not found.' });
         }
+    
 
         return res.status(200).json({ success: 'Employee successfully updated.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to update employee.' });
     }
 });
+
+
+export const update_employee_login_attempts = asyncHandler(async (req, res) => {
+    const { login_attempts } = req.body;
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+
+    try {
+        const sql  = 'UPDATE login SET login_attempts = ? WHERE emp_ID = ?';
+
+        const [update_login_no_password] = await db.query(sql, [login_attempts, emp_id]);
+        if (update_login_no_password.affectedRows === 0) {
+                return res.status(404).json({ error: 'Employee not found.' });
+        }
+   
+        return res.status(200).json({ success: 'Employee successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update employee.' });
+    }
+});
+
 
 
 
