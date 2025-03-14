@@ -10,7 +10,7 @@ export const get_all_user_log = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
     
     try {
-        const sql  = 'SELECT * FROM log WHERE emp_ID = ? ORDER BY id DESC'; // Use a parameterized query
+        const sql  = 'SELECT * FROM logs WHERE emp_ID = ? ORDER BY id DESC'; // Use a parameterized query
 
         const [log] = await db.query(sql, [emp_id]);
 
@@ -28,7 +28,7 @@ export const read_user_specific_log = asyncHandler(async (req, res) => {
     const { emp_id, log_id } = req.params; // Assuming department_id is passed as a URL parameter
     
     try {
-        const sql = 'UPDATE log SET is_read = ? WHERE id = ? AND emp_ID = ?';
+        const sql = 'UPDATE logs SET is_read = ? WHERE id = ? AND emp_ID = ?';
 
         const [log] = await db.query(sql, [1, log_id, emp_id]);
 
@@ -44,7 +44,7 @@ export const read_user_all_log = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
-        const sql = 'UPDATE log SET is_read = ? WHERE emp_ID = ?';
+        const sql = 'UPDATE logs SET is_read = ? WHERE emp_ID = ?';
 
         const [log] = await db.query(sql, [1, emp_id]);
 
