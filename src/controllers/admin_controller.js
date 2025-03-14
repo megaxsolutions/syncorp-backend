@@ -100,6 +100,8 @@ export const remove_user_level_admin = asyncHandler(async (req, res) => {
     try {
         const sql   = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
         const sql2  = 'UPDATE admin_login SET user_level = ? WHERE emp_ID = ?';
+        const sql3  = 'UPDATE admin_login SET user_level = ?, bucket = NULL WHERE emp_ID = ?';
+
 
         const [user] = await db.query(sql, [emp_id]);
 
@@ -116,7 +118,11 @@ export const remove_user_level_admin = asyncHandler(async (req, res) => {
                 return res.status(404).send('No record found');
             } 
            
-            const [update_data_admin_login] = await db.query(sql2, [updatedArrayString, emp_id]);    
+            const [update_data_admin_login] = await db.query(sql2, [updatedArrayString, emp_id]);  
+            
+            if(user_level == 2) {
+                const [update_data_admin_login_bucket] = await db.query(sql3, [updatedArrayString, emp_id]);  
+            }
 
             return res.status(200).json({ success: 'User level successfully updated.' });
         }

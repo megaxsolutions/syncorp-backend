@@ -85,21 +85,34 @@ export const delete_position = asyncHandler(async (req, res) => {
     const { position_id } = req.params; // Assuming position_id is passed as a URL parameter
 
     try {
-        const sql  = 'SELECT * FROM employee_profile_standing WHERE positionID = ?'; // Use a parameterized query
-        const sql2 = 'DELETE FROM positions WHERE id = ?';
+        const sql  = 'SELECT * FROM positions WHERE id = ?';
+        const sql2 = 'SELECT * FROM admin_login WHERE JSON_CONTAINS(user_level, ?)';
+        const sql3 = 'INSERT INTO logs (details, datetime, user_level, emp_ID, is_read) VALUES (?, ?, ?, ?, ?)';
+        const sql4 = 'SELECT * FROM employee_profile_standing WHERE positionID = ?'; // Use a parameterized query
+        const sql5 = 'DELETE FROM positions WHERE id = ?';
 
-        const [data_employee_profile_standing] = await db.query(sql, [position_id]);
+        const [data_position] = await db.query(sql, [position_id]);
+        const [data_admin_login] = await db.query(sql2, [JSON.stringify(1)]);
+
+        if (data_position.length === 0) {
+            return res.status(404).json({ error: 'Position not found.' });
+        }
+
+        const [data_employee_profile_standing] = await db.query(sql4, [position_id]);
 
         if(data_employee_profile_standing.length >= 1) {
             return res.status(400).json({ error: `Cannot be deleted ${data_employee_profile_standing.length == 1 ? `${ data_employee_profile_standing.length } row has` : `${ data_employee_profile_standing.length } rows have` } been affected.` });
         }
 
-        if(data_employee_profile_standing.length == 0) {
-            const [result] = await db.query(sql2, [position_id]);
+        const insert_logs_admin_level = await Promise.all(
+            data_admin_login.map(async (admin_login) => {
+                await db.query(sql3, ['Position has been deleted: ' + data_position[0]['position'], storeCurrentDateTime(0, 'hours'), 1, admin_login.emp_ID, 0]);
+                return admin_login.emp_ID;
+            })
+        );
 
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ error: 'Position not found.' });
-            }
+        if(data_employee_profile_standing.length == 0) {
+            const [result] = await db.query(sql5, [position_id]);
 
             return res.status(200).json({ success: 'Position successfully deleted.' });
         }

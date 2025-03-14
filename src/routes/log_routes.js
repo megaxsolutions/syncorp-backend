@@ -6,6 +6,7 @@ import { authenticateToken } from "../middleware/auth.js";
 const logRoutes = Router();
 
 logRoutes.get('/get_all_user_log/:emp_id', LogController.get_all_user_log);
+logRoutes.put('/read_user_specific_log/:emp_id/:log_id', LogController.read_user_specific_log);
+logRoutes.put('/read_user_all_log/:emp_id', LogController.read_user_all_log);
 
- 
 export default logRoutes;

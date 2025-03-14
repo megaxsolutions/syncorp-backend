@@ -323,6 +323,50 @@ export const update_employee = asyncHandler(async (req, res) => {
 });
 
 
+export const get_all_employee_supervisor = asyncHandler(async (req, res) => {
+    const { supervisor_emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter
+
+    try {
+        const sql = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+
+        const [data_admin_login] = await db.query(sql, [supervisor_emp_id]);
+
+        if (data_admin_login.length === 0) {
+            return res.status(404).json({ error: 'Supervisor not found.' });
+        }
+
+        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
+        const placeholders = bucketArray.map(() => '?').join(', ');
+
+
+        const sql2 = `SELECT login.emp_ID, login.password, login.login_attempts, 
+        DATE_FORMAT(login.expiry_date, '%Y-%m-%d') AS expiry_date,
+        employee_profile.fName, employee_profile.mName, employee_profile.lName, 
+        DATE_FORMAT(employee_profile.bDate, '%Y-%m-%d') AS bDate,
+        DATE_FORMAT(employee_profile.date_hired, '%Y-%m-%d') AS date_hired,
+        employee_profile.departmentID, employee_profile.clusterID,
+        employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
+        employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
+        employee_profile.employee_level, employee_profile.photo,
+        employee_profile_benefits.sss, employee_profile_benefits.pagibig,
+        employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
+        employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
+        employee_profile_standing.datetime_updated, employee_profile_standing.positionID
+        FROM login LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
+        LEFT JOIN employee_profile_benefits ON login.emp_ID = employee_profile_benefits.emp_ID 
+        LEFT JOIN employee_profile_standing ON login.emp_ID = employee_profile_standing.emp_ID
+        WHERE employee_profile.clusterID IN (${placeholders})
+        `;
+
+        const [users] = await db.query(sql2, bucketArray);
+
+        return res.status(200).json({ data: users });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all user.' });
+    }
+});
+
+
 export const get_all_employee = asyncHandler(async (req, res) => {
     try {
 
@@ -347,11 +391,6 @@ export const get_all_employee = asyncHandler(async (req, res) => {
        // const sql2 = 'INSERT INTO clock_state (emp_ID, state) VALUES (?, ?)';
        
         const [users] = await db.query(sql);
-
-        // for (const user of users) {
-        //     const [insert_data_clock_state] = await db.promise().query(sql2, [`${user.emp_ID}`, 0]);
-        //     // You can process insert_data_clock_state here if needed
-        // }
 
         return res.status(200).json({ data: users });
     } catch (error) {

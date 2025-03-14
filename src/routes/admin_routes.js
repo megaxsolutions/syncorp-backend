@@ -43,7 +43,7 @@ adminRoutes.post('/login_admin', AdminController.login_admin);
 adminRoutes.put('/update_admin_expiration/:emp_id', authenticateToken, AdminController.update_admin_expiration);
 adminRoutes.put('/update_admin_login/:emp_id', authenticateToken, AdminController.update_admin_login);
 adminRoutes.put('/update_admin/:emp_id', authenticateToken, upload.single('file_uploaded'), AdminController.update_admin);
-adminRoutes.post('/add_admin', AdminController.create_admin);
+adminRoutes.post('/add_admin', authenticateToken, AdminController.create_admin);
 adminRoutes.get('/get_all_admin', authenticateToken, AdminController.get_all_admin);
 adminRoutes.delete('/delete_admin/:admin_emp_id', authenticateToken, AdminController.delete_admin);
 adminRoutes.get('/remove_user_level_admin/:emp_id/:user_level', authenticateToken, AdminController.remove_user_level_admin);
