@@ -89,7 +89,7 @@ app.use("/overtime_requests", authenticateToken, overtimeRequestRoutes);
 app.use("/bulletins", authenticateToken, bulletinRoutes);
 app.use("/shift_schedules", authenticateToken, shiftscheduleRoutes);
 app.use("/coaching_types", authenticateToken, coachingTypeRoutes);
-app.use("/coaching", authenticateToken, coachingRoutes);
+app.use("/coaching", coachingRoutes);
 app.use("/payslips", authenticateToken, payslipRoutes);
 app.use("/logs", authenticateToken, logRoutes);
 app.use("/bonus", authenticateToken, bonusRoutes);

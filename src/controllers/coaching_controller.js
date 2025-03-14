@@ -31,7 +31,8 @@ export const create_coaching = asyncHandler(async (req, res) => {
         // Return the merged results in the response
         return res.status(200).json({ success: 'Coaching successfully created.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to create coaching.', data: error });
+        return res.status(500).json({ data: error });
+        //return res.status(500).json({ error: 'Failed to create coaching.', data: error });
     }
 });
 
@@ -84,7 +85,6 @@ export const get_all_coaching = asyncHandler(async (req, res) => {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
-
 
 export const get_all_coaching_supervisor = asyncHandler(async (req, res) => {
     const { supervisor_emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter

@@ -36,7 +36,7 @@ const upload = multer({ storage: storage });
 
 const adminRoutes = Router();
 
-
+//data
 adminRoutes.post('/login_admin', AdminController.login_admin);
 
 
