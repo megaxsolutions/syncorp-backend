@@ -95,6 +95,45 @@ export const get_all_user_overtime_request = asyncHandler(async (req, res) => {
     }
 });
 
+export const get_all_overtime_request_supervisor = asyncHandler(async (req, res) => {
+    const { supervisor_emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter
+    try {
+
+        const sql = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+
+        const [data_admin_login] = await db.query(sql, [supervisor_emp_id]);
+
+        if (data_admin_login.length === 0) {
+            return res.status(404).json({ error: 'Supervisor not found.' });
+        }
+
+        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
+        const placeholders = bucketArray.map(() => '?').join(', ');
+    
+        const sql2 = `SELECT 
+            overtime_request.id,
+            DATE_FORMAT(overtime_request.date, '%Y-%m-%d') AS date, 
+            overtime_request.hrs, overtime_request.ot_type, overtime_request.emp_ID, overtime_request.approved_by, 
+            DATE_FORMAT(overtime_request.date_approved, '%Y-%m-%d') AS date_approved, 
+            overtime_request.status, overtime_request.status2, 
+            overtime_request.date_approved_by2, overtime_request.approved_by2,
+            employee_profile.clusterID
+            FROM overtime_request 
+            LEFT JOIN employee_profile ON overtime_request.emp_ID = employee_profile.emp_ID
+            WHERE employee_profile.clusterID IN (${placeholders})
+            ORDER BY id DESC`;
+
+        const [overtime_request] = await db.query(sql2, bucketArray);
+
+
+
+        return res.status(200).json({ data: overtime_request });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+
 export const get_all_overtime_request = asyncHandler(async (req, res) => {
     try {
         const sql = `SELECT 
@@ -102,7 +141,8 @@ export const get_all_overtime_request = asyncHandler(async (req, res) => {
             DATE_FORMAT(date, '%Y-%m-%d') AS date, 
             hrs, ot_type, emp_ID, approved_by, 
             DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved, 
-            status FROM overtime_request`; // Use a parameterized query
+            status, status2, date_approved_by2, leave_request.approved_by2
+            FROM overtime_request`; // Use a parameterized query
 
         const [overtime_request] = await db.query(sql);
 

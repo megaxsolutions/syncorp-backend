@@ -112,17 +112,55 @@ export const update_approval_leave_request_admin = asyncHandler(async (req, res)
 
 
 export const get_all_leave_request = asyncHandler(async (req, res) => {
-    const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
-
     try {
         const sql = `SELECT id,
             DATE_FORMAT(date, '%Y-%m-%d') AS date, 
             leave_type, emp_ID, approved_by, 
             DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved,
-            status, details, file_uploaded
+            status, details, file_uploaded,
+            status2, date_approved_by2, approved_by2
             FROM leave_request ORDER BY id DESC`; // Use a parameterized query
 
-        const [leave_request] = await db.query(sql, [emp_id]);
+        const [leave_request] = await db.query(sql);
+
+        return res.status(200).json({ data: leave_request });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+
+
+
+export const get_all_leave_request_supervisor = asyncHandler(async (req, res) => {
+    const { supervisor_emp_id  } = req.params; // Assuming emp_id is passed as a URL parameter
+
+    try {
+        const sql = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+
+        const [data_admin_login] = await db.query(sql, [supervisor_emp_id]);
+
+        if (data_admin_login.length === 0) {
+            return res.status(404).json({ error: 'Supervisor not found.' });
+        }
+
+        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
+        const placeholders = bucketArray.map(() => '?').join(', ');
+
+
+        const sql2 = `SELECT leave_request.id,
+            DATE_FORMAT(leave_request.date, '%Y-%m-%d') AS date, 
+            leave_request.leave_type, leave_request.emp_ID, leave_request.approved_by, 
+            DATE_FORMAT(leave_request.date_approved, '%Y-%m-%d') AS date_approved,
+            leave_request.status, leave_request.details, leave_request.file_uploaded,
+            leave_request.status2, leave_request.date_approved_by2, leave_request.approved_by2,
+            employee_profile.clusterID
+            FROM leave_request 
+            LEFT JOIN employee_profile ON leave_request.emp_ID = employee_profile.emp_ID
+            WHERE employee_profile.clusterID IN (${placeholders})
+            ORDER BY id DESC`; // Use a parameterized query
+
+        const [leave_request] = await db.query(sql2, bucketArray);
 
         return res.status(200).json({ data: leave_request });
     } catch (error) {

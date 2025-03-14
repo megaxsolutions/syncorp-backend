@@ -39,10 +39,10 @@ const leaveRequestRoutes = Router();
 leaveRequestRoutes.post('/add_leave_request/:leave_type_id', upload.single('file_uploaded'), LeaveRequestController.create_leave_request);
 leaveRequestRoutes.put('/update_user_leave_request/:leave_request_id/:leave_type_id',  upload.single('file_uploaded'), LeaveRequestController.update_user_leave_request);
 leaveRequestRoutes.put('/update_approval_leave_request/:leave_request_id', LeaveRequestController.update_approval_leave_request);
-leaveRequestRoutes.put('/update_status_leave_request/:leave_request_id', LeaveRequestController.update_status_leave_request);
 leaveRequestRoutes.put('/update_approval_leave_request_admin/:leave_request_id', LeaveRequestController.update_approval_leave_request_admin);
-leaveRequestRoutes.put('/update_status_leave_request_admin/:leave_request_id', LeaveRequestController.update_status_leave_request);
 leaveRequestRoutes.get('/get_all_leave_request', LeaveRequestController.get_all_leave_request);
+leaveRequestRoutes.get('/get_all_leave_request_supervisor/:supervisor_emp_id', LeaveRequestController.get_all_leave_request_supervisor);
+
 leaveRequestRoutes.get('/get_all_user_leave_request/:emp_id', LeaveRequestController.get_all_user_leave_request);
 leaveRequestRoutes.delete('/delete_leave_request/:leave_request_id', LeaveRequestController.delete_leave_request);
 
