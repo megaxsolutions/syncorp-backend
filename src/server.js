@@ -28,6 +28,8 @@ import coachingTypeRoutes from "./routes/coaching_type_routes.js";
 import coachingRoutes from "./routes/coaching_routes.js";
 import payslipRoutes from "./routes/payslip_routes.js";
 import logRoutes from "./routes/log_routes.js";
+import bonusRoutes from "./routes/bonus_routes.js";
+
 
 
 import bodyParser from 'body-parser';
@@ -80,16 +82,18 @@ app.use("/cutoffs", authenticateToken, cutOffRoutes);
 app.use("/attendances", authenticateToken, attendanceRoutes);
 app.use("/dtr", authenticateToken, dtrRoutes);
 app.use("/breaks", authenticateToken, breakRoutes);
-app.use("/leave_requests", leaveRequestRoutes);
+app.use("/leave_requests", authenticateToken, leaveRequestRoutes);
 app.use("/leave_types", authenticateToken, leaveTypeRoutes);
 app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
-app.use("/overtime_requests", overtimeRequestRoutes);
+app.use("/overtime_requests", authenticateToken, overtimeRequestRoutes);
 app.use("/bulletins", authenticateToken, bulletinRoutes);
-app.use("/shift_schedules", shiftscheduleRoutes);
+app.use("/shift_schedules", authenticateToken, shiftscheduleRoutes);
 app.use("/coaching_types", authenticateToken, coachingTypeRoutes);
 app.use("/coaching", coachingRoutes);
 app.use("/payslips", authenticateToken, payslipRoutes);
 app.use("/logs", authenticateToken, logRoutes);
+app.use("/bonus", authenticateToken, bonusRoutes);
+
 
 
 

@@ -136,11 +136,6 @@ export const remove_user_level_admin = asyncHandler(async (req, res) => {
 export const update_admin_user_level = asyncHandler(async (req, res) => {
     const { emp_id, user_level } = req.body;
 
-    const array = [Number(user_level)];
-    
-    // Convert the array to a JSON string
-    const arrayString = JSON.stringify(array); // or array.join(',') for a comma-separated string
-
 
     try {
         const sql   = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
@@ -150,6 +145,11 @@ export const update_admin_user_level = asyncHandler(async (req, res) => {
         const [user] = await db.query(sql, [emp_id]);
 
         if (user.length == 0) {
+            const array = [Number(user_level)];
+    
+            // Convert the array to a JSON string
+            const arrayString = JSON.stringify(array); // or array.join(',') for a comma-separated string
+
             const [insert_data_admin_login] = await db.query(sql2, [emp_id, storeCurrentDate(3, 'months'), arrayString]);    
             return res.status(200).json({ success: 'Account successfully created.' });
         } else {
@@ -157,14 +157,86 @@ export const update_admin_user_level = asyncHandler(async (req, res) => {
             const existingArray = JSON.parse(existingArrayString); 
             const exists = existingArray.includes(Number(user_level)); // Check if the value exists
 
-            existingArray.push(Number(user_level)); 
-            const updatedArrayString = JSON.stringify(existingArray); 
-
             if (exists) {
                 return res.status(400).json({ error: 'User level already exists.' });
             } 
+
+            existingArray.push(Number(user_level)); 
+            const updatedArrayString = JSON.stringify(existingArray); 
            
             const [update_data_admin_login] = await db.query(sql3, [updatedArrayString, emp_id]);    
+
+            return res.status(200).json({ success: 'User level successfully updated.' });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to create admin entry' });
+    }
+});
+
+
+
+export const update_admin_user_level_supervisor_cluster = asyncHandler(async (req, res) => {
+    const { emp_id, user_level, cluster_id } = req.body;
+
+    if(Number(user_level) != 2) {
+        return res.status(400).json({ error: 'User level is not a supervisor.' });
+    }
+
+
+    try {
+        const sql   = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+        const sql2  = 'INSERT INTO admin_login (emp_ID, expiry_date, user_level, bucket) VALUES (?, ?, ?, ?)';
+        const sql3  = 'UPDATE admin_login SET  bucket = ? WHERE emp_ID = ?';
+        const sql4  = 'UPDATE admin_login SET user_level = ?, bucket = ? WHERE emp_ID = ?';
+
+
+        const [user] = await db.query(sql, [emp_id]);
+
+        if (user.length == 0) {
+            const user_level_array = [Number(user_level)];
+            const cluster_id_array = [Number(cluster_id)];
+
+        
+            // Convert the array to a JSON string
+            const arrayString = JSON.stringify(user_level_array); // or array.join(',') for a comma-separated string
+            const arrayString2 = JSON.stringify(cluster_id_array); // or array.join(',') for a comma-separated string
+
+
+            const [insert_data_admin_login] = await db.query(sql2, [emp_id, storeCurrentDate(3, 'months'), arrayString, arrayString2]);    
+            return res.status(200).json({ success: 'Account successfully created.' });
+        } else {
+
+            //return res.status(200).json({ success: });
+
+            const user_level_array = user[0]['user_level']; 
+            const existing_user_level = JSON.parse(user_level_array); 
+            const exists_user_level = existing_user_level.includes(Number(user_level)); // Check if the value exists
+
+            const bucket_array = user[0]['bucket'] == null ||  user[0]['bucket'] == "" ? "[]" :  user[0]['bucket']; 
+            const existing_bucket_array = JSON.parse(bucket_array); 
+            const exists_bucket = existing_bucket_array.includes(Number(cluster_id)); // Check if the value exists
+          
+           
+            // if (exists_user_level) {
+            //     return res.status(400).json({ error: 'User level already exists.' });
+            // } 
+           
+
+            if (exists_bucket) {
+                return res.status(400).json({ error: 'Cluster already exists.' });
+            } 
+
+            existing_user_level.push(Number(user_level)); 
+            existing_bucket_array.push(Number(cluster_id)); 
+            const updated_existing_bucket = JSON.stringify(existing_bucket_array); 
+            const updated_existing_user_level = JSON.stringify(existing_user_level); 
+
+            if (exists_user_level) {
+                const [update_data_admin_login_2] = await db.query(sql3, [updated_existing_bucket, emp_id]);    
+                return res.status(200).json({ success: 'User level successfully updated.' });
+            } 
+           
+            const [update_data_admin_login] = await db.query(sql4, [updated_existing_user_level, updated_existing_bucket, emp_id]);    
 
             return res.status(200).json({ success: 'User level successfully updated.' });
         }
