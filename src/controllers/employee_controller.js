@@ -335,7 +335,8 @@ export const get_all_employee_supervisor = asyncHandler(async (req, res) => {
             return res.status(404).json({ error: 'Supervisor not found.' });
         }
 
-        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
+
+        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == null || data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
         const placeholders = bucketArray.map(() => '?').join(', ');
 
 

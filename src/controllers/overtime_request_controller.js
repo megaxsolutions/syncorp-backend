@@ -107,7 +107,7 @@ export const get_all_overtime_request_supervisor = asyncHandler(async (req, res)
             return res.status(404).json({ error: 'Supervisor not found.' });
         }
 
-        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
+        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == null || data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
         const placeholders = bucketArray.map(() => '?').join(', ');
     
         const sql2 = `SELECT 
@@ -116,7 +116,8 @@ export const get_all_overtime_request_supervisor = asyncHandler(async (req, res)
             overtime_request.hrs, overtime_request.ot_type, overtime_request.emp_ID, overtime_request.approved_by, 
             DATE_FORMAT(overtime_request.date_approved, '%Y-%m-%d') AS date_approved, 
             overtime_request.status, overtime_request.status2, 
-            overtime_request.date_approved_by2, overtime_request.approved_by2,
+            DATE_FORMAT(overtime_request.date_approved_by2, '%Y-%m-%d') AS date_approved_by2, 
+            overtime_request.approved_by2,
             employee_profile.clusterID
             FROM overtime_request 
             LEFT JOIN employee_profile ON overtime_request.emp_ID = employee_profile.emp_ID
@@ -140,8 +141,10 @@ export const get_all_overtime_request = asyncHandler(async (req, res) => {
             id,
             DATE_FORMAT(date, '%Y-%m-%d') AS date, 
             hrs, ot_type, emp_ID, approved_by, 
-            DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved, 
-            status, status2, date_approved_by2, leave_request.approved_by2
+            DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved,
+            status, status2, 
+            DATE_FORMAT(date_approved_by2, '%Y-%m-%d') AS date_approved_by2,
+            approved_by2
             FROM overtime_request`; // Use a parameterized query
 
         const [overtime_request] = await db.query(sql);

@@ -18,4 +18,9 @@ shiftscheduleRoutes.get('/get_shift_schedule_day_overtime', ShiftScheduleControl
 
 
 
+shiftscheduleRoutes.get('/get_shift_schedule_day_supervisor/:supervisor_emp_id', ShiftScheduleController.get_shift_schedule_day_supervisor);
+shiftscheduleRoutes.get('/get_shift_schedule_day_overtime_supervisor/:supervisor_emp_id', ShiftScheduleController.get_shift_schedule_day_overtime_supervisor);
+
+
+
 export default shiftscheduleRoutes;
