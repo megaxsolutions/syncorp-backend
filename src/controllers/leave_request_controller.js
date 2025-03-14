@@ -118,7 +118,9 @@ export const get_all_leave_request = asyncHandler(async (req, res) => {
             leave_type, emp_ID, approved_by, 
             DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved,
             status, details, file_uploaded,
-            status2, date_approved_by2, approved_by2
+            status2, 
+            DATE_FORMAT(date_approved_by2, '%Y-%m-%d') AS date_approved_by2,
+            approved_by2
             FROM leave_request ORDER BY id DESC`; // Use a parameterized query
 
         const [leave_request] = await db.query(sql);
@@ -144,7 +146,7 @@ export const get_all_leave_request_supervisor = asyncHandler(async (req, res) =>
             return res.status(404).json({ error: 'Supervisor not found.' });
         }
 
-        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
+        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == null || data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
         const placeholders = bucketArray.map(() => '?').join(', ');
 
 
@@ -153,7 +155,9 @@ export const get_all_leave_request_supervisor = asyncHandler(async (req, res) =>
             leave_request.leave_type, leave_request.emp_ID, leave_request.approved_by, 
             DATE_FORMAT(leave_request.date_approved, '%Y-%m-%d') AS date_approved,
             leave_request.status, leave_request.details, leave_request.file_uploaded,
-            leave_request.status2, leave_request.date_approved_by2, leave_request.approved_by2,
+            leave_request.status2, 
+            DATE_FORMAT(leave_request.date_approved_by2, '%Y-%m-%d') AS date_approved_by2,
+            leave_request.approved_by2,
             employee_profile.clusterID
             FROM leave_request 
             LEFT JOIN employee_profile ON leave_request.emp_ID = employee_profile.emp_ID
