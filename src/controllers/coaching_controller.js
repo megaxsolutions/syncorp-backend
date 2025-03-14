@@ -84,3 +84,41 @@ export const get_all_coaching = asyncHandler(async (req, res) => {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
+
+
+export const get_all_coaching_supervisor = asyncHandler(async (req, res) => {
+    const { supervisor_emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter
+    try {
+        const sql = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+
+        const [data_admin_login] = await db.query(sql, [supervisor_emp_id]);
+
+
+
+        if (data_admin_login.length === 0) {
+            return res.status(404).json({ error: 'Supervisor not found.' });
+        }
+
+        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == null || data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
+	    const placeholders = bucketArray.map(() => '?').join(', ');
+
+
+        const sql2  = `SELECT
+        coaching.emp_ID, coaching.coached_by, 
+        coaching.date_coached, 
+        coaching.coaching_type, 
+        coaching.metrix_1, coaching.metrix_2, 
+        coaching.metrix_3, coaching.metrix_4
+        FROM coaching
+        LEFT JOIN employee_profile ON coaching.emp_ID = employee_profile.emp_ID
+        WHERE employee_profile.clusterID IN (${placeholders})
+        `; // Use a parameterized query
+
+        const [coaching] = await db.query(sql2, bucketArray);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: coaching });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});

@@ -11,6 +11,7 @@ coachingRoutes.post('/add_coaching', CoachingController.create_coaching);
 coachingRoutes.put('/update_coaching/:coaching_id', CoachingController.update_coaching);
 coachingRoutes.delete('/delete_coaching/:coaching_id', CoachingController.delete_coaching);
 coachingRoutes.get('/get_all_coaching', CoachingController.get_all_coaching);
+coachingRoutes.get('/get_all_coaching_supervisor/:supervisor_emp_id', CoachingController.get_all_coaching_supervisor);
 
 
 export default coachingRoutes;

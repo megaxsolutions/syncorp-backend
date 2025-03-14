@@ -515,10 +515,21 @@ export const get_shift_schedule_day_overtime = asyncHandler(async (req, res) => 
 
 
 export const get_shift_schedule_day_overtime_supervisor = asyncHandler(async (req, res) => {
-
+    const { supervisor_emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter
 
     try {
-        const sql = `SELECT 
+        const sql = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+
+        const [data_admin_login] = await db.query(sql, [supervisor_emp_id]);
+
+        if (data_admin_login.length === 0) {
+            return res.status(404).json({ error: 'Supervisor not found.' });
+        }
+
+        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == null || data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
+	    const placeholders = bucketArray.map(() => '?').join(', ');
+
+        const sql2 = `SELECT 
         shift_schedule.emp_ID,
         DATE_FORMAT(shift_schedule.shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in, 
         DATE_FORMAT(shift_schedule.shift_out, '%Y-%m-%d %H:%i:%s') AS shift_out,
@@ -529,9 +540,11 @@ export const get_shift_schedule_day_overtime_supervisor = asyncHandler(async (re
         CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
         FROM shift_schedule 
         LEFT JOIN employee_profile ON shift_schedule.emp_ID = employee_profile.emp_ID
-        WHERE shift_schedule.is_overtime = ?`; // Use a parameterized query
+        WHERE shift_schedule.is_overtime = ? AND employee_profile.clusterID IN (${placeholders})`; // Use a parameterized query
+       
+        const params = [1, ...bucketArray];
+        const [result] = await db.query(sql2, params);
 
-        const [result] = await db.query(sql, [1]);
 
         return res.status(200).json({ data: result });
     } catch (error) {
