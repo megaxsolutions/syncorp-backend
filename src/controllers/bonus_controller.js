@@ -21,12 +21,12 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 }
 
 export const create_bonus = asyncHandler(async (req, res) => {
-    const { perf_bonus, client_funded,  supervisor_emp_id, emp_id } = req.body;
+    const { perf_bonus, client_funded, supervisor_emp_id, emp_id, status } = req.body;
 
     try {
-        const sql = 'INSERT INTO bonus (perf_bonus, client_funded, plotted_by, emp_ID) VALUES (?, ?, ?, ?)';
+        const sql = 'INSERT INTO bonus (perf_bonus, client_funded, plotted_by, emp_ID, status) VALUES (?, ?, ?, ?, ?)';
 
-        const [insert_data_break] = await db.query(sql, [perf_bonus, client_funded, supervisor_emp_id, emp_id]);
+        const [insert_data_break] = await db.query(sql, [perf_bonus, client_funded, supervisor_emp_id, emp_id, status]);
 
     
         // Return the merged results in the response
