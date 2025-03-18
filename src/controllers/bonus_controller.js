@@ -87,6 +87,7 @@ export const get_all_bonus = asyncHandler(async (req, res) => {
         const sql  = `SELECT id,
         perf_bonus, client_funded, plotted_by, 
         approved_by, approved_by2,
+        status, status2,
         DATE_FORMAT(datetime_approved, '%Y-%m-%d %H:%i:%s') AS datetime_approved,  
         DATE_FORMAT(datetime_approved2, '%Y-%m-%d %H:%i:%s') AS datetime_approved2,  
         emp_ID
@@ -122,7 +123,7 @@ export const get_all_bonus_supervisor = asyncHandler(async (req, res) => {
         bonus.approved_by, bonus.approved_by2,
         DATE_FORMAT(bonus.datetime_approved, '%Y-%m-%d %H:%i:%s') AS datetime_approved,  
         DATE_FORMAT(bonus.datetime_approved2, '%Y-%m-%d %H:%i:%s') AS datetime_approved2,  
-        bonus.emp_ID
+        bonus.emp_ID, bonus.status, bonus.status2
         FROM bonus
         LEFT JOIN employee_profile ON bonus.emp_ID = employee_profile.emp_ID
         WHERE employee_profile.clusterID IN (${placeholders})
