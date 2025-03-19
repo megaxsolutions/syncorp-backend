@@ -133,6 +133,43 @@ export const remove_user_level_admin = asyncHandler(async (req, res) => {
 
 
 
+export const remove_cluster_supervisor = asyncHandler(async (req, res) => {
+    const { cluster_id, emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+
+    try {
+        const sql   = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+        const sql2  = 'UPDATE admin_login SET bucket = ? WHERE emp_ID = ?';
+
+
+        const [user] = await db.query(sql, [emp_id]);
+
+        if (user.length == 0) {
+            return res.status(404).json({ error: 'No user found.' });
+        } else {
+            const existingArrayString = user[0]['bucket']; 
+            const existingArray = JSON.parse(existingArrayString); 
+            const exists = existingArray.includes(Number(cluster_id)); // Check if the value exists
+           
+            const updatedArray = existingArray.filter(level => level !== Number(cluster_id)); // Remove the specified user_level
+            const updatedArrayString = JSON.stringify(updatedArray); // This will produce the updated array string
+
+            if (!exists) {
+                return res.status(404).send('No record found');
+            } 
+           
+            const [update_data_admin_login] = await db.query(sql2, [updatedArrayString, emp_id]);  
+            
+      
+            return res.status(200).json({ success: 'Bucket successfully updated.' });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update admin' });
+    }
+});
+
+
+
+
 export const update_admin_user_level = asyncHandler(async (req, res) => {
     const { emp_id, user_level } = req.body;
 
@@ -372,31 +409,44 @@ export const update_admin_expiration = asyncHandler(async (req, res) => {
 });
 
 
+export const update_admin_login_attempts = asyncHandler(async (req, res) => {
+    const { login_attempts } = req.body;
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+
+    try {
+        const sql  = 'UPDATE admin_login SET login_attempts = ? WHERE emp_ID = ?';
+
+
+        const [update_login] = await db.query(sql, [login_attempts, emp_id]);
+       
+        if (update_login_no_password.affectedRows === 0) {
+            return res.status(404).json({ error: 'Admin not found.' });
+        }
+     
+
+        return res.status(200).json({ success: 'Admin successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update admin.' });
+    }
+});
+
+
 export const update_admin_login = asyncHandler(async (req, res) => {
-    const { login_attempts, password, user_level } = req.body;
+    const { password } = req.body;
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
         const hash_password = hashConverterMD5(password);
 
-        const sql  = 'UPDATE admin_login SET login_attempts = ?, user_level = ? WHERE emp_ID = ?';
-        const sql2 = 'UPDATE admin_login SET login_attempts = ?, password = ?, user_level = ? WHERE emp_ID = ?';
+        const sql = 'UPDATE admin_login SET password = ? WHERE emp_ID = ?';
 
  
-
-        if(!password) {
-            const [update_login_no_password] = await db.query(sql, [login_attempts, emp_id, user_level]);
-            if (update_login_no_password.affectedRows === 0) {
-                return res.status(404).json({ error: 'Admin not found.' });
-            }
-        } else {
-            const [update_login_password] = await db.query(sql2, [login_attempts, hash_password, emp_id, user_level]);
+        const [update_login_password] = await db.query(sql, [ hash_password, emp_id]);
             
-            if (update_login_password.affectedRows === 0) {
-                return res.status(404).json({ error: 'Admin not found.' });
-            }
+        if (update_login_password.affectedRows === 0) {
+            return res.status(404).json({ error: 'Admin not found.' });
         }
-
+        
         return res.status(200).json({ success: 'Admin successfully updated.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to update admin.' });
@@ -433,9 +483,9 @@ export const update_admin = asyncHandler(async (req, res) => {
         const sql3 = 'UPDATE employee_profile_standing SET employee_status = ?, positionID = ?, datetime_updated = ? WHERE emp_ID = ?';
 
         const [employee_profile] = await db.query(sql0, [emp_id]);
-        const [insert_data_employee_profile] = await db.query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : employee_profile[0]['photo'], emp_id]);
-        const [insert_data_employee_profile_benefits] = await db.query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, emp_id]);
-        const [insert_data_employee_profile_standing] = await db.query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
+        const [update_data_employee_profile] = await db.query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : employee_profile[0]['photo'], emp_id]);
+        const [update_data_employee_profile_benefits] = await db.query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, emp_id]);
+        const [update_data_employee_profile_standing] = await db.query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
 
         if(req.file) {
             const filePath = path.join(uploadsDir, employee_profile[0]['photo']);
@@ -447,9 +497,9 @@ export const update_admin = asyncHandler(async (req, res) => {
             });
         }
 
-        return res.status(200).json({ success: 'Employee successfully updated.' });
+        return res.status(200).json({ success: 'Admin successfully updated.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to update employee entry' });
+        return res.status(500).json({ error: 'Failed to update admin entry' });
     }
 });
 
@@ -467,13 +517,19 @@ export const get_all_admin = asyncHandler(async (req, res) => {
         employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
         employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
         employee_profile.employee_level, employee_profile.photo,
+        employee_profile.accountID, employee_profile.drug_test, employee_profile.xray,
+        employee_profile.med_cert, employee_profile.nbi_clearance,
         employee_profile_benefits.sss, employee_profile_benefits.pagibig,
         employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
-        employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
+        employee_profile_benefits.healthcare, 
+        employee_profile_benefits.tranpo_allowance, 
+        employee_profile_benefits.food_allowance, 
+        employee_profile_standing.employee_status, employee_profile_standing.date_added,
         employee_profile_standing.datetime_updated, employee_profile_standing.positionID
         FROM admin_login LEFT JOIN employee_profile ON admin_login.emp_ID = employee_profile.emp_ID 
         LEFT JOIN employee_profile_benefits ON employee_profile.emp_ID = employee_profile_benefits.emp_ID 
         LEFT JOIN employee_profile_standing ON employee_profile.emp_ID = employee_profile_standing.emp_ID`;
+
 
         const [users] = await db.query(sql);
 
@@ -482,6 +538,45 @@ export const get_all_admin = asyncHandler(async (req, res) => {
         return res.status(500).json({ error: 'Failed to get all user.' });
     }
 });
+
+
+
+export const get_admin = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter
+
+    try {
+        const sql = `SELECT admin_login.emp_ID, admin_login.password, admin_login.login_attempts, 
+        DATE_FORMAT(admin_login.expiry_date, '%Y-%m-%d') AS expiry_date, admin_login.user_level, 
+        employee_profile.fName, employee_profile.mName, employee_profile.lName, 
+        DATE_FORMAT(employee_profile.bDate, '%Y-%m-%d') AS bDate,
+        DATE_FORMAT(employee_profile.date_hired, '%Y-%m-%d') AS date_hired,
+        employee_profile.departmentID, employee_profile.clusterID,
+        employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
+        employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
+        employee_profile.employee_level, employee_profile.photo,
+        employee_profile.accountID, employee_profile.drug_test, employee_profile.xray,
+        employee_profile.med_cert, employee_profile.nbi_clearance,
+        employee_profile_benefits.sss, employee_profile_benefits.pagibig,
+        employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
+        employee_profile_benefits.healthcare, 
+        employee_profile_benefits.tranpo_allowance, 
+        employee_profile_benefits.food_allowance, 
+        employee_profile_standing.employee_status, employee_profile_standing.date_added,
+        employee_profile_standing.datetime_updated, employee_profile_standing.positionID
+        FROM admin_login LEFT JOIN employee_profile ON admin_login.emp_ID = employee_profile.emp_ID 
+        LEFT JOIN employee_profile_benefits ON employee_profile.emp_ID = employee_profile_benefits.emp_ID 
+        LEFT JOIN employee_profile_standing ON employee_profile.emp_ID = employee_profile_standing.emp_ID
+        WHERE employee_profile.emp_ID = ?`;
+
+
+        const [users] = await db.query(sql, [emp_id]);
+
+        return res.status(200).json({ data: users });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all user.' });
+    }
+});
+  
   
 
 export const delete_admin = asyncHandler(async (req, res) => {

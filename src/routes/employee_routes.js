@@ -44,7 +44,8 @@ employeeRoutes.put('/update_employee_expiration/:emp_id', authenticateToken, Use
 employeeRoutes.put('/update_employee/:emp_id', authenticateToken,  upload.single('file_uploaded'), UserController.update_employee);
 employeeRoutes.post('/add_employee', upload.single('file_uploaded'), authenticateToken, UserController.create_employee);
 employeeRoutes.put('/update_employee_login_attempts/:emp_id', authenticateToken, UserController.update_employee_login_attempts);
-employeeRoutes.get('/get_all_employee', authenticateToken, UserController.get_all_employee);
+employeeRoutes.get('/get_employee/:emp_id', UserController.get_employee);
+employeeRoutes.get('/get_all_employee', UserController.get_all_employee);
 employeeRoutes.get('/get_all_employee_supervisor/:supervisor_emp_id', authenticateToken, UserController.get_all_employee_supervisor);
 employeeRoutes.put('/update_employee_login/:emp_id', authenticateToken, UserController.update_employee_login);
 

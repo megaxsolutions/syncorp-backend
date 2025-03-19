@@ -95,7 +95,8 @@ export const create_employee = asyncHandler(async (req, res) => {
          cluster_id, site_id, email, phone, address, 
          emergency_contact_person, emergency_contact_number, sss, 
          pagibig, philhealth, tin, basic_pay, employee_status, 
-         positionID, employee_level, healthcare, tranpo_allowance, food_allowance  } = req.body;
+         positionID, employee_level, healthcare, tranpo_allowance, food_allowance, 
+         account_id, drug_test, xray, med_cert, nbi_clearance  } = req.body;
 
          const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
          const filename_insert = `users/${filename}`; 
@@ -116,7 +117,7 @@ export const create_employee = asyncHandler(async (req, res) => {
             const sql  = 'INSERT INTO id_generator (datetime_created) VALUES (?)';
             const sql2 = 'INSERT INTO login (emp_ID, password, expiry_date) VALUES (?, ?, ?)';
             const sql3 = 'INSERT INTO employee_profile (emp_ID, fName, mName, lName, bDate, date_hired, departmentID, clusterID, siteID, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, photo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-            const sql4 = 'INSERT INTO employee_profile_benefits (emp_ID, sss, pagibig, philhealth, tin, basic_pay, healthcare, tranpo_allowance, food_allowance) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            const sql4 = 'INSERT INTO employee_profile_benefits (emp_ID, sss, pagibig, philhealth, tin, basic_pay, healthcare, tranpo_allowance, food_allowance, accountID, drug_test, xray, med_cert, nbi_clearance) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const sql5 = 'INSERT INTO employee_profile_standing (emp_ID, employee_status, positionID, date_added, datetime_updated) VALUES (?, ?, ?, ?, ?)';
             const sql6 = 'INSERT INTO clock_state (emp_ID, state, break_state) VALUES (?, ?, ?)';
             const sql7 = 'SELECT * FROM employee_profile WHERE emp_ID = ?'; // Use a parameterized query
@@ -125,7 +126,9 @@ export const create_employee = asyncHandler(async (req, res) => {
             const [insert_data_id_generator] = await db.query(sql, [storeCurrentDateTime(0, 'hours')]);
             const [insert_data_login] = await db.query(sql2, [insert_data_id_generator['insertId'], hash, storeCurrentDate(3, 'months')]);
             const [insert_data_employee_profile] = await db.query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : null]);
-            const [insert_data_employee_profile_benefits] = await db.query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay, healthcare, tranpo_allowance, food_allowance]);
+            
+            const [insert_data_employee_profile_benefits] = await db.query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay, healthcare, tranpo_allowance, food_allowance, account_id, drug_test, xray, med_cert, nbi_clearance]);
+            
             const [insert_data_employee_profile_standing] = await db.query(sql5, [insert_data_id_generator['insertId'], employee_status, positionID, storeCurrentDateTime(0, 'months'), storeCurrentDateTime(0, 'months')]);
             const [insert_data_clock_state] = await db.query(sql6, [insert_data_id_generator['insertId'], 0, 0]);
             const [employee_profile] = await db.query(sql7, [insert_data_id_generator['insertId']]);
@@ -159,11 +162,13 @@ export const login_employee = asyncHandler(async (req, res) => {
         employee_profile_benefits.sss, employee_profile_benefits.pagibig,
         employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
         employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
-        employee_profile_standing.datetime_updated, employee_profile_standing.positionID
+        employee_profile_standing.datetime_updated, employee_profile_standing.positionID,
+        admin_login.user_level, admin_login.bucket
         FROM login  
         LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
         LEFT JOIN employee_profile_benefits ON employee_profile.emp_ID = employee_profile_benefits.emp_ID 
         LEFT JOIN employee_profile_standing ON employee_profile.emp_ID = employee_profile_standing.emp_ID 
+        LEFT JOIN admin_login ON employee_profile.emp_ID = admin_login.emp_ID 
         WHERE login.emp_ID = ?`;
 
         const sql2 = 'INSERT INTO tokens (emp_ID, token, expiry_datetime) VALUES (?, ?, ?)';
@@ -188,6 +193,9 @@ export const login_employee = asyncHandler(async (req, res) => {
             //const hashTokenBCRYPT = hashConverterBCRYPT(token);
             const [data_token] = await db.query(sql2, [emp_ID, token, storeCurrentDateTime(1, 'hours')]);
             const [data_admin_login] = await db.query(sql3, [0, emp_ID]);
+
+            return res.status(200).json({ data: login });
+
 
             return res.status(200).json({ data: token, emp_id: login[0]['emp_ID'] });
         }
@@ -273,11 +281,13 @@ export const update_employee_login_attempts = asyncHandler(async (req, res) => {
 
 
 export const update_employee = asyncHandler(async (req, res) => {
-    const { birthdate, fname, mname, lname, date_hired, department_id, 
-         cluster_id, site_id, email, phone, address, 
-         emergency_contact_person, emergency_contact_number, sss, 
-         pagibig, philhealth, tin, basic_pay, employee_status, 
-         positionID, employee_level, healthcare, tranpo_allowance, food_allowance  } = req.body;
+         const { birthdate, fname, mname, lname, date_hired, department_id, 
+            cluster_id, site_id, email, phone, address, 
+            emergency_contact_person, emergency_contact_number, sss, 
+            pagibig, philhealth, tin, basic_pay, employee_status, 
+            positionID, employee_level, healthcare, tranpo_allowance, food_allowance, 
+            account_id, drug_test, xray, med_cert, nbi_clearance  } = req.body;
+
 
     const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
     const filename_insert = `users/${filename}`; 
@@ -296,12 +306,23 @@ export const update_employee = asyncHandler(async (req, res) => {
     }
     try {
         const sql0 = 'SELECT * FROM employee_profile WHERE emp_ID = ?'; // Use a parameterized query
-        const sql  = 'UPDATE employee_profile SET fName = ?, mName = ?, lName = ?, bDate = ?, date_hired = ?, departmentID = ?, clusterID = ?, siteID = ?, email = ?, phone = ?, address = ?, emergency_contact_person = ?, emergency_contact_number = ?, employee_level = ?, photo = ? WHERE emp_ID = ?';
+        
+        const sql  = `UPDATE employee_profile SET fName = ?, mName = ?, lName = ?,
+         bDate = ?, date_hired = ?, departmentID = ?, clusterID = ?, siteID = ?, 
+         email = ?, phone = ?, address = ?, emergency_contact_person = ?, 
+         emergency_contact_number = ?, employee_level = ?, photo = ?,
+         accountID = ?, drug_test = ?, xray = ?, med_cert = ?, nbi_clearance = ?
+         WHERE emp_ID = ?`;
+       
         const sql2 = 'UPDATE employee_profile_benefits SET sss = ?, pagibig = ?, philhealth = ?, tin = ?, basic_pay = ?, healthcare = ?, tranpo_allowance = ?, food_allowance = ? WHERE emp_ID = ?';
         const sql3 = 'UPDATE employee_profile_standing SET employee_status = ?, positionID = ?, datetime_updated = ? WHERE emp_ID = ?';
 
         const [employee_profile] = await db.query(sql0, [emp_id]);
-        const [insert_data_employee_profile] = await db.query(sql, [fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : employee_profile[0]['photo'], emp_id]);
+        const [insert_data_employee_profile] = await db.query(sql, [fname, mname, lname, birthdate, date_hired, department_id, 
+            cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, 
+            employee_level, req.file ? filename_insert : employee_profile[0]['photo'], 
+            account_id, drug_test, xray, med_cert, nbi_clearance,
+            emp_id]);
         const [insert_data_employee_profile_benefits] = await db.query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, tranpo_allowance, food_allowance, emp_id]);
         const [insert_data_employee_profile_standing] = await db.query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
 
@@ -340,6 +361,7 @@ export const get_all_employee_supervisor = asyncHandler(async (req, res) => {
         const placeholders = bucketArray.map(() => '?').join(', ');
 
 
+
         const sql2 = `SELECT login.emp_ID, login.password, login.login_attempts, 
         DATE_FORMAT(login.expiry_date, '%Y-%m-%d') AS expiry_date,
         employee_profile.fName, employee_profile.mName, employee_profile.lName, 
@@ -349,13 +371,20 @@ export const get_all_employee_supervisor = asyncHandler(async (req, res) => {
         employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
         employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
         employee_profile.employee_level, employee_profile.photo,
+        employee_profile.accountID, employee_profile.drug_test, employee_profile.xray,
+        employee_profile.med_cert, employee_profile.nbi_clearance,
         employee_profile_benefits.sss, employee_profile_benefits.pagibig,
         employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
-        employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
-        employee_profile_standing.datetime_updated, employee_profile_standing.positionID
-        FROM login LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
+        employee_profile_benefits.healthcare, employee_profile_benefits.tranpo_allowance, 
+        employee_profile_benefits.food_allowance, 
+        employee_profile_standing.employee_status, employee_profile_standing.date_added,
+        employee_profile_standing.datetime_updated, employee_profile_standing.positionID,
+        accounts.accountName
+        FROM login 
+        LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
         LEFT JOIN employee_profile_benefits ON login.emp_ID = employee_profile_benefits.emp_ID 
         LEFT JOIN employee_profile_standing ON login.emp_ID = employee_profile_standing.emp_ID
+        LEFT JOIN accounts ON employee_profile.accountID = accounts.id
         WHERE employee_profile.clusterID IN (${placeholders})
         `;
 
@@ -368,10 +397,12 @@ export const get_all_employee_supervisor = asyncHandler(async (req, res) => {
 });
 
 
-export const get_all_employee = asyncHandler(async (req, res) => {
+
+export const get_employee = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter
+
+
     try {
-
-
         const sql = `SELECT login.emp_ID, login.password, login.login_attempts, 
         DATE_FORMAT(login.expiry_date, '%Y-%m-%d') AS expiry_date,
         employee_profile.fName, employee_profile.mName, employee_profile.lName, 
@@ -381,15 +412,59 @@ export const get_all_employee = asyncHandler(async (req, res) => {
         employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
         employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
         employee_profile.employee_level, employee_profile.photo,
+        employee_profile.accountID, employee_profile.drug_test, employee_profile.xray,
+        employee_profile.med_cert, employee_profile.nbi_clearance,
         employee_profile_benefits.sss, employee_profile_benefits.pagibig,
         employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
-        employee_profile_benefits.healthcare, employee_profile_standing.employee_status, employee_profile_standing.date_added,
-        employee_profile_standing.datetime_updated, employee_profile_standing.positionID
-        FROM login LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
+        employee_profile_benefits.healthcare, employee_profile_benefits.tranpo_allowance, 
+        employee_profile_benefits.food_allowance, 
+        employee_profile_standing.employee_status, employee_profile_standing.date_added,
+        employee_profile_standing.datetime_updated, employee_profile_standing.positionID,
+        accounts.accountName
+        FROM login 
+        LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
         LEFT JOIN employee_profile_benefits ON login.emp_ID = employee_profile_benefits.emp_ID 
-        LEFT JOIN employee_profile_standing ON login.emp_ID = employee_profile_standing.emp_ID`;
+        LEFT JOIN employee_profile_standing ON login.emp_ID = employee_profile_standing.emp_ID
+        LEFT JOIN accounts ON employee_profile.accountID = accounts.id
+        WHERE employee_profile.emp_ID = ?
+        `;
 
-       // const sql2 = 'INSERT INTO clock_state (emp_ID, state) VALUES (?, ?)';
+       
+        const [users] = await db.query(sql, [emp_id]);
+
+        return res.status(200).json({ data: users });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all user.' });
+    }
+});
+
+export const get_all_employee = asyncHandler(async (req, res) => {
+    try {
+        const sql = `SELECT login.emp_ID, login.password, login.login_attempts, 
+        DATE_FORMAT(login.expiry_date, '%Y-%m-%d') AS expiry_date,
+        employee_profile.fName, employee_profile.mName, employee_profile.lName, 
+        DATE_FORMAT(employee_profile.bDate, '%Y-%m-%d') AS bDate,
+        DATE_FORMAT(employee_profile.date_hired, '%Y-%m-%d') AS date_hired,
+        employee_profile.departmentID, employee_profile.clusterID,
+        employee_profile.siteID, employee_profile.email, employee_profile.phone, employee_profile.address,
+        employee_profile.emergency_contact_person, employee_profile.emergency_contact_number,
+        employee_profile.employee_level, employee_profile.photo,
+        employee_profile.accountID, employee_profile.drug_test, employee_profile.xray,
+        employee_profile.med_cert, employee_profile.nbi_clearance,
+        employee_profile_benefits.sss, employee_profile_benefits.pagibig,
+        employee_profile_benefits.philhealth, employee_profile_benefits.tin, employee_profile_benefits.basic_pay,
+        employee_profile_benefits.healthcare, employee_profile_benefits.tranpo_allowance, 
+        employee_profile_benefits.food_allowance, 
+        employee_profile_standing.employee_status, employee_profile_standing.date_added,
+        employee_profile_standing.datetime_updated, employee_profile_standing.positionID,
+        accounts.accountName
+        FROM login 
+        LEFT JOIN employee_profile ON login.emp_ID = employee_profile.emp_ID 
+        LEFT JOIN employee_profile_benefits ON login.emp_ID = employee_profile_benefits.emp_ID 
+        LEFT JOIN employee_profile_standing ON login.emp_ID = employee_profile_standing.emp_ID
+        LEFT JOIN accounts ON employee_profile.accountID = accounts.id
+        `;
+
        
         const [users] = await db.query(sql);
 

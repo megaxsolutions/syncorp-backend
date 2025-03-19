@@ -29,6 +29,8 @@ import coachingRoutes from "./routes/coaching_routes.js";
 import payslipRoutes from "./routes/payslip_routes.js";
 import logRoutes from "./routes/log_routes.js";
 import bonusRoutes from "./routes/bonus_routes.js";
+import accountRoutes from "./routes/account_routes.js";
+
 
 
 
@@ -92,7 +94,9 @@ app.use("/coaching_types", authenticateToken, coachingTypeRoutes);
 app.use("/coaching", coachingRoutes);
 app.use("/payslips", authenticateToken, payslipRoutes);
 app.use("/logs", authenticateToken, logRoutes);
-app.use("/bonus", authenticateToken, bonusRoutes);
+app.use("/bonus", bonusRoutes);
+app.use("/accounts", accountRoutes);
+
 
 
 
