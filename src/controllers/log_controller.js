@@ -10,7 +10,8 @@ export const get_all_user_log = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
     
     try {
-        const sql  = 'SELECT * FROM logs WHERE emp_ID = ? ORDER BY id DESC'; // Use a parameterized query
+        const sql = 'SELECT * FROM logs WHERE emp_ID = ? ORDER BY id DESC LIMIT 100'; // Adjust the order by column as needed
+
 
         const [log] = await db.query(sql, [emp_id]);
 
