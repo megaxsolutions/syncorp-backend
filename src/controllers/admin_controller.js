@@ -146,7 +146,8 @@ export const remove_cluster_supervisor = asyncHandler(async (req, res) => {
         if (user.length == 0) {
             return res.status(404).json({ error: 'No user found.' });
         } else {
-            const existingArrayString = user[0]['bucket']; 
+           // const existingArrayString = user[0]['bucket']; 
+            const existingArrayString = user[0]['bucket'] == null || user[0]['bucket'] == "" ? "[]" :  user[0]['bucket'];
             const existingArray = JSON.parse(existingArrayString); 
             const exists = existingArray.includes(Number(cluster_id)); // Check if the value exists
            
