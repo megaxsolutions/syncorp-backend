@@ -104,7 +104,7 @@ export const get_all_coaching_supervisor = asyncHandler(async (req, res) => {
 
 
         const sql2  = `SELECT
-        coaching.id
+        coaching.id,
         coaching.emp_ID, coaching.coached_by, 
         coaching.date_coached, 
         coaching.coaching_type, 
