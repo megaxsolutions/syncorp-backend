@@ -194,7 +194,6 @@ export const login_employee = asyncHandler(async (req, res) => {
             const [data_token] = await db.query(sql2, [emp_ID, token, storeCurrentDateTime(1, 'hours')]);
             const [data_admin_login] = await db.query(sql3, [0, emp_ID]);
 
-            return res.status(200).json({ data: login });
 
 
             return res.status(200).json({ data: token, emp_id: login[0]['emp_ID'] });
