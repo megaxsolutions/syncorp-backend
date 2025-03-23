@@ -37,7 +37,7 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
         const sql  = `SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date FROM attendance WHERE emp_ID = ? AND date = ?`;
         const sql5  = `SELECT siteID,accountID FROM employee_profile WHERE emp_ID = ?`;
         const sql2 = `SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date FROM attendance WHERE emp_ID = ? AND date = ? AND timeOUT IS NOT NULL`;
-        const sql3 = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date ,siteID) VALUES (?, ?, ?, ?,?)';
+        const sql3 = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date,siteID,accountID) VALUES (?, ?, ?, ?,?,?)';
         const sql4 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
 
         //const [attendance] = await db.query(sql, [emp_id, storeCurrentDate(0, 'hours')]);
