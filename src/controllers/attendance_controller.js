@@ -35,7 +35,7 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
 
     try {
         const sql  = `SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date FROM attendance WHERE emp_ID = ? AND date = ?`;
-        const sql5  = `SELECT siteID FROM employee_profile WHERE emp_ID = ?`;
+        const sql5  = `SELECT siteID,accountID FROM employee_profile WHERE emp_ID = ?`;
         const sql2 = `SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date FROM attendance WHERE emp_ID = ? AND date = ? AND timeOUT IS NOT NULL`;
         const sql3 = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date ,siteID) VALUES (?, ?, ?, ?,?)';
         const sql4 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
@@ -47,8 +47,9 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
        // if(attendance.length == 0) {
              const [siteResult] = await db.query(sql5, [emp_id]); 
              const siteID = siteResult.length > 0 ? siteResult[0].siteID : null;
+             const accountID = siteResult.length > 0 ? siteResult[0].accountID : null;
         
-            const [insert_data_site] = await db.query(sql3, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours'),siteID]);
+            const [insert_data_site] = await db.query(sql3, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours'),siteID,accountID]);
             const [update_data_clock_state] = await db.query(sql4, [1, emp_id]); 
             
 
