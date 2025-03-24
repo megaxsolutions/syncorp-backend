@@ -31,6 +31,8 @@ import logRoutes from "./routes/log_routes.js";
 import bonusRoutes from "./routes/bonus_routes.js";
 import accountRoutes from "./routes/account_routes.js";
 import breakscheduleRoutes from "./routes/break_schedule_routes.js";
+import adjustmentRoutes from "./routes/adjusment_routes.js";
+
 
 
 
@@ -82,7 +84,7 @@ app.use("/employee_levels", authenticateToken, employeeLevelRoutes);
 app.use("/admin_levels", authenticateToken, adminLevelRoutes);
 app.use("/holidays", authenticateToken, holidayRoutes);
 app.use("/cutoffs", authenticateToken, cutOffRoutes);
-app.use("/attendances", authenticateToken, attendanceRoutes);
+app.use("/attendances", attendanceRoutes);
 app.use("/dtr", authenticateToken, dtrRoutes);
 app.use("/breaks", authenticateToken, breakRoutes);
 app.use("/leave_requests", authenticateToken, leaveRequestRoutes);
@@ -98,6 +100,8 @@ app.use("/logs", authenticateToken, logRoutes);
 app.use("/bonus", authenticateToken, bonusRoutes);
 app.use("/accounts", authenticateToken, accountRoutes);
 app.use("/break_schedules", authenticateToken, breakscheduleRoutes);
+app.use("/adjustments", authenticateToken, adjustmentRoutes);
+
 
 
 

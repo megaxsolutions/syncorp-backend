@@ -26,3 +26,6 @@ Training 12
 
 employee 0
 
+attendance time adjustment
+live attendance
+coaching specific
