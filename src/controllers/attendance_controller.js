@@ -49,7 +49,7 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
              const siteID = siteResult.length > 0 ? siteResult[0].siteID : null;
              const accountID = siteResult.length > 0 ? siteResult[0].accountID : null;
         
-            const [insert_data_site] = await db.query(sql3, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours'),siteID,accountID]);
+            const [insert_data_attendance] = await db.query(sql3, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours'),siteID,accountID]);
             const [update_data_clock_state] = await db.query(sql4, [1, emp_id]); 
             
 
