@@ -35,8 +35,9 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
 
     try {
         const sql  = `SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date FROM attendance WHERE emp_ID = ? AND date = ?`;
+        const sql5  = `SELECT siteID,accountID FROM employee_profile WHERE emp_ID = ?`;
         const sql2 = `SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date FROM attendance WHERE emp_ID = ? AND date = ? AND timeOUT IS NOT NULL`;
-        const sql3 = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date ) VALUES (?, ?, ?, ?)';
+        const sql3 = 'INSERT INTO attendance (emp_ID, timeIN, clusterID, date,siteID,accountID) VALUES (?, ?, ?, ?,?,?)';
         const sql4 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
 
         //const [attendance] = await db.query(sql, [emp_id, storeCurrentDate(0, 'hours')]);
@@ -44,8 +45,13 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
 
 
        // if(attendance.length == 0) {
-            const [insert_data_site] = await db.query(sql3, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours')]);
-            const [update_data_clock_state] = await db.query(sql4, [1, emp_id]);   
+             const [siteResult] = await db.query(sql5, [emp_id]); 
+             const siteID = siteResult.length > 0 ? siteResult[0].siteID : null;
+             const accountID = siteResult.length > 0 ? siteResult[0].accountID : null;
+        
+            const [insert_data_site] = await db.query(sql3, [emp_id, storeCurrentDateTime(0, 'hours'), cluster_id, storeCurrentDate(0, 'hours'),siteID,accountID]);
+            const [update_data_clock_state] = await db.query(sql4, [1, emp_id]); 
+            
 
             return res.status(200).json({ success: 'Attendance recorded successfully.' });        
         //}
@@ -62,6 +68,7 @@ export const create_attendance_time_in = asyncHandler(async (req, res) => {
         return res.status(500).json({ error: 'Failed to create attendance.' });
     }
 });
+
 
 export const update_attendance_time_out = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
@@ -207,6 +214,70 @@ export const get_all_attendance_supervisor = asyncHandler(async (req, res) => {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
+
+
+export const get_all_attendance_live = asyncHandler(async (req, res) => {
+
+    try {
+        const sql = `
+        SELECT attendance.id, attendance.emp_ID,
+            DATE_FORMAT(attendance.timeIN, '%Y-%m-%d %H:%i:%s') AS timeIN,
+            DATE_FORMAT(attendance.timeOUT, '%Y-%m-%d %H:%i:%s') AS timeOUT, 
+            DATE_FORMAT(attendance.date, '%Y-%m-%d') AS date, 
+            employee_profile.clusterID,
+            CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
+        FROM attendance
+        LEFT JOIN employee_profile ON attendance.emp_ID = employee_profile.emp_ID
+        WHERE DATE_FORMAT(attendance.date, '%Y-%m-%d') = ?
+        `;
+       
+        const [attendance] = await db.query(sql, [storeCurrentDate(0, 'hours')]);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: attendance });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+export const get_all_attendance_supervisor_live = asyncHandler(async (req, res) => {
+    const { supervisor_emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter
+
+    try {
+        const sql = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+
+        const [data_admin_login] = await db.query(sql, [supervisor_emp_id]);
+
+        if (data_admin_login.length === 0) {
+            return res.status(404).json({ error: 'Supervisor not found.' });
+        }
+
+        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == null || data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
+        const placeholders = bucketArray.map(() => '?').join(', ');
+
+        const sql2 = `
+        SELECT attendance.id, attendance.emp_ID,
+            DATE_FORMAT(attendance.timeIN, '%Y-%m-%d %H:%i:%s') AS timeIN,
+            DATE_FORMAT(attendance.timeOUT, '%Y-%m-%d %H:%i:%s') AS timeOUT, 
+            DATE_FORMAT(attendance.date, '%Y-%m-%d') AS date, 
+            employee_profile.clusterID,
+            CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
+        FROM attendance
+        LEFT JOIN employee_profile ON attendance.emp_ID = employee_profile.emp_ID
+        WHERE DATE_FORMAT(attendance.date, '%Y-%m-%d') = ? AND employee_profile.clusterID IN (${placeholders})
+        `;
+
+       
+        const params = [storeCurrentDate(0, 'hours'), ...bucketArray];
+        const [attendance] = await db.query(sql2, params);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: attendance });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
 
 
 
