@@ -224,7 +224,7 @@ export const delete_break_shift_schedule_multiple_day = asyncHandler(async (req,
     try {
         const sql  = 'SELECT * FROM login'; // Use a parameterized query
 
-        const sqlDelete = `DELETE FROM shift_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') IN (?) AND schedule_type = ? AND is_overtime = ? AND is_break = ?`;
+        const sqlDelete = `DELETE FROM break_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') IN (?) AND schedule_type = ?`;
 
         const selected_days = array_selected_days;
 
@@ -240,7 +240,7 @@ export const delete_break_shift_schedule_multiple_day = asyncHandler(async (req,
 
         const delete_shift_schedules = await Promise.all(
             emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlDelete, [emp_id, days, schedule_type_id, 0, 1]);
+                const [result] = await db.query(sqlDelete, [emp_id, days, schedule_type_id]);
                 if(result.affectedRows > 0) {
                     employees_affected++;
                 }
