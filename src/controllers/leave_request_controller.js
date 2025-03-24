@@ -182,7 +182,7 @@ export const get_all_user_leave_request = asyncHandler(async (req, res) => {
             leave_type, emp_ID, approved_by, 
             DATE_FORMAT(date_approved, '%Y-%m-%d') AS date_approved,
             status, details, file_uploaded
-            FROM leave_request WHERE emp_ID = ?`; // Use a parameterized query
+            FROM leave_request WHERE emp_ID = ? ORDER BY id DESC`; // Use a parameterized query
 
         const [leave_request] = await db.query(sql, [emp_id]);
 
