@@ -21,6 +21,26 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
     return formattedExpirationDateTime;
 }
 
+// Function to get the current date and time in Asia/Manila and store it in the database
+function storeCurrentDateTime(expirationAmount, expirationUnit) {
+    // Get the current date and time in Asia/Manila timezone
+    const currentDateTime = moment.tz("Asia/Manila");
+
+    // Calculate the expiration date and time
+    const expirationDateTime = currentDateTime.clone().add(expirationAmount, expirationUnit);
+
+    // Format the current date and expiration date
+    const formattedCurrentDateTime = currentDateTime.format('YYYY-MM-DD HH:mm:ss');
+    const formattedExpirationDateTime = expirationDateTime.format('YYYY-MM-DD HH:mm:ss');
+
+    // Return both current and expiration date-time
+    return formattedExpirationDateTime;
+    // return {
+    //     currentDateTime: formattedCurrentDateTime,
+    //     expirationDateTime: formattedExpirationDateTime
+    // };
+}
+
 export const create_coaching = asyncHandler(async (req, res) => {
     const { emp_id, coached_emp_id, coaching_type, metrix_1, metrix_2, metrix_3, metrix_4 } = req.body;
 
@@ -44,12 +64,31 @@ export const update_coaching = asyncHandler(async (req, res) => {
         const [result] = await db.query(sql, [emp_id, coached_emp_id, coaching_type, metrix_1, metrix_2, metrix_3, metrix_4, coaching_id]);
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Coaching type not found.' });
+            return res.status(404).json({ error: 'Coaching not found.' });
         }
 
-        return res.status(200).json({ success: 'Coaching type successfully updated.' });
+        return res.status(200).json({ success: 'Coaching successfully updated.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to update coaching type.' });
+        return res.status(500).json({ error: 'Failed to update coaching.' });
+    }
+});
+
+
+
+export const update_coaching_acknowledgement = asyncHandler(async (req, res) => {
+    const { coaching_id, emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter
+
+    try {
+        const sql = 'UPDATE coaching SET emp_ID = ?, acknowledge_datetime = ? WHERE id = ?';
+        const [result] = await db.query(sql, [emp_id, storeCurrentDateTime(0, 'hours'), coaching_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Coaching not found.' });
+        }
+
+        return res.status(200).json({ success: 'Coaching acknowledgement successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update coaching acknowledgement.' });
     }
 });
 
@@ -77,6 +116,21 @@ export const get_all_coaching = asyncHandler(async (req, res) => {
         const sql  = 'SELECT * FROM coaching'; // Use a parameterized query
 
         const [coaching] = await db.query(sql);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: coaching });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+export const get_all_user_coaching = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter
+
+    try {
+        const sql  = 'SELECT * FROM coaching WHERE emp_ID = ?'; // Use a parameterized query
+
+        const [coaching] = await db.query(sql, [emp_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ data: coaching });
