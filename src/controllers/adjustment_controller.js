@@ -111,7 +111,7 @@ export const get_all_user_adjustment = asyncHandler(async (req, res) => {
         const [adjustment] = await db.query(sql, [emp_id]);
    
         // Return the merged results in the response
-        return res.status(200).json({ data: departments });
+        return res.status(200).json({ data: adjustment });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
@@ -125,7 +125,7 @@ export const get_all_adjustment = asyncHandler(async (req, res) => {
         const [adjustment] = await db.query(sql);
    
         // Return the merged results in the response
-        return res.status(200).json({ data: departments });
+        return res.status(200).json({ data: adjustment });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
