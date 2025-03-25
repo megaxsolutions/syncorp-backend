@@ -14,15 +14,10 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
     const expirationDateTime = currentDateTime.clone().add(expirationAmount, expirationUnit);
 
     // Format the current date and expiration date
-    const formattedCurrentDateTime = currentDateTime.format('YYYY-MM-DD');
     const formattedExpirationDateTime = expirationDateTime.format('YYYY-MM-DD');
 
     // Return both current and expiration date-time
     return formattedExpirationDateTime;
-    // return {
-    //     currentDateTime: formattedCurrentDateTime,
-    //     expirationDateTime: formattedExpirationDateTime
-    // };
 }
 
 
@@ -32,7 +27,6 @@ export const create_adjustment = asyncHandler(async (req, res) => {
 
 
     try {
-
         const sql  = 'SELECT * FROM adjustment WHERE attendance_id = ?'; // Use a parameterized query
         const sql2 = 'INSERT INTO adjustment (date, timein, timeout, emp_ID, status, reason, attendance_id) VALUES (?, ?, ?, ?, ?, ?, ?)';
 
@@ -43,15 +37,47 @@ export const create_adjustment = asyncHandler(async (req, res) => {
             return res.status(400).json({ error: 'Adjustment already exist.' });
         }
 
-        const [adjustment] = await db.query(sql2, [ storeCurrentDate(0, 'hours'), time_in, time_out, emp_id, 0, reason, attendance_id]);
+        const [adjustment] = await db.query(sql2, [storeCurrentDate(0, 'hours'), time_in, time_out, emp_id, 0, reason, attendance_id]);
 
-      
         // Return the merged results in the response
         return res.status(200).json({ success: 'Adjustment successfully created.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create adjustment.' });
     }
 });
+
+
+
+
+export const update_approval_adjustment = asyncHandler(async (req, res) => {
+    const { status, admin_emp_id } = req.body;
+    const { adjustment_id } = req.params; // Assuming department_id is passed as a URL parameter
+
+    try {
+        const sql   = 'SELECT * FROM adjustment WHERE id = ? AND status != 0'; // Use a parameterized query
+        const sql2  = 'SELECT * FROM adjustment WHERE id = ? AND status = 0'; // Use a parameterized query
+        const sql3 = 'UPDATE adjustment SET status = ?, approved_by = ?, date_approved_by = ? WHERE id = ?';
+        const sql4 = 'UPDATE attendance SET timeIN = ?, timeOUT = ? WHERE id = ?';
+
+        const [data_adjustment] = await db.query(sql, [adjustment_id]);
+        const [data_adjustment_2] = await db.query(sql2, [adjustment_id]);
+
+
+        if (data_adjustment.length >= 1) {
+            return res.status(400).json({ error: 'This adjustment has already been processed.' });        
+        }      
+
+
+        const [update_adjustment] = await db.query(sql3, [status, admin_emp_id, storeCurrentDate(0, 'hours'), adjustment_id]);
+        const [update_attendance] = await db.query(sql4, [data_adjustment_2[0]['timein'], data_adjustment_2[0]['timeout'], data_adjustment_2[0]['attendance_id']]);
+
+        return res.status(200).json({ success: 'Adjustment successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update adjustment.'  });
+    }
+});
+
+
 
 export const update_adjustment = asyncHandler(async (req, res) => {
     const { time_in, time_out, reason } = req.body;
