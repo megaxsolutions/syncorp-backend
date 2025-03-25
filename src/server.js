@@ -32,6 +32,8 @@ import bonusRoutes from "./routes/bonus_routes.js";
 import accountRoutes from "./routes/account_routes.js";
 import breakscheduleRoutes from "./routes/break_schedule_routes.js";
 import adjustmentRoutes from "./routes/adjusment_routes.js";
+import eodRoutes from "./routes/eod_routes.js";
+
 
 
 
@@ -101,6 +103,8 @@ app.use("/bonus", authenticateToken, bonusRoutes);
 app.use("/accounts", authenticateToken, accountRoutes);
 app.use("/break_schedules", authenticateToken, breakscheduleRoutes);
 app.use("/adjustments", authenticateToken, adjustmentRoutes);
+app.use("/eod", authenticateToken, eodRoutes);
+
 
 
 
