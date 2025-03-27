@@ -80,10 +80,10 @@ export const get_all_eod_supervisor = asyncHandler(async (req, res) => {
 
         //const sql2 = `SELECT * FROM employee_profile WHERE clusterID IN (${placeholders})`;
 
-        const [attendance] = await db.query(sql2, bucketArray);
+        const [eod] = await db.query(sql2, bucketArray);
 
         // Return the merged results in the response
-        return res.status(200).json({ data: attendance });
+        return res.status(200).json({ data: eod });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
