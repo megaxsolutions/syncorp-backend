@@ -96,7 +96,7 @@ export const create_employee = asyncHandler(async (req, res) => {
          emergency_contact_person, emergency_contact_number, sss, 
          pagibig, philhealth, tin, basic_pay, employee_status, 
          positionID, employee_level, healthcare, tranpo_allowance, food_allowance, 
-         account_id, drug_test, xray, med_cert, nbi_clearance  } = req.body;
+         account_id, drug_test, xray, med_cert, nbi_clearance, employment_status } = req.body;
 
          const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
          const filename_insert = `users/${filename}`; 
@@ -116,7 +116,7 @@ export const create_employee = asyncHandler(async (req, res) => {
         
             const sql  = 'INSERT INTO id_generator (datetime_created) VALUES (?)';
             const sql2 = 'INSERT INTO login (emp_ID, password, expiry_date) VALUES (?, ?, ?)';
-            const sql3 = 'INSERT INTO employee_profile (emp_ID, fName, mName, lName, bDate, date_hired, departmentID, clusterID, siteID, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, photo, accountID, drug_test, xray, med_cert, nbi_clearance) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            const sql3 = 'INSERT INTO employee_profile (emp_ID, fName, mName, lName, bDate, date_hired, departmentID, clusterID, siteID, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, photo, accountID, drug_test, xray, med_cert, nbi_clearance, employment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const sql4 = 'INSERT INTO employee_profile_benefits (emp_ID, sss, pagibig, philhealth, tin, basic_pay, healthcare, tranpo_allowance, food_allowance) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const sql5 = 'INSERT INTO employee_profile_standing (emp_ID, employee_status, positionID, date_added, datetime_updated) VALUES (?, ?, ?, ?, ?)';
             const sql6 = 'INSERT INTO clock_state (emp_ID, state, break_state) VALUES (?, ?, ?)';
@@ -125,7 +125,7 @@ export const create_employee = asyncHandler(async (req, res) => {
 
             const [insert_data_id_generator] = await db.query(sql, [storeCurrentDateTime(0, 'hours')]);
             const [insert_data_login] = await db.query(sql2, [insert_data_id_generator['insertId'], hash, storeCurrentDate(3, 'months')]);
-            const [insert_data_employee_profile] = await db.query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : null, account_id, drug_test, xray, med_cert, nbi_clearance]);
+            const [insert_data_employee_profile] = await db.query(sql3, [insert_data_id_generator['insertId'], fname, mname, lname, birthdate, date_hired, department_id, cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, employee_level, req.file ? filename_insert : null, account_id, drug_test, xray, med_cert, nbi_clearance, employment_status]);
             const [insert_data_employee_profile_benefits] = await db.query(sql4, [insert_data_id_generator['insertId'], sss, pagibig, philhealth, tin, basic_pay, healthcare, tranpo_allowance, food_allowance]);
             const [insert_data_employee_profile_standing] = await db.query(sql5, [insert_data_id_generator['insertId'], employee_status, positionID, storeCurrentDateTime(0, 'months'), storeCurrentDateTime(0, 'months')]);
             const [insert_data_clock_state] = await db.query(sql6, [insert_data_id_generator['insertId'], 0, 0]);
@@ -283,7 +283,7 @@ export const update_employee = asyncHandler(async (req, res) => {
             emergency_contact_person, emergency_contact_number, sss, 
             pagibig, philhealth, tin, basic_pay, employee_status, 
             positionID, employee_level, healthcare, tranpo_allowance, food_allowance, 
-            account_id, drug_test, xray, med_cert, nbi_clearance  } = req.body;
+            account_id, drug_test, xray, med_cert, nbi_clearance, employment_status  } = req.body;
 
 
     const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
@@ -308,7 +308,8 @@ export const update_employee = asyncHandler(async (req, res) => {
          bDate = ?, date_hired = ?, departmentID = ?, clusterID = ?, siteID = ?, 
          email = ?, phone = ?, address = ?, emergency_contact_person = ?, 
          emergency_contact_number = ?, employee_level = ?, photo = ?,
-         accountID = ?, drug_test = ?, xray = ?, med_cert = ?, nbi_clearance = ?
+         accountID = ?, drug_test = ?, xray = ?, med_cert = ?, nbi_clearance = ?,
+         employment_status = ?
          WHERE emp_ID = ?`;
        
         const sql2 = 'UPDATE employee_profile_benefits SET sss = ?, pagibig = ?, philhealth = ?, tin = ?, basic_pay = ?, healthcare = ?, tranpo_allowance = ?, food_allowance = ? WHERE emp_ID = ?';
@@ -318,7 +319,7 @@ export const update_employee = asyncHandler(async (req, res) => {
         const [insert_data_employee_profile] = await db.query(sql, [fname, mname, lname, birthdate, date_hired, department_id, 
             cluster_id, site_id, email, phone, address, emergency_contact_person, emergency_contact_number, 
             employee_level, req.file ? filename_insert : employee_profile[0]['photo'], 
-            account_id, drug_test, xray, med_cert, nbi_clearance, emp_id]);
+            account_id, drug_test, xray, med_cert, nbi_clearance, employment_status, emp_id]);
         const [insert_data_employee_profile_benefits] = await db.query(sql2, [sss, pagibig, philhealth, tin, basic_pay, healthcare, tranpo_allowance, food_allowance, emp_id]);
         const [insert_data_employee_profile_standing] = await db.query(sql3, [employee_status, positionID, storeCurrentDateTime(0, 'months'), emp_id]);
 

@@ -96,7 +96,8 @@ export const delete_site = asyncHandler(async (req, res) => {
         const sql3 = 'INSERT INTO logs (details, datetime, user_level, emp_ID, is_read) VALUES (?, ?, ?, ?, ?)';
         const sql4 = 'SELECT * FROM employee_profile WHERE siteID = ?'; // Use a parameterized query
         const sql5 = 'SELECT * FROM departments WHERE siteID = ?'; // Use a parameterized query
-        const sql6 = 'DELETE FROM sites WHERE id = ?';
+        const sql6 = 'SELECT * FROM accounts WHERE siteID = ?'; // Use a parameterized query
+        const sql7 = 'DELETE FROM sites WHERE id = ?';
 
         
         const [data_site] = await db.query(sql, [site_id]);
@@ -112,6 +113,8 @@ export const delete_site = asyncHandler(async (req, res) => {
 
         const [data_employee_profile] = await db.query(sql4, [site_id]);
         const [data_departments] = await db.query(sql5, [site_id]);
+        const [data_accounts] = await db.query(sql6, [site_id]);
+
 
 
         if(data_employee_profile.length >= 1) {
@@ -122,6 +125,10 @@ export const delete_site = asyncHandler(async (req, res) => {
             return res.status(400).json({ error: `Cannot be deleted ${data_departments.length == 1 ? `${ data_departments.length } row has` : `${ data_departments.length } rows have` } been affected.` });
         }
 
+        if(data_accounts.length >= 1) {
+            return res.status(400).json({ error: `Cannot be deleted ${data_accounts.length == 1 ? `${ data_accounts.length } row has` : `${ data_accounts.length } rows have` } been affected.` });
+        }
+
         const insert_logs_admin_level = await Promise.all(
             data_admin_login.map(async (admin_login) => {
                 await db.query(sql3, ['Site has been deleted: ' + data_site[0]['siteName'], storeCurrentDateTime(0, 'hours'), 1, admin_login.emp_ID, 0]);
@@ -130,7 +137,7 @@ export const delete_site = asyncHandler(async (req, res) => {
         );
 
         if(data_employee_profile.length == 0) {
-            const [result] = await db.query(sql6, [site_id]);
+            const [result] = await db.query(sql7, [site_id]);
 
             return res.status(200).json({ success: 'Site successfully deleted.' });
         }
