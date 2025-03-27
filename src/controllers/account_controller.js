@@ -129,9 +129,9 @@ export const delete_account = asyncHandler(async (req, res) => {
 
         const [data_employee_profile] = await db.query(sql5, [account_id]);
 
-        if(data_site.length >= 1) {
-            return res.status(400).json({ error: `Cannot be deleted ${data_site.length == 1 ? `${ data_site.length } row has` : `${ data_site.length } rows have` } been affected.` });
-        }
+        // if(data_site.length >= 1) {
+        //     return res.status(400).json({ error: `Cannot be deleted ${data_site.length == 1 ? `${ data_site.length } row has` : `${ data_site.length } rows have` } been affected.` });
+        // }
 
 
         if(data_employee_profile.length >= 1) {

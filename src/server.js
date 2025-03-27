@@ -33,6 +33,7 @@ import accountRoutes from "./routes/account_routes.js";
 import breakscheduleRoutes from "./routes/break_schedule_routes.js";
 import adjustmentRoutes from "./routes/adjusment_routes.js";
 import eodRoutes from "./routes/eod_routes.js";
+import payrollRoutes from "./routes/payroll_routes.js";
 
 
 
@@ -104,6 +105,8 @@ app.use("/accounts", authenticateToken, accountRoutes);
 app.use("/break_schedules", authenticateToken, breakscheduleRoutes);
 app.use("/adjustments", authenticateToken, adjustmentRoutes);
 app.use("/eod", authenticateToken, eodRoutes);
+app.use("/payrolls", payrollRoutes);
+
 
 
 
