@@ -132,7 +132,13 @@ export const get_all_user_adjustment = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
-        const sql  = 'SELECT * FROM adjustment WHERE emp_ID = ?'; // Use a parameterized query
+        const sql  = `SELECT 
+        DATE_FORMAT(timein, '%Y-%m-%d %H:%i:%s') AS timein,
+        DATE_FORMAT(timeout, '%Y-%m-%d %H:%i:%s') AS timeout,
+        DATE_FORMAT(date_approved_by, '%Y-%m-%d') AS date_approved_by,
+        DATE_FORMAT(date, '%Y-%m-%d') AS date,
+        emp_ID, status, approved_by,reason, attendance_id 
+        FROM adjustment WHERE emp_ID = ?`; // Use a parameterized query
 
         const [adjustment] = await db.query(sql, [emp_id]);
    
@@ -146,7 +152,13 @@ export const get_all_user_adjustment = asyncHandler(async (req, res) => {
 
 export const get_all_adjustment = asyncHandler(async (req, res) => {
     try {
-        const sql  = 'SELECT * FROM adjustment'; // Use a parameterized query
+        const sql  = `SELECT 
+        DATE_FORMAT(timein, '%Y-%m-%d %H:%i:%s') AS timein,
+        DATE_FORMAT(timeout, '%Y-%m-%d %H:%i:%s') AS timeout,
+        DATE_FORMAT(date_approved_by, '%Y-%m-%d') AS date_approved_by,
+        DATE_FORMAT(date, '%Y-%m-%d') AS date,
+        emp_ID, status, approved_by,reason, attendance_id 
+        FROM adjustment`; // Use a parameterized query
 
         const [adjustment] = await db.query(sql);
    
