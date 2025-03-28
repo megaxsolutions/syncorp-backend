@@ -132,7 +132,7 @@ export const get_all_user_adjustment = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
 
     try {
-        const sql  = `SELECT 
+        const sql  = `SELECT id,
         DATE_FORMAT(timein, '%Y-%m-%d %H:%i:%s') AS timein,
         DATE_FORMAT(timeout, '%Y-%m-%d %H:%i:%s') AS timeout,
         DATE_FORMAT(date_approved_by, '%Y-%m-%d') AS date_approved_by,
@@ -152,7 +152,7 @@ export const get_all_user_adjustment = asyncHandler(async (req, res) => {
 
 export const get_all_adjustment = asyncHandler(async (req, res) => {
     try {
-        const sql  = `SELECT 
+        const sql  = `SELECT id,
         DATE_FORMAT(timein, '%Y-%m-%d %H:%i:%s') AS timein,
         DATE_FORMAT(timeout, '%Y-%m-%d %H:%i:%s') AS timeout,
         DATE_FORMAT(date_approved_by, '%Y-%m-%d') AS date_approved_by,
