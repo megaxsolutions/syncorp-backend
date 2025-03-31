@@ -29,3 +29,16 @@ employee 0
 attendance time adjustment
 live attendance
 coaching specific
+
+1 for regular
+2 for day off
+
+off schedule
+
+signature
+att_incentives
+bonus cut off id
+complexity
+
+
+

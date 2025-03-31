@@ -3,37 +3,37 @@ import cors from 'cors';
 
 import { app, server, io, db } from './config/config.js'; // Import the database connection
 
-import employeeRoutes from "./routes/employee_routes.js";
-import mainRoutes from "./routes/main_routes.js";
-import departmentRoutes from "./routes/department_routes.js";
-import siteRoutes from "./routes/site_routes.js";
-import clusterRoutes from "./routes/cluster_routes.js";
-import positionRoutes from "./routes/position_routes.js";
-import employeeLevelRoutes from "./routes/employee_level_routes.js";
-import adminRoutes from "./routes/admin_routes.js";
-import holidayRoutes from "./routes/holiday_routes.js";
-import cutOffRoutes from "./routes/cutoff_routes.js";
-import attendanceRoutes from "./routes/attendance_routes.js";
-import dtrRoutes from "./routes/dtr_routes.js";
-import recoveryRoutes from "./routes/recovery_routes.js";
-import adminLevelRoutes from "./routes/admin_level_routes.js";
-import breakRoutes from "./routes/break_routes.js";
-import leaveRequestRoutes from "./routes/leave_request_routes.js";
-import leaveTypeRoutes from "./routes/leave_type_routes.js";
-import overtimeTypeRoutes from "./routes/overtime_type_routes.js";
-import overtimeRequestRoutes from "./routes/overtime_request_routes.js";
-import bulletinRoutes from "./routes/bulletin_routes.js";
-import shiftscheduleRoutes from "./routes/shift_schedule_routes.js";
-import coachingTypeRoutes from "./routes/coaching_type_routes.js";
-import coachingRoutes from "./routes/coaching_routes.js";
-import payslipRoutes from "./routes/payslip_routes.js";
-import logRoutes from "./routes/log_routes.js";
-import bonusRoutes from "./routes/bonus_routes.js";
-import accountRoutes from "./routes/account_routes.js";
-import breakscheduleRoutes from "./routes/break_schedule_routes.js";
-import adjustmentRoutes from "./routes/adjusment_routes.js";
-import eodRoutes from "./routes/eod_routes.js";
-import payrollRoutes from "./routes/payroll_routes.js";
+import employeeRoutes from "./routes/sync_db/employee_routes.js";
+import mainRoutes from "./routes/sync_db/main_routes.js";
+import departmentRoutes from "./routes/sync_db/department_routes.js";
+import siteRoutes from "./routes/sync_db/site_routes.js";
+import clusterRoutes from "./routes/sync_db/cluster_routes.js";
+import positionRoutes from "./routes/sync_db/position_routes.js";
+import employeeLevelRoutes from "./routes/sync_db/employee_level_routes.js";
+import adminRoutes from "./routes/sync_db/admin_routes.js";
+import holidayRoutes from "./routes/sync_db/holiday_routes.js";
+import cutOffRoutes from "./routes/sync_db/cutoff_routes.js";
+import attendanceRoutes from "./routes/sync_db/attendance_routes.js";
+import dtrRoutes from "./routes/sync_db/dtr_routes.js";
+import recoveryRoutes from "./routes/sync_db/recovery_routes.js";
+import adminLevelRoutes from "./routes/sync_db/admin_level_routes.js";
+import breakRoutes from "./routes/sync_db/break_routes.js";
+import leaveRequestRoutes from "./routes/sync_db/leave_request_routes.js";
+import leaveTypeRoutes from "./routes/sync_db/leave_type_routes.js";
+import overtimeTypeRoutes from "./routes/sync_db/overtime_type_routes.js";
+import overtimeRequestRoutes from "./routes/sync_db/overtime_request_routes.js";
+import bulletinRoutes from "./routes/sync_db/bulletin_routes.js";
+import shiftscheduleRoutes from "./routes/sync_db/shift_schedule_routes.js";
+import coachingTypeRoutes from "./routes/sync_db/coaching_type_routes.js";
+import coachingRoutes from "./routes/sync_db/coaching_routes.js";
+import payslipRoutes from "./routes/sync_db/payslip_routes.js";
+import logRoutes from "./routes/sync_db/log_routes.js";
+import bonusRoutes from "./routes/sync_db/bonus_routes.js";
+import accountRoutes from "./routes/sync_db/account_routes.js";
+import breakscheduleRoutes from "./routes/sync_db/break_schedule_routes.js";
+import adjustmentRoutes from "./routes/sync_db/adjusment_routes.js";
+import eodRoutes from "./routes/sync_db/eod_routes.js";
+import payrollRoutes from "./routes/sync_db/payroll_routes.js";
 
 
 
@@ -74,8 +74,8 @@ app.use(cors());
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-app.use("/admins", adminRoutes);
 app.use("/employees", employeeRoutes);
+app.use("/admins", adminRoutes);
 app.use("/recovery", recoveryRoutes);
 
 app.use("/main", authenticateToken, mainRoutes);
@@ -105,7 +105,7 @@ app.use("/accounts", authenticateToken, accountRoutes);
 app.use("/break_schedules", authenticateToken, breakscheduleRoutes);
 app.use("/adjustments", authenticateToken, adjustmentRoutes);
 app.use("/eod", authenticateToken, eodRoutes);
-app.use("/payrolls", payrollRoutes);
+app.use("/payrolls", authenticateToken, payrollRoutes);
 
 
 

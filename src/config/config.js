@@ -22,7 +22,18 @@ const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
+  database: process.env.DB_NAME_1,
+  port: 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+const db2 = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME_2,
   port: 3306,
   waitForConnections: true,
   connectionLimit: 10,
@@ -30,11 +41,22 @@ const db = mysql.createPool({
 });
 
 // Function to check database connection
-const checkDatabaseConnection = async () => {
+const checkDatabaseConnection1 = async () => {
   try {
     const connection = await db.getConnection();
     connection.query('SELECT 1');
-    console.log('Database connected successfully');
+    console.log('Database 1 connected successfully');
+    connection.release(); // Release the connection back to the pool
+  } catch (error) {
+    console.error('Error connecting to the database:', error);
+  }
+};
+
+const checkDatabaseConnection2 = async () => {
+  try {
+    const connection = await db2.getConnection();
+    connection.query('SELECT 1');
+    console.log('Database 2 connected successfully');
     connection.release(); // Release the connection back to the pool
   } catch (error) {
     console.error('Error connecting to the database:', error);
@@ -42,13 +64,14 @@ const checkDatabaseConnection = async () => {
 };
 
 // Check the database connection when the application starts
-checkDatabaseConnection();
+checkDatabaseConnection1();
+checkDatabaseConnection2();
 
 
 
 
 // Export the server and io
-export { server, io, app, db };
+export { server, io, app, db, db2 };
 
 // Optionally, you can also export the app if needed
 export default app;
