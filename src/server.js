@@ -34,6 +34,13 @@ import breakscheduleRoutes from "./routes/sync_db/break_schedule_routes.js";
 import adjustmentRoutes from "./routes/sync_db/adjusment_routes.js";
 import eodRoutes from "./routes/sync_db/eod_routes.js";
 import payrollRoutes from "./routes/sync_db/payroll_routes.js";
+import complexityRoutes from "./routes/sync_db/complexity_routes.js";
+import attendanceIncentivesRoutes from "./routes/sync_db/att_incentives_routes.js";
+import signatureRoutes from "./routes/sync_db/signature_routes.js";
+
+
+
+
 
 import courseCategoryRoutes from "./routes/lms/course_category_routes.js";
 import courseRoutes from "./routes/lms/course_routes.js";
@@ -117,6 +124,13 @@ app.use("/break_schedules", authenticateToken, breakscheduleRoutes);
 app.use("/adjustments", authenticateToken, adjustmentRoutes);
 app.use("/eod", authenticateToken, eodRoutes);
 app.use("/payrolls", authenticateToken, payrollRoutes);
+app.use("/complexity", authenticateToken, complexityRoutes);
+app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes);
+app.use("/signatures", authenticateToken, signatureRoutes);
+
+
+
+
 
 
 //lms
