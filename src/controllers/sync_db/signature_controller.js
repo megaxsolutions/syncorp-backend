@@ -86,14 +86,14 @@ export const update_signature = asyncHandler(async (req, res) => {
 });
 
 export const delete_signature = asyncHandler(async (req, res) => {
-    const { bulletin_id } = req.params; // Assuming bulletin_id is passed as a URL parameter
+    const { signature_id } = req.params; // Assuming bulletin_id is passed as a URL parameter
 
     try {
         const sql  = 'SELECT * FROM signatures WHERE id = ?'; // Use a parameterized query
         const sql2 = 'DELETE FROM signatures WHERE id = ?';
 
-        const [signature] = await db.query(sql, [bulletin_id]);
-        const [result] = await db.query(sql2, [bulletin_id]);
+        const [signature] = await db.query(sql, [signature_id]);
+        const [result] = await db.query(sql2, [signature_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Signature not found.' });
@@ -115,7 +115,9 @@ export const delete_signature = asyncHandler(async (req, res) => {
 
 export const get_all_signature = asyncHandler(async (req, res) => {
     try {
-        const sql  = 'SELECT * FROM signatures'; // Use a parameterized query
+        const sql  = `SELECT id, emp_ID, signature,
+        DATE_FORMAT(stamp, '%Y-%m-%d %H:%i:%s') AS stamp
+        FROM signatures WHERE emp_ID = ?`; // Use a parameterized query
 
         const [signature] = await db.query(sql);
 

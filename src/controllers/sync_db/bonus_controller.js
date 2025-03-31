@@ -21,12 +21,12 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 }
 
 export const create_bonus = asyncHandler(async (req, res) => {
-    const { perf_bonus, client_funded, supervisor_emp_id, emp_id, status } = req.body;
+    const { perf_bonus, client_funded, supervisor_emp_id, emp_id, status, cutoff_id } = req.body;
 
     try {
-        const sql = 'INSERT INTO bonus (perf_bonus, client_funded, plotted_by, emp_ID, status) VALUES (?, ?, ?, ?, ?)';
+        const sql = 'INSERT INTO bonus (perf_bonus, client_funded, plotted_by, emp_ID, status, cutoff_ID) VALUES (?, ?, ?, ?, ?, ?)';
 
-        const [insert_data_break] = await db.query(sql, [perf_bonus, client_funded, supervisor_emp_id, emp_id, status]);
+        const [insert_data_break] = await db.query(sql, [perf_bonus, client_funded, supervisor_emp_id, emp_id, status, cutoff_id]);
 
     
         // Return the merged results in the response
@@ -37,13 +37,13 @@ export const create_bonus = asyncHandler(async (req, res) => {
 });
 
 export const update_bonus = asyncHandler(async (req, res) => {
-    const { perf_bonus, client_funded,  supervisor_emp_id, emp_id } = req.body;
+    const { perf_bonus, client_funded,  supervisor_emp_id, emp_id, cutoff_id } = req.body;
     const { bonus_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
 
-        const sql2 = 'UPDATE bonus SET perf_bonus = ?, client_funded = ?, plotted_by = ?, emp_ID = ? WHERE id = ?';
-        const [update_data_breaks] = await db.query(sql2, [perf_bonus, client_funded, supervisor_emp_id, emp_id, bonus_id]);
+        const sql2 = 'UPDATE bonus SET perf_bonus = ?, client_funded = ?, plotted_by = ?, emp_ID = ?, cutoff_ID = ? WHERE id = ?';
+        const [update_data_breaks] = await db.query(sql2, [perf_bonus, client_funded, supervisor_emp_id, emp_id, cutoff_id, bonus_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ success: 'Bonus successfully updated.' });
@@ -90,7 +90,7 @@ export const get_all_bonus = asyncHandler(async (req, res) => {
         status, status2,
         DATE_FORMAT(datetime_approved, '%Y-%m-%d %H:%i:%s') AS datetime_approved,  
         DATE_FORMAT(datetime_approved2, '%Y-%m-%d %H:%i:%s') AS datetime_approved2,  
-        emp_ID
+        emp_ID, cutoff_ID
         FROM bonus`; // Use a parameterized query
                                   
         const [bonus] = await db.query(sql);
@@ -123,7 +123,7 @@ export const get_all_bonus_supervisor = asyncHandler(async (req, res) => {
         bonus.approved_by, bonus.approved_by2,
         DATE_FORMAT(bonus.datetime_approved, '%Y-%m-%d %H:%i:%s') AS datetime_approved,  
         DATE_FORMAT(bonus.datetime_approved2, '%Y-%m-%d %H:%i:%s') AS datetime_approved2,  
-        bonus.emp_ID, bonus.status, bonus.status2
+        bonus.emp_ID, bonus.status, bonus.status2, bonus.cutoff_ID
         FROM bonus
         LEFT JOIN employee_profile ON bonus.emp_ID = employee_profile.emp_ID
         WHERE employee_profile.clusterID IN (${placeholders})

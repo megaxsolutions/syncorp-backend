@@ -1,5 +1,5 @@
 import { Router } from "express";
-import * as BulletinController  from '../../controllers/sync_db/signature_controller.js'; // Adjust the path as necessary
+import * as SignatureController  from '../../controllers/sync_db/signature_controller.js'; // Adjust the path as necessary
 
 import { authenticateToken } from "../../middleware/auth.js";
 
@@ -36,14 +36,13 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-const bulletinRoutes = Router();
+const signatureRoutes = Router();
 
 
-bulletinRoutes.post('/add_bulletin', upload.single('file_uploaded'), BulletinController.create_bulletin);
-bulletinRoutes.put('/update_bulletin/:bulletin_id/:emp_id', upload.single('file_uploaded'), BulletinController.update_bulletin);
-bulletinRoutes.delete('/delete_bulletin/:bulletin_id', BulletinController.delete_bulletin);
-bulletinRoutes.get('/get_all_bulletin', BulletinController.get_all_bulletin);
+signatureRoutes.post('/add_bulletin', upload.single('file_uploaded'), SignatureController.create_signature);
+signatureRoutes.put('/update_signature/:signature_id/:emp_id', upload.single('file_uploaded'), SignatureController.update_signature);
+signatureRoutes.delete('/delete_signature/:signature_id', SignatureController.delete_signature);
+signatureRoutes.get('/get_all_signature', SignatureController.get_all_signature);
 
 
-
-export default bulletinRoutes;
+export default signatureRoutes;
