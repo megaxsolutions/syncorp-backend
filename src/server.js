@@ -35,6 +35,16 @@ import adjustmentRoutes from "./routes/sync_db/adjusment_routes.js";
 import eodRoutes from "./routes/sync_db/eod_routes.js";
 import payrollRoutes from "./routes/sync_db/payroll_routes.js";
 
+import courseCategoryRoutes from "./routes/lms/course_category_routes.js";
+import courseRoutes from "./routes/lms/course_routes.js";
+import materialRoutes from "./routes/lms/material_routes.js";
+import submissionRoutes from "./routes/lms/submission_routes.js";
+import userRoutes from "./routes/lms/user_routes.js";
+
+
+
+
+
 
 
 
@@ -74,6 +84,7 @@ app.use(cors());
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+//sync_db
 app.use("/employees", employeeRoutes);
 app.use("/admins", adminRoutes);
 app.use("/recovery", recoveryRoutes);
@@ -108,8 +119,12 @@ app.use("/eod", authenticateToken, eodRoutes);
 app.use("/payrolls", authenticateToken, payrollRoutes);
 
 
-
-
+//lms
+app.use("/course_catergory", authenticateToken, courseCategoryRoutes);
+app.use("/courses", authenticateToken, courseRoutes);
+app.use("/materials", authenticateToken, materialRoutes);
+app.use("/submissions", authenticateToken, submissionRoutes);
+app.use("/users", authenticateToken, userRoutes);
 
 
 
