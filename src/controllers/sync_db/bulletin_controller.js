@@ -69,12 +69,6 @@ export const update_bulletin = asyncHandler(async (req, res) => {
         if (bulletin.length === 0) {
             return res.status(404).json({ message: 'Bulletin not found' });
         }
-
-        const [result] = await db.query(sql2, [filename_insert || bulletin[0]['file_name'], bulletin_id]);
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Bulletin not found.' });
-        }
         
         if (req.file) {
             const filePath = path.join(uploadsDir, bulletin[0]['file_name']);
@@ -85,6 +79,13 @@ export const update_bulletin = asyncHandler(async (req, res) => {
                 }
             });
         }
+
+        const [result] = await db.query(sql2, [filename_insert || bulletin[0]['file_name'], bulletin_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Bulletin not found.' });
+        }
+
         const [data_bulletins] = await db.query(sql3);
         bulletin_websocket(data_bulletins);
 

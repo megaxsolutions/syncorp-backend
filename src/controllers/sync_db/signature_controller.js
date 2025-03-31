@@ -63,11 +63,6 @@ export const update_signature = asyncHandler(async (req, res) => {
             return res.status(404).json({ message: 'Signature not found' });
         }
 
-        const [result] = await db.query(sql2, [filename_insert || signature[0]['signature'], signature_id]);
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Signature not found.' });
-        }
         
         if (req.file) {
             const filePath = path.join(uploadsDir, signature[0]['signature']);
@@ -77,6 +72,12 @@ export const update_signature = asyncHandler(async (req, res) => {
                     console.error('Error deleting file:', err);
                 }
             });
+        }
+
+        const [result] = await db.query(sql2, [filename_insert || signature[0]['signature'], signature_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Signature not found.' });
         }
 
         return res.status(200).json({ success: 'Signature successfully updated.' });
