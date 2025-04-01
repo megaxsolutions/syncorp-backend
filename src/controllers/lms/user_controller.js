@@ -39,7 +39,8 @@ export const create_user = asyncHandler(async (req, res) => {
     const { emp_id } = req.body;
 
     try {
-        const sql = 'INSERT INTO users (emp_ID, date_created) VALUES (?)';
+        const sql = 'INSERT INTO users (emp_ID, date_created) VALUES (?, ?)';
+
         const [insert_data_submission] = await db2.query(sql, [emp_id, storeCurrentDate(0, 'hours')]);
       
         // Return the merged results in the response
