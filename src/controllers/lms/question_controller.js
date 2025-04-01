@@ -25,7 +25,7 @@ export const create_question = asyncHandler(async (req, res) => {
 
     try {
         const sql = 'INSERT INTO questions (courseID, categoryID, question, selection_type, correct_answer, date_created, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        const [insert_data_question] = await db.query(sql, [course_id, category_id, question, selection_type, correct_answer, storeCurrentDateTime(0, 'hours'), created_by]);
+        const [insert_data_question] = await db2.query(sql, [course_id, category_id, question, selection_type, correct_answer, storeCurrentDateTime(0, 'hours'), created_by]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Material successfully created.' });
@@ -42,7 +42,7 @@ export const update_question = asyncHandler(async (req, res) => {
     try {
         const sql = `UPDATE questions SET courseID = ?, categoryID = ?, question = ?, selection_type = ?, correct_answer = ?, created_by = ? WHERE id = ?`;
 
-        const [update_data_question] = await db.query(sql, [course_id, category_id, question, selection_type, correct_answer, created_by, question_id]);
+        const [update_data_question] = await db2.query(sql, [course_id, category_id, question, selection_type, correct_answer, created_by, question_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ success: 'Question successfully updated.' });
@@ -58,7 +58,7 @@ export const get_all_question = asyncHandler(async (req, res) => {
         DATE_FORMAT(date_created, '%Y-%m-%d %H:%i:%s') AS date_created
         FROM questions`; // Use a parameterized query
                                   
-        const [materials] = await db.query(sql);
+        const [materials] = await db2.query(sql);
 
         // Return the merged results in the response
         return res.status(200).json({ data: materials });
@@ -75,7 +75,7 @@ export const delete_question = asyncHandler(async (req, res) => {
     try {
         const sql = 'DELETE FROM questions WHERE id = ?';
 
-        const [result] = await db.query(sql, [question_id]);
+        const [result] = await db2.query(sql, [question_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Question not found.' });
