@@ -37,12 +37,13 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
 export const create_user = asyncHandler(async (req, res) => {
     const { array_employee_emp_id  } = req.body;
-    const insertValues = [];
-    let employees_affected = 0;
-    const existingSchedulesMap = new Map();
+
 
     try {
-        const sql       = 'SELECT * FROM login'; // Use a parameterized query
+        const insertValues = [];
+        let employees_affected = 0;
+        const existingSchedulesMap = new Map();
+
         const sqlInsert = 'INSERT INTO users (emp_ID, date_created) VALUES ?';
         const sqlSelect = `SELECT id, emp_ID, 
         DATE_FORMAT(date_created, '%Y-%m-%d') AS date_created
@@ -83,13 +84,6 @@ export const create_user = asyncHandler(async (req, res) => {
         // If there are any values to insert, perform a batch insert
         if (insertValues.length > 0) {
             await db2.query(sqlInsert, [insertValues]);
-        }
-
-        const [users] = await db.query(sql);
-
-
-        if (users.length === array_employee_emp_id.length) {
-            return res.status(200).json({ success: 'All employees have been added to the LMS.' });
         }
 
         return res.status(200).json({ 
