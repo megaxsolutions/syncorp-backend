@@ -21,11 +21,11 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 }
 
 export const create_submission = asyncHandler(async (req, res) => {
-    const { course_id, category_id, emp_id, question_id, answer, correct_answer } = req.body;
+    const { course_id, category_id, emp_id, question_id, answer } = req.body;
 
     try {
         const sql = 'INSERT INTO submissions (courseID, categoryID, emp_ID, questionID, answer, correct_answer, datetime_submitted) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        const [insert_data_submission] = await db2.query(sql, [course_id, category_id, emp_id, question_id, answer, correct_answer, storeCurrentDateTime(0, 'hours')]);
+        const [insert_data_submission] = await db2.query(sql, [course_id, category_id, emp_id, question_id, answer, "answer", storeCurrentDateTime(0, 'hours')]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Submission successfully created.' });
