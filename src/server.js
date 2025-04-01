@@ -134,7 +134,7 @@ app.use("/signatures", authenticateToken, signatureRoutes);
 
 
 //lms
-app.use("/course_catergory", authenticateToken, courseCategoryRoutes);
+app.use("/course_catergory", courseCategoryRoutes);
 app.use("/courses", authenticateToken, courseRoutes);
 app.use("/materials", authenticateToken, materialRoutes);
 app.use("/submissions", authenticateToken, submissionRoutes);
