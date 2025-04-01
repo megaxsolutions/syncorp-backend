@@ -137,8 +137,8 @@ app.use("/signatures", authenticateToken, signatureRoutes);
 app.use("/course_catergory", authenticateToken, courseCategoryRoutes);
 app.use("/courses", authenticateToken, courseRoutes);
 app.use("/materials", authenticateToken, materialRoutes);
-app.use("/submissions", authenticateToken, submissionRoutes);
-app.use("/users", authenticateToken, userRoutes);
+app.use("/submissions", submissionRoutes);
+app.use("/users", userRoutes);
 
 
 

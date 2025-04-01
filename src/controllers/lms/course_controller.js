@@ -25,7 +25,7 @@ export const create_course = asyncHandler(async (req, res) => {
 
     try {
         const sql = 'INSERT INTO courses (course_title, date_added) VALUES (?, ?)';
-        const [insert_data_course] = await db.query(sql, [course_title, storeCurrentDateTime(0, 'hours')]);
+        const [insert_data_course] = await db2.query(sql, [course_title, storeCurrentDateTime(0, 'hours')]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Course successfully created.' });
@@ -42,7 +42,7 @@ export const update_course = asyncHandler(async (req, res) => {
     try {
         const sql = 'UPDATE courses SET course_title = ? WHERE id = ?';
 
-        const [update_data_course] = await db.query(sql, [course_title, course_id]);
+        const [update_data_course] = await db2.query(sql, [course_title, course_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ success: 'Course successfully updated.' });
@@ -60,7 +60,7 @@ export const get_all_course = asyncHandler(async (req, res) => {
         DATE_FORMAT(date_added, '%Y-%m-%d %H:%i:%s') AS date_added,  
         FROM courses`; // Use a parameterized query
                                   
-        const [courses] = await db.query(sql);
+        const [courses] = await db2.query(sql);
 
         // Return the merged results in the response
         return res.status(200).json({ data: courses });
@@ -77,7 +77,7 @@ export const delete_course = asyncHandler(async (req, res) => {
     try {
         const sql = 'DELETE FROM courses WHERE id = ?';
 
-        const [result] = await db.query(sql, [course_id]);
+        const [result] = await db2.query(sql, [course_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Course not found.' });

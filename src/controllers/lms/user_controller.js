@@ -39,8 +39,8 @@ export const create_user = asyncHandler(async (req, res) => {
     const { emp_id } = req.body;
 
     try {
-        const sql = 'INSERT INTO users (emp_ID, date_created) VALUES (?)';
-        const [insert_data_submission] = await db.query(sql, [emp_id, storeCurrentDate(0, 'hours')]);
+        const sql = 'INSERT INTO users (emp_ID, date_created) VALUES (?, ?)';
+        const [insert_data_submission] = await db2.query(sql, [emp_id, storeCurrentDate(0, 'hours')]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'User successfully created.' });
@@ -56,7 +56,7 @@ export const get_all_user = asyncHandler(async (req, res) => {
         DATE_FORMAT(date_created, '%Y-%m-%d') AS date_created
         FROM users`; // Use a parameterized query
                                   
-        const [users] = await db.query(sql);
+        const [users] = await db2.query(sql);
 
         // Return the merged results in the response
         return res.status(200).json({ data: users });
@@ -73,7 +73,7 @@ export const check_user = asyncHandler(async (req, res) => {
         DATE_FORMAT(date_created, '%Y-%m-%d') AS date_created
         FROM users WHERE emp_ID = ?`; // Use a parameterized query
                                   
-        const [users] = await db.query(sql, [emp_id]);
+        const [users] = await db2.query(sql, [emp_id]);
 
         if(users.length >= 1) {
             return res.status(200).json({ data: users });
