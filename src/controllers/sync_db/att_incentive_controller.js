@@ -110,7 +110,10 @@ export const update_approval_att_incentive_admin = asyncHandler(async (req, res)
 
 export const get_all_att_incentive = asyncHandler(async (req, res) => {
     try {
-        const sql  = `SELECT id, emp_ID, amount, cutoff_ID
+        const sql  = `SELECT id, emp_ID, amount, cutoff_ID, plotted_by,
+        approved_by, approved_by2, status, status2,
+        DATE_FORMAT(att_incentives.datetime_approved, '%Y-%m-%d %H:%i:%s') AS datetime_approved,  
+        DATE_FORMAT(att_incentives.datetime_approved2, '%Y-%m-%d %H:%i:%s') AS datetime_approved2
         FROM att_incentives`; // Use a parameterized query
                                   
         const [att_incentives] = await db.query(sql);
