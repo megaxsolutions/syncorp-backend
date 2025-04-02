@@ -68,12 +68,12 @@ export const update_approval_bonus = asyncHandler(async (req, res) => {
 });
 
 export const update_approval_bonus_admin = asyncHandler(async (req, res) => {
-    const { status, supervisor_emp_id } = req.body;
+    const { status, admin_emp_id } = req.body;
     const { bonus_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
         const sql = 'UPDATE bonus SET status2 = ?, approved_by2 = ?, datetime_approved2 = ? WHERE id = ?';
-        const [update_data_bonus] = await db.query(sql, [status, supervisor_emp_id, storeCurrentDateTime(0, 'hours'), bonus_id]);
+        const [update_data_bonus] = await db.query(sql, [status, admin_emp_id, storeCurrentDateTime(0, 'hours'), bonus_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ success: 'Bonus approval successfully updated.' });

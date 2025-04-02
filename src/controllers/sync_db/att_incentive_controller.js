@@ -23,11 +23,11 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 
 
 export const create_att_incentive = asyncHandler(async (req, res) => {
-    const { emp_id, amount, cutoff_id } = req.body;
+    const { emp_id, amount, cutoff_id, status, supervisor_emp_id } = req.body;
 
     try {
-        const sql = 'INSERT INTO att_incentives (emp_ID, amount, cutoff_ID) VALUES (?, ?, ?)';
-        const [insert_data_att_incentive] = await db.query(sql, [emp_id, amount, cutoff_id]);
+        const sql = 'INSERT INTO att_incentives (emp_ID, amount, cutoff_ID, status, plotted_by, approved_by, datetime_approved) VALUES (?, ?, ?, ?, ?, ?, ?)';
+        const [insert_data_att_incentive] = await db.query(sql, [emp_id, amount, cutoff_id, status, supervisor_emp_id, supervisor_emp_id, storeCurrentDateTime(0, 'hours')]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Attendance incentive successfully created.' });
@@ -53,6 +53,20 @@ export const update_att_incentive = asyncHandler(async (req, res) => {
 });
 
 
+export const update_approval_att_incentive_admin = asyncHandler(async (req, res) => {
+    const { status, admin_emp_id } = req.body;
+    const { att_incentive_id } = req.params; // Assuming emp_id is passed as a URL parameter
+
+    try {
+        const sql = 'UPDATE att_incentives SET status2 = ?, approved_by2 = ?, datetime_approved2 = ? WHERE id = ?';
+        const [update_data_bonus] = await db.query(sql, [status, admin_emp_id, storeCurrentDateTime(0, 'hours'), att_incentive_id]);
+
+        // Return the merged results in the response
+        return res.status(200).json({ success: 'Bonus approval successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update bonus.' });
+    }
+});
 
 export const get_all_att_incentive = asyncHandler(async (req, res) => {
     try {
