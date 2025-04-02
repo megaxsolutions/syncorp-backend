@@ -21,11 +21,11 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 }
 
 export const create_complexity = asyncHandler(async (req, res) => {
-    const { emp_id, amount, cutoff_id } = req.body;
+    const { emp_id, amount, cutoff_id, status, supervisor_emp_id } = req.body;
 
     try {
-        const sql = 'INSERT INTO complexity (emp_ID, amount, cutoff_ID) VALUES (?, ?, ?)';
-        const [insert_data_att_incentive] = await db.query(sql, [emp_id, amount, cutoff_id]);
+        const sql = 'INSERT INTO complexity (emp_ID, amount, cutoff_ID, status, plotted_by, approved_by, datetime_approved) VALUES (?, ?, ?, ?, ?, ?, ?)';
+        const [insert_data_att_incentive] = await db.query(sql, [emp_id, amount, cutoff_id, status, supervisor_emp_id, supervisor_emp_id, storeCurrentDateTime(0, 'hours')]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Complexity successfully created.' });
@@ -63,6 +63,21 @@ export const get_all_complexity = asyncHandler(async (req, res) => {
         return res.status(200).json({ data: complexity });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+export const update_approval_complexity_admin = asyncHandler(async (req, res) => {
+    const { status, admin_emp_id } = req.body;
+    const { complexity_id } = req.params; // Assuming emp_id is passed as a URL parameter
+
+    try {
+        const sql = 'UPDATE complexity SET status2 = ?, approved_by2 = ?, datetime_approved2 = ? WHERE id = ?';
+        const [update_data_bonus] = await db.query(sql, [status, admin_emp_id, storeCurrentDateTime(0, 'hours'), complexity_id]);
+
+        // Return the merged results in the response
+        return res.status(200).json({ success: 'Bonus approval successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update bonus.' });
     }
 });
 
