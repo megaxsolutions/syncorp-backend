@@ -48,6 +48,9 @@ import materialRoutes from "./routes/lms/material_routes.js";
 import submissionRoutes from "./routes/lms/submission_routes.js";
 import userRoutes from "./routes/lms/user_routes.js";
 import questionRoutes from "./routes/lms/question_routes.js";
+import trainerRoutes from "./routes/lms/trainer_routes.js";
+import enrollRoutes from "./routes/lms/enroll_routes.js";
+
 
 
 
@@ -141,6 +144,9 @@ app.use("/materials", authenticateToken, materialRoutes);
 app.use("/submissions", authenticateToken, submissionRoutes);
 app.use("/users", authenticateToken, userRoutes);
 app.use("/questions", authenticateToken, questionRoutes);
+app.use("/enrolls", authenticateToken, enrollRoutes);
+app.use("/trainers", authenticateToken, trainerRoutes);
+
 
 
 
