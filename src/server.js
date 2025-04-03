@@ -125,8 +125,8 @@ app.use("/break_schedules", authenticateToken, breakscheduleRoutes);
 app.use("/adjustments", authenticateToken, adjustmentRoutes);
 app.use("/eod", authenticateToken, eodRoutes);
 app.use("/payrolls", authenticateToken, payrollRoutes);
-app.use("/complexity", authenticateToken, complexityRoutes);
-app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes);
+app.use("/complexity", complexityRoutes);
+app.use("/attendance_incentives", attendanceIncentivesRoutes);
 app.use("/signatures", authenticateToken, signatureRoutes);
 
 
@@ -139,7 +139,7 @@ app.use("/course_catergory", authenticateToken, courseCategoryRoutes);
 app.use("/courses", authenticateToken, courseRoutes);
 app.use("/materials", authenticateToken, materialRoutes);
 app.use("/submissions", authenticateToken, submissionRoutes);
-app.use("/users", userRoutes);
+app.use("/users", authenticateToken, userRoutes);
 app.use("/questions", authenticateToken, questionRoutes);
 
 
