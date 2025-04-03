@@ -42,5 +42,8 @@ bonus cut off id
 att_incentives
 complexity
 
+id, emp_id, categoryID, courseID .. trainer
+id, emp_id, categoryID, courseID .. enroll
+
 
 
