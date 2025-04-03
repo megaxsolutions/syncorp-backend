@@ -41,7 +41,7 @@ export const create_user = asyncHandler(async (req, res) => {
 
     try {
         const insertValues = [];
-        let employees_affected = 0;
+        let users_affected = 0;
         const existingSchedulesMap = new Map();
 
         const sqlInsert = 'INSERT INTO users (emp_ID, date_created) VALUES ?';
@@ -65,18 +65,18 @@ export const create_user = asyncHandler(async (req, res) => {
 
          // Loop through each employee and day to prepare the insertion data
          for (const emp_id of array_employee_emp_id) {
-            let count_employees = 0;
+            let count_users = 0;
             const key = `${emp_id}`;
 
             // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
             if (!existingSchedulesMap.has(key)) {
                 insertValues.push([emp_id, storeCurrentDate(0, 'hours')]);
-                ++count_employees;
+                ++count_users;
             }
 
             // If at least one schedule was added for this employee, increment the affected count
-            if (count_employees > 0) {
-                employees_affected++;
+            if (count_users > 0) {
+                users_affected++;
             }
         }
 
@@ -87,7 +87,7 @@ export const create_user = asyncHandler(async (req, res) => {
         }
 
         return res.status(200).json({ 
-            success: `${employees_affected} employee${employees_affected >= 2 ? 's' : ''} have been added to the LMS.` 
+            success: `${users_affected} user${users_affected >= 2 ? 's' : ''} have been added to the LMS.` 
         });        // Return the merged results in the response
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create user.' });
@@ -129,4 +129,51 @@ export const check_user = asyncHandler(async (req, res) => {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
+
+export const delete_user = asyncHandler(async (req, res) => {
+    const { user_id } = req.params; // Assuming emp_id is passed as a URL parameter
+
+    try {
+        const sql = `DELETE FROM users WHERE id = ?`;
+   
+        const [result] = await db2.query(sql, [user_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+    
+        return res.status(200).json({ success: 'User successfully deleted.' });
+    } catch (error) {
+        console.error(error); // Log the error for debugging
+        return res.status(500).json({ error: 'Failed to delete user.' });
+    }
+});
+
+
+export const delete_multiple_user = asyncHandler(async (req, res) => {
+    const { array_employee_emp_id } = req.body;
+
+    try {
+        const sqlDelete = `DELETE FROM users WHERE emp_ID = ?`;
+        let users_affected = 0;
+
+        const delete_lms_users = await Promise.all(
+            array_employee_emp_id.map(async (emp_id) => {
+                const [result] = await db2.query(sqlDelete, [emp_id]);
+                if(result.affectedRows > 0) {
+                    users_affected++;
+                }
+                return result;
+            })
+        );
+
+        return res.status(200).json({ 
+            success: `${users_affected} user${users_affected >= 2 ? 's' : ''} have been removed to the LMS.` 
+        });  
+    } catch (error) {
+        console.error(error); // Log the error for debugging
+        return res.status(500).json({ error: 'Failed to delete user.' });
+    }
+});
+
 
