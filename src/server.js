@@ -125,8 +125,8 @@ app.use("/break_schedules", authenticateToken, breakscheduleRoutes);
 app.use("/adjustments", authenticateToken, adjustmentRoutes);
 app.use("/eod", authenticateToken, eodRoutes);
 app.use("/payrolls", authenticateToken, payrollRoutes);
-app.use("/complexity", complexityRoutes);
-app.use("/attendance_incentives", attendanceIncentivesRoutes);
+app.use("/complexity", authenticateToken, complexityRoutes);
+app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes);
 app.use("/signatures", authenticateToken, signatureRoutes);
 
 
