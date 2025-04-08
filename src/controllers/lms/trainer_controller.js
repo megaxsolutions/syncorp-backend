@@ -46,7 +46,7 @@ export const create_trainer = asyncHandler(async (req, res) => {
 
         const sqlInsert = 'INSERT INTO trainer (emp_ID, categoryID, courseID, plotted_by) VALUES ?';
         const sqlSelect = `SELECT id, emp_ID, categoryID, courseID, plotted_by
-        FROM trainer WHERE emp_ID = ? AND categoryID = ? AND courseID = ?;`;
+        FROM trainer WHERE emp_ID = ? AND categoryID = ? AND courseID = ?`;
 
 
         const lms_trainers = await Promise.all(
@@ -96,7 +96,7 @@ export const create_trainer = asyncHandler(async (req, res) => {
 export const get_all_trainer = asyncHandler(async (req, res) => {
     try {
         const sql = `SELECT id, emp_ID, categoryID, courseID, plotted_by
-        FROM trainer WHERE emp_ID = ?;`;
+        FROM trainer WHERE emp_ID = ?`;
                                   
         const [trainers] = await db2.query(sql);
 
@@ -130,7 +130,7 @@ export const check_user_trainer = asyncHandler(async (req, res) => {
 
     try {
         const sql = `SELECT id, emp_ID, categoryID, courseID, plotted_by
-        FROM trainer WHERE emp_ID = ? AND categoryID = ? AND courseID = ?;`;
+        FROM trainer WHERE emp_ID = ? AND categoryID = ? AND courseID = ?`;
 
         const [trainer] = await db2.query(sql, [emp_id, category_id, course_id]);
 

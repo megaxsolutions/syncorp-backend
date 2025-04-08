@@ -46,7 +46,7 @@ export const create_enroll = asyncHandler(async (req, res) => {
 
         const sqlInsert = 'INSERT INTO enroll (emp_ID, categoryID, courseID, plotted_by, datetime_enrolled) VALUES ?';
         const sqlSelect = `SELECT id, emp_ID, categoryID, courseID, plotted_by
-        FROM enroll WHERE emp_ID = ? AND categoryID = ? AND courseID = ?;`;
+        FROM enroll WHERE emp_ID = ? AND categoryID = ? AND courseID = ?`;
 
 
         const lms_trainers = await Promise.all(
@@ -98,9 +98,27 @@ export const get_all_enroll = asyncHandler(async (req, res) => {
     try {
         const sql = `SELECT id, emp_ID, categoryID, courseID, plotted_by,
         DATE_FORMAT(datetime_enrolled, '%Y-%m-%d %H:%i:%s') AS datetime_enrolled
-        FROM enroll WHERE emp_ID = ?;`;
+        FROM enroll`;
                                   
         const [enroll] = await db2.query(sql);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: enroll });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+
+export const get_all_user_enroll = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
+
+    try {
+        const sql = `SELECT id, emp_ID, categoryID, courseID, plotted_by,
+        DATE_FORMAT(datetime_enrolled, '%Y-%m-%d %H:%i:%s') AS datetime_enrolled
+        FROM enroll WHERE emp_ID = ?`;
+                                  
+        const [enroll] = await db2.query(sql, [emp_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ data: enroll });
@@ -151,7 +169,7 @@ export const check_user_enroll = asyncHandler(async (req, res) => {
     try {
         const sql = `SELECT id, emp_ID, categoryID, courseID, plotted_by,
         DATE_FORMAT(datetime_enrolled, '%Y-%m-%d %H:%i:%s') AS datetime_enrolled
-        FROM enroll WHERE emp_ID = ? AND categoryID = ? AND courseID = ?;`;
+        FROM enroll WHERE emp_ID = ? AND categoryID = ? AND courseID = ?`;
                                   
         const [enroll] = await db2.query(sql, [emp_id, category_id, course_id]);
 
