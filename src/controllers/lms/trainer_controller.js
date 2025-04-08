@@ -96,9 +96,25 @@ export const create_trainer = asyncHandler(async (req, res) => {
 export const get_all_trainer = asyncHandler(async (req, res) => {
     try {
         const sql = `SELECT id, emp_ID, categoryID, courseID, plotted_by
-        FROM trainer WHERE emp_ID = ?`;
+        FROM trainer`;
                                   
         const [trainers] = await db2.query(sql);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: trainers });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+export const get_all_user_trainer = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
+
+    try {
+        const sql = `SELECT id, emp_ID, categoryID, courseID, plotted_by
+        FROM trainer WHERE emp_ID = ?`;
+                                  
+        const [trainers] = await db2.query(sql, [emp_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ data: trainers });
