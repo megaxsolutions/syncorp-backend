@@ -86,7 +86,7 @@ export const create_trainer = asyncHandler(async (req, res) => {
         }
 
         return res.status(200).json({ 
-            success: `${employees_affected} trainer${employees_affected >= 2 ? 's' : ''} have been added to the LMS.` 
+            success: `${trainers_affected} trainer${trainers_affected >= 2 ? 's' : ''} have been added to the LMS.` 
         });        // Return the merged results in the response
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create trainer.' });
