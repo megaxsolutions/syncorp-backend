@@ -96,7 +96,7 @@ export const create_trainer = asyncHandler(async (req, res) => {
 export const get_all_trainer = asyncHandler(async (req, res) => {
     try {
         const sql = `SELECT id, emp_ID, categoryID, courseID, plotted_by
-        FROM trainer WHERE emp_ID = ?;`;
+        FROM trainer`;
                                   
         const [trainers] = await db2.query(sql);
 
