@@ -144,8 +144,8 @@ app.use("/materials", authenticateToken, materialRoutes);
 app.use("/submissions", authenticateToken, submissionRoutes);
 app.use("/users", authenticateToken, userRoutes);
 app.use("/questions", authenticateToken, questionRoutes);
-app.use("/enrolls", authenticateToken, enrollRoutes);
-app.use("/trainers", authenticateToken, trainerRoutes);
+app.use("/enrolls", enrollRoutes);
+app.use("/trainers", trainerRoutes);
 
 
 
