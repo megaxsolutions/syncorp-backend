@@ -37,6 +37,8 @@ import payrollRoutes from "./routes/sync_db/payroll_routes.js";
 import complexityRoutes from "./routes/sync_db/complexity_routes.js";
 import attendanceIncentivesRoutes from "./routes/sync_db/att_incentives_routes.js";
 import signatureRoutes from "./routes/sync_db/signature_routes.js";
+import moodMeterRoutes from "./routes/sync_db/mood_meter_routes.js";
+
 
 
 
@@ -131,6 +133,8 @@ app.use("/payrolls", authenticateToken, payrollRoutes);
 app.use("/complexity", authenticateToken, complexityRoutes);
 app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes);
 app.use("/signatures", authenticateToken, signatureRoutes);
+app.use("/mood_meters", authenticateToken, moodMeterRoutes);
+
 
 
 
