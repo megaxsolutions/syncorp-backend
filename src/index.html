@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat</title>
+    <script src="/socket.io/socket.io.js"></script> <!-- Include Socket.IO client library -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 200px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Chat</h1>
+    <div id="messages"></div>
+    <input id="messageInput" type="text" placeholder="Type a message" />
+    <button id="sendButton">Send</button>
+
+    <script>
+        const socket = io('http://localhost:8000'); // Connect to the WebSocket server
+
+        // Get references to the DOM elements
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const messagesDiv = document.getElementById('messages');
+
+        // Listen for messages from the server
+        socket.on('message', (msg) => {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = msg;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
+        });
+
+        // Send a message when the button is clicked
+        sendButton.addEventListener('click', () => {
+            const message = messageInput.value;
+            if (message) {
+                socket.emit('message', message); // Send message to the server
+                messageInput.value = ''; // Clear the input
+            }
+        });
+
+        // Optionally, send a message when the Enter key is pressed
+        messageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+<!-- // App.js
+import React, { useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:8000'); // Adjust the URL if needed
+
+const Test = () => {
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState('');
+
+    useEffect(() => {
+        // Listen for messages from the server
+        socket.on('message', (data) => {
+            setMessages((prevMessages) => [...prevMessages, data]);
+        });
+
+        // Cleanup on unmount
+        return () => {
+            socket.off('message');
+        };
+    }, []);
+
+    const sendMessage = () => {
+        if (input) {
+            socket.emit('message', input);
+            setInput('');
+        }
+    };
+
+    return (
+        <div>
+            <h1>WebSocket Chat</h1>
+            <div>
+                {messages.map((msg, index) => (
+                    <div key={index}>{msg}</div>
+                ))}
+            </div>
+            <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type a message"
+            />
+            <button onClick={sendMessage}>Send</button>
+        </div>
+    );
+};
+
+export default Test; -->

@@ -1,0 +1,49 @@
+add employyee
+
+sucess - generate ID - id generator 7 digit
+emp_id
+
+data for department, site, cluster, position
+
+notification
+
+employee notification after created
+0 regular
+1 preshift
+2 post shift
+3 rd
+
+attendance names
+
+
+
+crud notification add update delete
+
+admin 1
+supervisor 2
+HR 10
+Training 12
+
+employee 0
+
+attendance time adjustment
+live attendance
+coaching specific
+
+1 for regular
+2 for day off
+
+off schedule
+
+signature
+bonus cut off id
+
+
+att_incentives
+complexity
+
+id, emp_id, categoryID, courseID .. trainer
+id, emp_id, categoryID, courseID .. enroll
+
+
+
