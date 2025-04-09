@@ -133,7 +133,7 @@ app.use("/payrolls", authenticateToken, payrollRoutes);
 app.use("/complexity", authenticateToken, complexityRoutes);
 app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes);
 app.use("/signatures", authenticateToken, signatureRoutes);
-app.use("/mood_meters", authenticateToken, moodMeterRoutes);
+app.use("/mood_meters", moodMeterRoutes);
 
 
 
