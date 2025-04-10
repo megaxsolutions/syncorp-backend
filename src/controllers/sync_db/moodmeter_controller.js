@@ -42,6 +42,26 @@ export const create_moodmeter = asyncHandler(async (req, res) => {
     }
 });
 
+
+export const check_moodmeter = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming site_id is passed as a URL parameter
+   
+    try {
+        const sql  = `SELECT * FROM moodmeter WHERE emp_ID = ? AND DATE_FORMAT(date, '%Y-%m-%d') = ?`; // Use a parameterized query
+
+        const [moodmeter] = await db.query(sql, [emp_id, storeCurrentDate(0, 'hours')]);
+
+        if (moodmeter.length >= 1) {
+            return res.status(400).json({ error: 'You have already submitted your mood meter today.' });
+        }
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: true });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
 export const get_all_user_moodmeter = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming site_id is passed as a URL parameter
 
