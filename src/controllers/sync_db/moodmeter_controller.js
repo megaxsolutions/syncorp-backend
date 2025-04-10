@@ -56,7 +56,7 @@ export const check_moodmeter = asyncHandler(async (req, res) => {
         }
 
         // Return the merged results in the response
-        return res.status(200).json({ data: moodmeter });
+        return res.status(200).json({ data: true });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
