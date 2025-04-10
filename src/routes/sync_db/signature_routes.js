@@ -43,6 +43,8 @@ signatureRoutes.post('/add_bulletin', upload.single('file_uploaded'), SignatureC
 signatureRoutes.put('/update_signature/:signature_id/:emp_id', upload.single('file_uploaded'), SignatureController.update_signature);
 signatureRoutes.delete('/delete_signature/:signature_id', SignatureController.delete_signature);
 signatureRoutes.get('/get_all_signature', SignatureController.get_all_signature);
+signatureRoutes.get('/get_all_user_signature/:emp_id', SignatureController.get_all_user_signature);
+
 
 
 export default signatureRoutes;

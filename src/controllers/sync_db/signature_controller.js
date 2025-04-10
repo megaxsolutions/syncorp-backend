@@ -118,9 +118,26 @@ export const get_all_signature = asyncHandler(async (req, res) => {
     try {
         const sql  = `SELECT id, emp_ID, signature,
         DATE_FORMAT(stamp, '%Y-%m-%d %H:%i:%s') AS stamp
-        FROM signatures WHERE emp_ID = ?`; // Use a parameterized query
+        FROM signatures`; // Use a parameterized query
 
         const [signature] = await db.query(sql);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: signature });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+export const get_all_user_signature = asyncHandler(async (req, res) => {
+    const { emp_id } = req.params; // Assuming bulletin_id is passed as a URL parameter
+
+    try {
+        const sql  = `SELECT id, emp_ID, signature,
+        DATE_FORMAT(stamp, '%Y-%m-%d %H:%i:%s') AS stamp
+        FROM signatures WHERE emp_ID = ?`; // Use a parameterized query
+
+        const [signature] = await db.query(sql, [emp_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ data: signature });
