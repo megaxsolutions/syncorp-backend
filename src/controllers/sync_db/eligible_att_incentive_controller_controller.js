@@ -28,11 +28,26 @@ export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
 
 export const create_eligible_att_incentive = asyncHandler(async (req, res) => {
     try {
-        const sql = 'INSERT INTO eligible_att_incentives (emp_ID, amount, cutoffID, cutoff_period) VALUES (?, ?, ?, ?)';
-        const [insert_data_eligible_att_incentives] = await db.query(sql, [date, storeCurrentDateTime(0, 'hours'), holiday_name, holiday_type]);
+        const sql  = 'SELECT * FROM login'; // Use a parameterized query
+        const sql2  = 'SELECT * FROM incident_report'; // Use a parameterized query
+
+        const sql3 = 'INSERT INTO eligible_att_incentives (emp_ID, amount, cutoffID, cutoff_period) VALUES (?, ?, ?, ?)';
+
+
+        const [logins] = await db.query(sql);
+
+        const logins_user = await Promise.all(
+            logins.map(async (login) => {
+               // console.log(login.emp_ID);
+                return login;
+            })
+        );
+
+        
+      //  const [insert_data_eligible_att_incentives] = await db.query(sql2, [date, storeCurrentDateTime(0, 'hours'), holiday_name, holiday_type]);
 
         // Return the merged results in the response
-        return res.status(200).json({ data: dtr });
+        return res.status(200).json({ data: 123 });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }

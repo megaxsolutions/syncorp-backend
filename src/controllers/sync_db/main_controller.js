@@ -23,7 +23,6 @@ export const get_all_dropdown_data = asyncHandler(async (req, res) => {
         FROM cutoff`; // Use a parameterized query
 
 
-
         const [departments] = await db.query(sql);
         const [clusters] = await db.query(sql2);
         const [sites] = await db.query(sql3);
