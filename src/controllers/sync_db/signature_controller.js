@@ -32,14 +32,10 @@ export const create_signature = asyncHandler(async (req, res) => {
     const filename_insert = filename ? `signatures/${filename}` : null; 
 
     try {
-        const sql  = 'INSERT INTO bulletin (signature, emp_ID, stamp) VALUES (?, ?, ?)';
-        const sql2 = 'SELECT * FROM bulletin ORDER BY id DESC LIMIT 50'; // Adjust the order by column as needed
+        const sql  = 'INSERT INTO signatures (signature, emp_ID, stamp) VALUES (?, ?, ?)';
 
+        const [insert_data_signature] = await db.query(sql, [filename_insert, emp_id, storeCurrentDateTime(0, 'hours')]);
 
-        const [insert_data_cluster] = await db.query(sql, [filename_insert, emp_id, storeCurrentDateTime(0, 'hours')]);
-        const [data_bulletins] = await db.query(sql2);
-
-      
         // Return the merged results in the response
         return res.status(200).json({ success: 'Signature successfully created.' });
     } catch (error) {

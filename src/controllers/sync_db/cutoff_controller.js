@@ -6,11 +6,11 @@ import { db } from '../../config/config.js'; // Import the database connection
 import moment from 'moment-timezone';
 
 export const create_cutoff = asyncHandler(async (req, res) => {
-    const { start_date, end_date } = req.body;
+    const { start_date, end_date, status } = req.body;
 
     try {
-        const sql = 'INSERT INTO cutoff (startDate, endDate) VALUES (?, ?)';
-        const [insert_data_site] = await db.query(sql, [start_date, end_date]);
+        const sql = 'INSERT INTO cutoff (startDate, endDate, status) VALUES (?, ?, ?)';
+        const [insert_data_site] = await db.query(sql, [start_date, end_date, status]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Cutoff successfully created.' });

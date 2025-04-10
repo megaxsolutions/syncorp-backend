@@ -12,6 +12,9 @@ incidentReportRoutes.put('/update_incident_report/:incident_report_id', Incident
 incidentReportRoutes.delete('/delete_incident_report/:incident_report_id', IncidentReportController.delete_incident_report);
 incidentReportRoutes.get('/get_all_incident_report', IncidentReportController.get_all_incident_report);
 incidentReportRoutes.get('/get_all_user_incident_report/:emp_id', IncidentReportController.get_all_user_incident_report);
+incidentReportRoutes.get('/get_all_incident_report_supervisor/:supervisor_emp_id', IncidentReportController.get_all_incident_report_supervisor);
+
+ 
 
 
 export default incidentReportRoutes;
