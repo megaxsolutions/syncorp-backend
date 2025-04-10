@@ -98,13 +98,15 @@ export const update_approval_att_incentive_admin = asyncHandler(async (req, res)
     const { att_incentive_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
-        const sql = 'UPDATE att_incentives SET status2 = ?, approved_by2 = ?, datetime_approved2 = ? WHERE id = ?';
-        const [update_data_bonus] = await db.query(sql, [status, admin_emp_id, storeCurrentDateTime(0, 'hours'), att_incentive_id]);
+        const sql  = 'UPDATE att_incentives SET status2 = ?, approved_by2 = ?, datetime_approved2 = ? WHERE id = ?';
+      
+        const [update_data_att_incentives] = await db.query(sql, [status, admin_emp_id, storeCurrentDateTime(0, 'hours'), att_incentive_id]);
+
 
         // Return the merged results in the response
-        return res.status(200).json({ success: 'Bonus approval successfully updated.' });
+        return res.status(200).json({ success: 'Attendance incentive approval successfully updated.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to update bonus.' });
+        return res.status(500).json({ error: 'Failed to update attendance incentive approval.' });
     }
 });
 
