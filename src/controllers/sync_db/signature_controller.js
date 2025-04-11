@@ -32,9 +32,29 @@ export const create_signature = asyncHandler(async (req, res) => {
     const filename_insert = filename ? `signatures/${filename}` : null; 
 
     try {
-        const sql  = 'INSERT INTO signatures (signature, emp_ID, stamp) VALUES (?, ?, ?)';
+        const sql  = 'SELECT * FROM signatures WHERE emp_ID = ?'; // Use a parameterized query
+        const sql2 = 'INSERT INTO signatures (signature, emp_ID, stamp) VALUES (?, ?, ?)';
+        const sql3 = 'UPDATE signatures SET signature = ? WHERE id = ?';
 
-        const [insert_data_signature] = await db.query(sql, [filename_insert, emp_id, storeCurrentDateTime(0, 'hours')]);
+
+        const [signature] = await db.query(sql, [emp_id]);
+
+        if (signature.length === 0) {
+            const [insert_data_signature] = await db.query(sql2, [filename_insert, emp_id, storeCurrentDateTime(0, 'hours')]);
+        }
+
+        if (req.file) {
+            const filePath = path.join(uploadsDir, signature[0]['signature']);
+
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error('Error deleting file:', err);
+                }
+            });
+        }
+
+        const [result] = await db.query(sql3, [filename_insert || signature[0]['signature'], signature[0]['id']]);
+
 
         // Return the merged results in the response
         return res.status(200).json({ success: 'Signature successfully created.' });
