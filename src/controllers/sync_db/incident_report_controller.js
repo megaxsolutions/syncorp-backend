@@ -26,7 +26,7 @@ export const create_incident_report = asyncHandler(async (req, res) => {
         
     try {
         const sql = 'INSERT INTO incident_report (emp_ID, details, submitted_datetime) VALUES (?, ?, ?)';
-        const [insert_data_incident_report] = await db.query(sql, [emp_id, details, storeCurrentDateTime(0, 'hours') ]);
+        const [insert_data_incident_report] = await db.query(sql, [emp_id, details, storeCurrentDateTime(0, 'hours')]);
                 
         
         // Return the merged results in the response
@@ -79,9 +79,8 @@ export const get_all_incident_report_supervisor = asyncHandler(async (req, res) 
         const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == null || data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
         const placeholders = bucketArray.map(() => '?').join(', ');
 
-        const sql2 = `
-        SELECT incident_report.id, incident_report.emp_ID,
-        incident_report.details
+        const sql2 = `SELECT incident_report.id, incident_report.emp_ID,
+        incident_report.details,
         DATE_FORMAT(incident_report.submitted_datetime, '%Y-%m-%d %H:%i:%s') AS submitted_datetime
         FROM incident_report
         LEFT JOIN employee_profile ON incident_report.emp_ID = employee_profile.emp_ID
