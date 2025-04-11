@@ -9,7 +9,7 @@ export const create_cutoff = asyncHandler(async (req, res) => {
     const { start_date, end_date } = req.body;
 
     try {
-        const sql = 'INSERT INTO cutoff (startDate, endDate) VALUES (?, ?)';
+        const sql = 'INSERT INTO cutoff (startDate, endDate, status) VALUES (?, ?)';
         const [insert_data_site] = await db.query(sql, [start_date, end_date]);
       
         // Return the merged results in the response

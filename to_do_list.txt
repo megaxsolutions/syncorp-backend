@@ -52,5 +52,10 @@ previos month
 att_incentives
 eligible_att_incentives
 
+late, undertime,  over_break, 1 leave only, no incident report
+
+
+id, emp_id, details, submitted_datetime
+
 
 

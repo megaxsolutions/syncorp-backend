@@ -39,6 +39,8 @@ import attendanceIncentivesRoutes from "./routes/sync_db/att_incentives_routes.j
 import signatureRoutes from "./routes/sync_db/signature_routes.js";
 import moodMeterRoutes from "./routes/sync_db/mood_meter_routes.js";
 import incidentReportRoutes from "./routes/sync_db/incident_report_routes.js";
+import eligibleAttendanceIncentive from "./routes/sync_db/eligible_att_incentive_routes.js";
+
 
 
 
@@ -137,6 +139,7 @@ app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes)
 app.use("/signatures", authenticateToken, signatureRoutes);
 app.use("/mood_meters", authenticateToken, moodMeterRoutes);
 app.use("/incident_reports", authenticateToken, incidentReportRoutes);
+app.use("/eligible_att_incentives", eligibleAttendanceIncentive);
 
 
 
