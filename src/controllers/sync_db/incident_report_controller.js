@@ -22,7 +22,7 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 }
 
 export const create_incident_report = asyncHandler(async (req, res) => {
-    const { emp_id, details } = req.params; // Assuming emp_id is passed as a URL parameter
+    const { emp_id, details } = req.body; // Assuming emp_id is passed as a URL parameter
         
     try {
         const sql = 'INSERT INTO incident_report (emp_ID, details, submitted_datetime) VALUES (?, ?, ?)';
@@ -30,9 +30,9 @@ export const create_incident_report = asyncHandler(async (req, res) => {
                 
         
         // Return the merged results in the response
-        return res.status(200).json({ data: insert_data_incident_report });
+        return res.status(200).json({ success: 'Incident report successfully created.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to get all data.' });
+        return res.status(500).json({ error: 'Failed to create incident report.' });
     }
 });
 
@@ -101,7 +101,7 @@ export const get_all_incident_report_supervisor = asyncHandler(async (req, res) 
 
 
 export const update_incident_report = asyncHandler(async (req, res) => {
-    const { emp_id, details } = req.params; // Assuming emp_id is passed as a URL parameter
+    const { emp_id, details } = req.body; // Assuming emp_id is passed as a URL parameter
     const { incident_report_id } = req.params; // Assuming holiday_id is passed as a URL parameter
 
     try {
