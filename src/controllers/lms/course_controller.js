@@ -21,11 +21,11 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 }
 
 export const create_course = asyncHandler(async (req, res) => {
-    const { course_title } = req.body;
+    const { course_title, course_details } = req.body;
 
     try {
-        const sql = 'INSERT INTO courses (course_title, date_added) VALUES (?, ?)';
-        const [insert_data_course] = await db2.query(sql, [course_title, storeCurrentDateTime(0, 'hours')]);
+        const sql = 'INSERT INTO courses (course_title, course_details, date_added) VALUES (?, ?, ?)';
+        const [insert_data_course] = await db2.query(sql, [course_title, course_details, storeCurrentDateTime(0, 'hours')]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Course successfully created.' });
@@ -36,13 +36,13 @@ export const create_course = asyncHandler(async (req, res) => {
 
 
 export const update_course = asyncHandler(async (req, res) => {
-    const { course_title } = req.body;
+    const { course_title, course_details } = req.body;
     const { course_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
-        const sql = 'UPDATE courses SET course_title = ? WHERE id = ?';
+        const sql = 'UPDATE courses SET course_title = ?, course_details = ? WHERE id = ?';
 
-        const [update_data_course] = await db2.query(sql, [course_title, course_id]);
+        const [update_data_course] = await db2.query(sql, [course_title, course_details, course_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ success: 'Course successfully updated.' });
@@ -57,6 +57,7 @@ export const get_all_course = asyncHandler(async (req, res) => {
     try {
         const sql  = `SELECT id,
         course_title,
+        course_details,
         DATE_FORMAT(date_added, '%Y-%m-%d %H:%i:%s') AS date_added 
         FROM courses`; // Use a parameterized query
                                   
