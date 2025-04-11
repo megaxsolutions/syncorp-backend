@@ -124,8 +124,8 @@ export const get_all_coaching = asyncHandler(async (req, res) => {
         coaching.metrix_5,
         DATE_FORMAT(coaching.date_coached, '%Y-%m-%d') AS date_coached,
         DATE_FORMAT(coaching.acknowledge_datetime, '%Y-%m-%d %H:%i:%s') AS acknowledge_datetime,
-        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullName,
-        CONCAT(employee_profile_2.fName, ' ', employee_profile_2.lName) AS coach_fullName,
+        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname,
+        CONCAT(employee_profile_2.fName, ' ', employee_profile_2.lName) AS coach_fullname,
         employee_signature.signature as employee_signature,
         coach_signature.signature as coach_signature
         FROM coaching
@@ -160,8 +160,8 @@ export const get_all_user_coaching = asyncHandler(async (req, res) => {
         coaching.metrix_5,
         DATE_FORMAT(coaching.date_coached, '%Y-%m-%d') AS date_coached,
         DATE_FORMAT(coaching.acknowledge_datetime, '%Y-%m-%d %H:%i:%s') AS acknowledge_datetime,
-        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullName,
-        CONCAT(employee_profile_2.fName, ' ', employee_profile_2.lName) AS coach_fullName,
+        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname,
+        CONCAT(employee_profile_2.fName, ' ', employee_profile_2.lName) AS coach_fullname,
         employee_signature.signature as employee_signature,
         coach_signature.signature as coach_signature
         FROM coaching
@@ -211,8 +211,8 @@ export const get_all_coaching_supervisor = asyncHandler(async (req, res) => {
         coaching.metrix_5,
         DATE_FORMAT(coaching.date_coached, '%Y-%m-%d') AS date_coached,
         DATE_FORMAT(coaching.acknowledge_datetime, '%Y-%m-%d %H:%i:%s') AS acknowledge_datetime,
-        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullName,
-        CONCAT(employee_profile_2.fName, ' ', employee_profile_2.lName) AS coach_fullName,
+        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname,
+        CONCAT(employee_profile_2.fName, ' ', employee_profile_2.lName) AS coach_fullname,
         employee_signature.signature as employee_signature,
         coach_signature.signature as coach_signature
         FROM coaching
