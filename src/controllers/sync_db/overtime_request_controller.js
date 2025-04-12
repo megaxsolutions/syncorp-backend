@@ -20,11 +20,11 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 }
 
 export const create_overtime_request = asyncHandler(async (req, res) => {
-    const { ot_type, hrs, emp_ID } = req.body;
+    const { ot_type, hrs, emp_ID, startSpec, endSpec } = req.body;
 
     try {
-        const sql = 'INSERT INTO overtime_request (date, hrs, ot_type, emp_ID, status) VALUES (?, ?, ?, ?, ?)';
-        const [insert_data_overtime_request] = await db.query(sql, [storeCurrentDate(0, 'hours'), hrs, ot_type, emp_ID, 'pending']);
+        const sql = 'INSERT INTO overtime_request (date, hrs, ot_type, emp_ID, status,startSpec,endSpec) VALUES (?, ?, ?, ?, ?, ?, ?)';
+        const [insert_data_overtime_request] = await db.query(sql, [storeCurrentDate(0, 'hours'), hrs, ot_type, emp_ID, 'pending',startSpec,endSpec]);
       
         return res.status(200).json({ success: 'Overtime request successfully created.' });
     } catch (error) {
