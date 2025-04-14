@@ -16,6 +16,7 @@ const __dirname = dirname(__filename);
 // Define the uploads directory relative to the current file
 const uploadsDir = path.join(__dirname, '../../../uploads/users/');
 
+
 // Ensure the uploads directory exists
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });

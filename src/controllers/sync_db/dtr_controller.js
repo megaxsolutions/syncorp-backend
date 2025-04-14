@@ -87,13 +87,25 @@ export const get_all_user_dtr = asyncHandler(async (req, res) => {
         const averageOvertime = count > 0 ? (totalOvertime / count).toFixed(2) : 0; // Calculate average
         const averageUndertime = count > 0 ? (totalUndertime / count).toFixed(2) : 0; // Calculate average
         const averageLate = count > 0 ? (totalLate / count).toFixed(2) : 0; // Calculate average
-        const late_and_undertime_average =count > 0 ? ((totalLate / count) + (totalUndertime / count)).toFixed(2) : 0;
+        const late_and_undertime_average = count > 0 ? ((totalLate / count) + (totalUndertime / count)).toFixed(2) : 0;
+
+        // const result0 = {
+        //     overtime : totalOvertime.toFixed(2),
+        //     undertime : totalUndertime.toFixed(2),
+        //     late : totalLate.toFixed(2),
+        //     late_and_undertime : (totalLate + totalUndertime).toFixed(2),
+        //     overtime_average : averageOvertime,
+        //     late_average : averageLate,
+        //     undertime_average : averageUndertime,
+        //     late_and_undertime_average : late_and_undertime_average,
+        //     dtr: data_dtr
+        // };
 
         const result = {
-            overtime_average : averageOvertime,
-            late_average : averageLate,
-            undertime_average : averageUndertime,
-            late_and_undertime_average : late_and_undertime_average,
+            overtime : totalOvertime.toFixed(2),
+            undertime : totalUndertime.toFixed(2),
+            late : totalLate.toFixed(2),
+            late_and_undertime : (totalLate + totalUndertime).toFixed(2),
             dtr: data_dtr
         };
 
