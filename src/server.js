@@ -136,7 +136,7 @@ app.use("/eod", authenticateToken, eodRoutes);
 app.use("/payrolls", authenticateToken, payrollRoutes);
 app.use("/complexity", authenticateToken, complexityRoutes);
 app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes);
-app.use("/signatures", authenticateToken, signatureRoutes);
+app.use("/signatures", signatureRoutes);
 app.use("/mood_meters", authenticateToken, moodMeterRoutes);
 app.use("/incident_reports", authenticateToken, incidentReportRoutes);
 app.use("/eligible_att_incentives", eligibleAttendanceIncentive);
