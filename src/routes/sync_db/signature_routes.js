@@ -39,7 +39,7 @@ const upload = multer({ storage: storage });
 const signatureRoutes = Router();
 
 
-signatureRoutes.post('/add_bulletin', upload.single('file_uploaded'), SignatureController.create_signature);
+signatureRoutes.post('/add_signature', upload.single('file_uploaded'), SignatureController.create_signature);
 signatureRoutes.put('/update_signature/:signature_id/:emp_id', upload.single('file_uploaded'), SignatureController.update_signature);
 signatureRoutes.delete('/delete_signature/:signature_id', SignatureController.delete_signature);
 signatureRoutes.get('/get_all_signature', SignatureController.get_all_signature);
