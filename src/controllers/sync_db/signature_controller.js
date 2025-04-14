@@ -41,6 +41,8 @@ export const create_signature = asyncHandler(async (req, res) => {
 
         if (signature.length === 0) {
             const [insert_data_signature] = await db.query(sql2, [filename_insert, emp_id, storeCurrentDateTime(0, 'hours')]);
+           
+            return res.status(200).json({ success: 'Signature successfully created.' });
         }
 
         if (req.file) {
