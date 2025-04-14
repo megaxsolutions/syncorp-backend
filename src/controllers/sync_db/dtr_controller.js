@@ -78,7 +78,6 @@ export const get_all_user_dtr = asyncHandler(async (req, res) => {
                 totalOvertime += overtime;
                 totalLate += late;
                 totalUndertime += undertime;
-
                 count++;
 
                 return dtr;
@@ -88,13 +87,13 @@ export const get_all_user_dtr = asyncHandler(async (req, res) => {
         const averageOvertime = count > 0 ? (totalOvertime / count).toFixed(2) : 0; // Calculate average
         const averageUndertime = count > 0 ? (totalUndertime / count).toFixed(2) : 0; // Calculate average
         const averageLate = count > 0 ? (totalLate / count).toFixed(2) : 0; // Calculate average
-
+        const late_and_undertime_average =count > 0 ? ((totalLate / count) + (totalUndertime / count)).toFixed(2) : 0;
 
         const result = {
             overtime_average : averageOvertime,
             late_average : averageLate,
             undertime_average : averageUndertime,
-            late_and_undertime_average : ((totalLate / count) + (totalUndertime / count)).toFixed(2),
+            late_and_undertime_average : late_and_undertime_average,
             dtr: data_dtr
         };
 
