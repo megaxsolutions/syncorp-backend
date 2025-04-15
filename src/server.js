@@ -113,10 +113,10 @@ app.use("/clusters", authenticateToken, clusterRoutes);
 app.use("/positions", authenticateToken, positionRoutes);
 app.use("/employee_levels", authenticateToken, employeeLevelRoutes);
 app.use("/admin_levels", authenticateToken, adminLevelRoutes);
-app.use("/holidays", authenticateToken, holidayRoutes);
+app.use("/holidays", holidayRoutes);
 app.use("/cutoffs", authenticateToken, cutOffRoutes);
 app.use("/attendances", authenticateToken, attendanceRoutes);
-app.use("/dtr", dtrRoutes);
+app.use("/dtr", authenticateToken, dtrRoutes);
 app.use("/breaks", authenticateToken, breakRoutes);
 app.use("/leave_requests", authenticateToken, leaveRequestRoutes);
 app.use("/leave_types", authenticateToken, leaveTypeRoutes);
@@ -139,7 +139,7 @@ app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes)
 app.use("/signatures", signatureRoutes);
 app.use("/mood_meters", authenticateToken, moodMeterRoutes);
 app.use("/incident_reports", authenticateToken, incidentReportRoutes);
-app.use("/eligible_att_incentives", eligibleAttendanceIncentive);
+app.use("/eligible_att_incentives", authenticateToken, eligibleAttendanceIncentive);
 
 
 
@@ -155,8 +155,8 @@ app.use("/materials", authenticateToken, materialRoutes);
 app.use("/submissions", authenticateToken, submissionRoutes);
 app.use("/users", authenticateToken, userRoutes);
 app.use("/questions", authenticateToken, questionRoutes);
-app.use("/enrolls", enrollRoutes);
-app.use("/trainers", trainerRoutes);
+app.use("/enrolls", authenticateToken, enrollRoutes);
+app.use("/trainers", authenticateToken, trainerRoutes);
 
 
 

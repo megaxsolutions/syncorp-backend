@@ -14,27 +14,22 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
     const expirationDateTime = currentDateTime.clone().add(expirationAmount, expirationUnit);
 
     // Format the current date and expiration date
-    const formattedCurrentDateTime = currentDateTime.format('YYYY-MM-DD HH:mm:ss');
     const formattedExpirationDateTime = expirationDateTime.format('YYYY-MM-DD HH:mm:ss');
 
     // Return both current and expiration date-time
     return formattedExpirationDateTime;
-    // return {
-    //     currentDateTime: formattedCurrentDateTime,
-    //     expirationDateTime: formattedExpirationDateTime
-    // };
 }
 
 export const create_site = asyncHandler(async (req, res) => {
     const { site_name } = req.body;
 
     try {
-        const sql = 'INSERT INTO sites (siteName) VALUES (?)';
+        const sql  = 'INSERT INTO sites (siteName, stamp) VALUES (?, ?)';
         const sql2 = 'SELECT * FROM admin_login WHERE JSON_CONTAINS(user_level, ?)';
         const sql3 = 'INSERT INTO logs (details, datetime, user_level, emp_ID, is_read) VALUES (?, ?, ?, ?, ?)';
 
 
-        const [insert_data_site] = await db.query(sql, [site_name]);
+        const [insert_data_site] = await db.query(sql, [site_name, storeCurrentDateTime(0, 'hours')]);
         const [data_admin_login] = await db.query(sql2, [JSON.stringify(1)]);
 
         const insert_logs_admin_level = await Promise.all(

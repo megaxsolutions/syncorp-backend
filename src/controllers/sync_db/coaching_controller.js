@@ -42,11 +42,19 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 }
 
 export const create_coaching = asyncHandler(async (req, res) => {
-    const { emp_id, coached_emp_id, coaching_type, metrix_1, metrix_2, metrix_3, metrix_4, metrix_5 } = req.body;
+    const { emp_id, coached_emp_id, coaching_type, coaching_goal, behavior, 
+        root_cause, coachees_action_plan, coachs_action_plan,
+        glidepath, stop, start, continue_, follow_up_date  } = req.body;
+
+    
 
     try {
-        const sql = 'INSERT INTO coaching (emp_ID, coached_by, date_coached, coaching_type, metrix_1, metrix_2, metrix_3, metrix_4, metrix_5) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        const [insert_data_coaching_types] = await db.query(sql, [emp_id, coached_emp_id, storeCurrentDate(0, 'hours'), coaching_type, metrix_1, metrix_2, metrix_3, metrix_4, metrix_5]);
+        const sql = `INSERT INTO coaching (emp_ID, coached_by, date_coached, coaching_type, coaching_goal, behavior, 
+        root_cause, coachees_action_plan, coachs_action_plan,
+        glidepath, stop, start, continue_, follow_up_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        const [insert_data_coaching_types] = await db.query(sql, [emp_id, coached_emp_id, storeCurrentDate(0, 'hours'), coaching_type, coaching_goal, behavior, 
+            root_cause, coachees_action_plan, coachs_action_plan,
+            glidepath, stop, start, continue_, follow_up_date]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Coaching successfully created.' });
@@ -56,12 +64,20 @@ export const create_coaching = asyncHandler(async (req, res) => {
 });
 
 export const update_coaching = asyncHandler(async (req, res) => {
-    const { emp_id, coaching_type, coached_emp_id, metrix_1, metrix_2, metrix_3, metrix_4, metrix_5 } = req.body;
+    const { emp_id, coached_emp_id, coaching_type, coaching_goal, behavior, 
+        root_cause, coachees_action_plan, coachs_action_plan,
+        glidepath, stop, start, continue_, follow_up_date  } = req.body;
     const { coaching_id } = req.params; // Assuming cluster_id is passed as a URL parameter
 
     try {
-        const sql = 'UPDATE coaching SET emp_ID = ?, coached_by = ?, coaching_type = ?, metrix_1 = ?, metrix_2 = ?, metrix_3 = ?, metrix_4 = ?, metrix_5 = ? WHERE id = ?';
-        const [result] = await db.query(sql, [emp_id, coached_emp_id, coaching_type, metrix_1, metrix_2, metrix_3, metrix_4, metrix_5, coaching_id]);
+        const sql = `UPDATE coaching SET emp_ID = ?, coached_by = ?, coaching_type = ?, 
+        coaching_goal = ?, behavior = ?, root_cause = ?, coachees_action_plan = ?, coachs_action_plan = ?,
+        glidepath = ?, stop = ?, start = ?, continue_ = ?, follow_up_date = ?
+        WHERE id = ?`;
+
+        const [result] = await db.query(sql, [emp_id, coached_emp_id, coaching_type, coaching_goal, 
+            behavior, root_cause, coachees_action_plan, 
+            coachs_action_plan, glidepath, stop, start, continue_, follow_up_date, coaching_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Coaching not found.' });
@@ -119,9 +135,12 @@ export const get_all_coaching = asyncHandler(async (req, res) => {
         coaching.coached_by, 
         coaching.date_coached, 
         coaching.coaching_type, 
-        coaching.metrix_1, coaching.metrix_2, 
-        coaching.metrix_3, coaching.metrix_4,
-        coaching.metrix_5,
+        coaching.coaching_goal, coaching.behavior, 
+        coaching.root_cause, coaching.coachees_action_plan, 
+        coaching.coachs_action_plan,
+        coaching.glidepath, 
+        coaching.stop, coaching.start, coaching.continue_, 
+        coaching.follow_up_date,
         DATE_FORMAT(coaching.date_coached, '%Y-%m-%d') AS date_coached,
         DATE_FORMAT(coaching.acknowledge_datetime, '%Y-%m-%d %H:%i:%s') AS acknowledge_datetime,
         CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname,
@@ -155,9 +174,12 @@ export const get_all_user_coaching = asyncHandler(async (req, res) => {
         coaching.coached_by, 
         coaching.date_coached, 
         coaching.coaching_type, 
-        coaching.metrix_1, coaching.metrix_2, 
-        coaching.metrix_3, coaching.metrix_4,
-        coaching.metrix_5,
+        coaching.coaching_goal, coaching.behavior, 
+        coaching.root_cause, coaching.coachees_action_plan, 
+        coaching.coachs_action_plan,
+        coaching.glidepath, 
+        coaching.stop, coaching.start, coaching.continue_, 
+        coaching.follow_up_date,
         DATE_FORMAT(coaching.date_coached, '%Y-%m-%d') AS date_coached,
         DATE_FORMAT(coaching.acknowledge_datetime, '%Y-%m-%d %H:%i:%s') AS acknowledge_datetime,
         CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname,
@@ -206,9 +228,12 @@ export const get_all_coaching_supervisor = asyncHandler(async (req, res) => {
         coaching.coached_by, 
         coaching.date_coached, 
         coaching.coaching_type, 
-        coaching.metrix_1, coaching.metrix_2, 
-        coaching.metrix_3, coaching.metrix_4,
-        coaching.metrix_5,
+        coaching.coaching_goal, coaching.behavior, 
+        coaching.root_cause, coaching.coachees_action_plan, 
+        coaching.coachs_action_plan,
+        coaching.glidepath, 
+        coaching.stop, coaching.start, coaching.continue_, 
+        coaching.follow_up_date,
         DATE_FORMAT(coaching.date_coached, '%Y-%m-%d') AS date_coached,
         DATE_FORMAT(coaching.acknowledge_datetime, '%Y-%m-%d %H:%i:%s') AS acknowledge_datetime,
         CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname,
