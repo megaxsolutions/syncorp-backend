@@ -66,6 +66,7 @@ export const get_all_user_dtr = asyncHandler(async (req, res) => {
         let totalOvertime = 0;
         let totalLate = 0;
         let totalUndertime = 0;
+        let totalAbsent = 0;
         let count = 0;
 
         
@@ -74,10 +75,13 @@ export const get_all_user_dtr = asyncHandler(async (req, res) => {
                 const overtime = parseFloat(dtr.overtime) || 0; // Ensure to handle null or undefined
                 const late = parseFloat(dtr.late) || 0; // Ensure to handle null or undefined
                 const undertime = parseFloat(dtr.undertime) || 0; // Ensure to handle null or undefined
+                const absent = !dtr.state || dtr.state.toLowerCase() == 'abs' ? 1 : 0; // Ensure to handle null or undefined
+
 
                 totalOvertime += overtime;
                 totalLate += late;
                 totalUndertime += undertime;
+                totalAbsent += absent;
                 count++;
 
                 return dtr;
@@ -102,6 +106,8 @@ export const get_all_user_dtr = asyncHandler(async (req, res) => {
         // };
 
         const result = {
+            total_days : data_dtr.length,
+            total_absent : totalAbsent,
             overtime : totalOvertime.toFixed(2),
             undertime : totalUndertime.toFixed(2),
             late : totalLate.toFixed(2),
