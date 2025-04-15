@@ -20,6 +20,20 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
     return formattedExpirationDateTime;
 }
 
+function storeCurrentDate(expirationAmount, expirationUnit) {
+    // Get the current date and time in Asia/Manila timezone
+    const currentDateTime = moment.tz("Asia/Manila");
+
+    // Calculate the expiration date and time
+    const expirationDateTime = currentDateTime.clone().add(expirationAmount, expirationUnit);
+
+    // Format the expiration date
+    const formattedExpirationDateTime = expirationDateTime.format('YYYY');
+
+    // Return the formatted expiration date-time
+    return formattedExpirationDateTime;
+}
+
 export const create_holiday = asyncHandler(async (req, res) => {
     const { date, holiday_name, holiday_type } = req.body;
 
@@ -49,6 +63,26 @@ export const update_holiday = asyncHandler(async (req, res) => {
         return res.status(200).json({ success: 'Holiday successfully updated.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to update holiday.' });
+    }
+});
+
+
+export const get_all_holiday_current_year = asyncHandler(async (req, res) => {
+    try {
+        const sql = `SELECT id,
+            DATE_FORMAT(date, '%Y-%m-%d') AS date, 
+            DATE_FORMAT(datetime_added, '%Y-%m-%d %H:%i:%s') AS datetime_added,
+            holiday_name,
+            holiday_type
+            FROM holidays WHERE DATE_FORMAT(date, '%Y') = ?`; // Use a parameterized query
+
+        const [holidays] = await db.query(sql, [storeCurrentDate(0, 'hours')]);
+
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: holidays });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
 

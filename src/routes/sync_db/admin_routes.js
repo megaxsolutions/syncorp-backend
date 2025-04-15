@@ -44,6 +44,9 @@ adminRoutes.put('/update_admin_expiration/:emp_id', authenticateToken, AdminCont
 adminRoutes.put('/update_admin_login/:emp_id', authenticateToken, AdminController.update_admin_login);
 adminRoutes.put('/update_admin_login_attempts/:emp_id', authenticateToken, AdminController.update_admin_login_attempts);
 
+adminRoutes.put('/update_admin_login_site_id/:emp_id', authenticateToken, AdminController.update_admin_login_site_id);
+
+
 
 adminRoutes.put('/update_admin/:emp_id', authenticateToken, upload.single('file_uploaded'), AdminController.update_admin);
 adminRoutes.post('/add_admin', authenticateToken, AdminController.create_admin);

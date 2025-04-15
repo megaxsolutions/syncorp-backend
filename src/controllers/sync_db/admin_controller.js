@@ -286,22 +286,21 @@ export const update_admin_user_level_supervisor_cluster = asyncHandler(async (re
 
 
 export const create_admin = asyncHandler(async (req, res) => {
-    const { emp_id, password, user_level } = req.body;
+    const { emp_id, password, user_level, site_id } = req.body;
 
     const array = [Number(user_level)];
     
     // Convert the array to a JSON string
     const arrayString = JSON.stringify(array); // or array.join(',') for a comma-separated string
 
-
     try {
         const sql   = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
-        const sql2  = 'INSERT INTO admin_login (emp_ID, password, expiry_date, user_level) VALUES (?, ?, ?, ?)';
+        const sql2  = 'INSERT INTO admin_login (emp_ID, password, expiry_date, user_level, siteID) VALUES (?, ?, ?, ?, ?)';
 
         const [user] = await db.query(sql, [emp_id]);
 
         if (user.length == 0) {
-            const [insert_data_admin_login] = await db.query(sql2, [emp_id, hashConverterMD5(password), storeCurrentDate(3, 'months'), arrayString]);    
+            const [insert_data_admin_login] = await db.query(sql2, [emp_id, hashConverterMD5(password), storeCurrentDate(3, 'months'), arrayString, site_id]);    
             return res.status(200).json({ success: 'Account successfully created.' });
         } 
 
@@ -310,6 +309,27 @@ export const create_admin = asyncHandler(async (req, res) => {
         return res.status(500).json({ error: 'Failed to create admin entry' });
     }
 });
+
+
+export const update_admin_login_site_id = asyncHandler(async (req, res) => {
+    const { site_id  } = req.body;
+    const { emp_id } = req.params; // Assuming department_id is passed as a URL parameter
+
+    try {
+        const sql = 'UPDATE admin_login SET password = ? WHERE emp_ID = ?';
+ 
+        const [update_login_password] = await db.query(sql, [site_id , emp_id]);
+            
+        if (update_login_password.affectedRows === 0) {
+            return res.status(404).json({ error: 'Admin not found.' });
+        }
+        
+        return res.status(200).json({ success: 'Admin successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update admin.' });
+    }
+});
+
 
 
 
