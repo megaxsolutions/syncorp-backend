@@ -49,12 +49,12 @@ export const create_holiday = asyncHandler(async (req, res) => {
 });
 
 export const update_holiday = asyncHandler(async (req, res) => {
-    const { date, holiday_name, holiday_type } = req.body;
+    const { date, holiday_name, holiday_type, siteIDs } = req.body;
     const { holiday_id } = req.params; // Assuming holiday_id is passed as a URL parameter
 
     try {
-        const sql = 'UPDATE holidays SET date = ?, holiday_name = ?, holiday_type = ? WHERE id = ?';        
-        const [result] = await db.query(sql, [date, holiday_name, holiday_type, holiday_id]);
+        const sql = 'UPDATE holidays SET date = ?, holiday_name = ?, holiday_type = ?, site=? WHERE id = ?';        
+        const [result] = await db.query(sql, [date, holiday_name, holiday_type, holiday_id, siteIDs]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Holiday not found.' });
