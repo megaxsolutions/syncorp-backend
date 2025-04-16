@@ -53,7 +53,13 @@ export const get_all_user_incident_report = asyncHandler(async (req, res) => {
 
 export const get_all_incident_report = asyncHandler(async (req, res) => {
     try {
-        const sql  = 'SELECT * FROM incident_report'; // Use a parameterized query
+        const sql = `SELECT incident_report.id, incident_report.emp_ID,
+        incident_report.details,
+        DATE_FORMAT(incident_report.submitted_datetime, '%Y-%m-%d %H:%i:%s') AS submitted_datetime,
+        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname
+        FROM incident_report
+        LEFT JOIN employee_profile ON incident_report.emp_ID = employee_profile.emp_ID
+        `;
 
         const [incident_report] = await db.query(sql);
 
@@ -81,7 +87,8 @@ export const get_all_incident_report_supervisor = asyncHandler(async (req, res) 
 
         const sql2 = `SELECT incident_report.id, incident_report.emp_ID,
         incident_report.details,
-        DATE_FORMAT(incident_report.submitted_datetime, '%Y-%m-%d %H:%i:%s') AS submitted_datetime
+        DATE_FORMAT(incident_report.submitted_datetime, '%Y-%m-%d %H:%i:%s') AS submitted_datetime,
+        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname
         FROM incident_report
         LEFT JOIN employee_profile ON incident_report.emp_ID = employee_profile.emp_ID
         WHERE employee_profile.clusterID IN (${placeholders})

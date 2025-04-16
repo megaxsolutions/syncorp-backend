@@ -138,7 +138,7 @@ app.use("/complexity", authenticateToken, complexityRoutes);
 app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes);
 app.use("/signatures", signatureRoutes);
 app.use("/mood_meters", authenticateToken, moodMeterRoutes);
-app.use("/incident_reports", authenticateToken, incidentReportRoutes);
+app.use("/incident_reports", incidentReportRoutes);
 app.use("/eligible_att_incentives", authenticateToken, eligibleAttendanceIncentive);
 
 
