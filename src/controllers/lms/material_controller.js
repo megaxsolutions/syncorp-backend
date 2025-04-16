@@ -55,7 +55,7 @@ export const update_material = asyncHandler(async (req, res) => {
         const sql  = 'SELECT * FROM materials WHERE id = ?'; // Use a parameterized query
         const sql2 = `UPDATE materials SET courseID = ?, categoryID = ?, title = ?, filename = ?, created_by = ?, filename_uploaded = ? WHERE id = ?`;
 
-        const [material] = await db.query(sql, [material_id]);
+        const [material] = await db2.query(sql, [material_id]);
 
         if (material.length === 0) {
             return res.status(404).json({ message: 'Material not found' });
@@ -106,13 +106,24 @@ export const delete_material = asyncHandler(async (req, res) => {
 
 
     try {
-        const sql = 'DELETE FROM materials WHERE id = ?';
+        const sql  = 'SELECT * FROM materials WHERE id = ?'; // Use a parameterized query
+        const sql2 = 'DELETE FROM materials WHERE id = ?';
 
-        const [result] = await db2.query(sql, [material_id]);
+        const [material] = await db2.query(sql, [material_id]);
 
-        if (result.affectedRows === 0) {
+        if (material.length === 0) {
             return res.status(404).json({ error: 'Material not found.' });
         }
+
+        const filePath = path.join(uploadsDir, material[0]['filename_uploaded']);
+
+        fs.unlink(filePath, (err) => {
+            if (err) {
+                console.error('Error deleting file:', err);
+            }
+        });
+        const [result] = await db2.query(sql2, [material_id]);
+
 
         return res.status(200).json({ success: 'Material successfully deleted.' });
     } catch (error) {

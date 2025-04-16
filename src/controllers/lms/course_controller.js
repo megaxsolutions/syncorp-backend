@@ -5,6 +5,15 @@ import { db2 } from '../../config/config.js'; // Import the database connection
 
 import moment from 'moment-timezone';
 
+import path from 'path'; // Import the path module
+import fs from 'fs'; // Import fs to check if the directory exists
+import { fileURLToPath } from 'url'; // Import fileURLToPath
+import { dirname, join } from 'path'; // Import dirname
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const uploadsDir = path.join(__dirname, '../../../uploads/');
+
+
 // Function to get the current date and time in Asia/Manila and store it in the database
 function storeCurrentDateTime(expirationAmount, expirationUnit) {
     // Get the current date and time in Asia/Manila timezone
@@ -21,11 +30,14 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 }
 
 export const create_course = asyncHandler(async (req, res) => {
-    const { course_title, course_details } = req.body;
+    const { course_title, course_details, category_id } = req.body;
+
+    const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+    const filename_insert = filename ? `courses/${filename}` : null; 
 
     try {
-        const sql = 'INSERT INTO courses (course_title, course_details, date_added) VALUES (?, ?, ?)';
-        const [insert_data_course] = await db2.query(sql, [course_title, course_details, storeCurrentDateTime(0, 'hours')]);
+        const sql = 'INSERT INTO courses (course_title, course_details, date_added, filename, categoryID) VALUES (?, ?, ?, ?, ?)';
+        const [insert_data_course] = await db2.query(sql, [course_title, course_details, storeCurrentDateTime(0, 'hours'), filename_insert, category_id]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Course successfully created.' });
@@ -36,13 +48,33 @@ export const create_course = asyncHandler(async (req, res) => {
 
 
 export const update_course = asyncHandler(async (req, res) => {
-    const { course_title, course_details } = req.body;
+    const { course_title, course_details, category_id } = req.body;
     const { course_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
-    try {
-        const sql = 'UPDATE courses SET course_title = ?, course_details = ? WHERE id = ?';
+    const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+    const filename_insert = filename ? `courses/${filename}` : null; 
 
-        const [update_data_course] = await db2.query(sql, [course_title, course_details, course_id]);
+    try {
+        const sql  = 'SELECT * FROM courses WHERE id = ?'; // Use a parameterized query
+        const sql2 = 'UPDATE courses SET course_title = ?, course_details = ?, categoryID = ?, filename = ? WHERE id = ?';
+
+        const [course] = await db2.query(sql, [course_id]);
+
+        if (course.length === 0) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+        if (req.file) {
+            const filePath = path.join(uploadsDir, course[0]['filename']);
+
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error('Error deleting file:', err);
+                }
+            });
+        }
+
+        const [update_data_course] = await db2.query(sql2, [course_title, course_details, category_id, filename_insert || course[0]['filename'], course_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ success: 'Course successfully updated.' });
@@ -76,13 +108,26 @@ export const delete_course = asyncHandler(async (req, res) => {
 
 
     try {
-        const sql = 'DELETE FROM courses WHERE id = ?';
+        const sql  = 'SELECT * FROM courses WHERE id = ?'; // Use a parameterized query
+        const sql2 = 'DELETE FROM courses WHERE id = ?';
 
-        const [result] = await db2.query(sql, [course_id]);
+        const [course] = await db2.query(sql, [course_id]);
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Course not found.' });
+        
+        if (course.length === 0) {
+            return res.status(404).json({ error: 'Couurse not found.' });
         }
+
+        const filePath = path.join(uploadsDir, course[0]['filename']);
+
+        fs.unlink(filePath, (err) => {
+            if (err) {
+                console.error('Error deleting file:', err);
+            }
+        });
+
+        const [result] = await db2.query(sql2, [course_id]);
+
 
         return res.status(200).json({ success: 'Course successfully deleted.' });
     } catch (error) {

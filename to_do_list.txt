@@ -75,3 +75,5 @@ start
 continue
 follow_up_date
 
+add and update image [course and course category]
+

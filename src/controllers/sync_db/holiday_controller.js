@@ -36,9 +36,9 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
 export const create_holiday = asyncHandler(async (req, res) => {
     const { date, holiday_name, holiday_type, siteIDs } = req.body;
-     const siteIDsString = siteIDs.join(',');
+    const siteIDsString = siteIDs.join(',');
     try {
-        const sql = 'INSERT INTO holidays (date, datetime_added, holiday_name, holiday_type,site) VALUES (?, ?, ?, ?, ?)';
+        const sql = 'INSERT INTO holidays (date, datetime_added, holiday_name, holiday_type, site) VALUES (?, ?, ?, ?, ?)';
         const [insert_data_holiday] = await db.query(sql, [date, storeCurrentDateTime(0, 'hours'), holiday_name, holiday_type, siteIDsString]);
       
         // Return the merged results in the response
