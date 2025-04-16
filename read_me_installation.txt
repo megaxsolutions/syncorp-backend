@@ -15,7 +15,7 @@ npm install mysql2
 npm install worker_threads
 npm install ws
 
-npm install express-async-handler express mysql2 sequelize cors -g nodemon body-parser jsonwebtoken
+
 
 13.228.73.214
 sync_db
@@ -27,5 +27,5 @@ Kk9566678@!
 
 
 
-npm install socket.io-client
+npm install socket.io-client - frontend
 

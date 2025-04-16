@@ -5,6 +5,14 @@ import { db2 } from '../../config/config.js'; // Import the database connection
 
 import moment from 'moment-timezone';
 
+import path from 'path'; // Import the path module
+import fs from 'fs'; // Import fs to check if the directory exists
+import { fileURLToPath } from 'url'; // Import fileURLToPath
+import { dirname, join } from 'path'; // Import dirname
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const uploadsDir = path.join(__dirname, '../../../uploads/');
+
 // Function to get the current date and time in Asia/Manila and store it in the database
 function storeCurrentDateTime(expirationAmount, expirationUnit) {
     // Get the current date and time in Asia/Manila timezone
@@ -22,10 +30,13 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 
 export const create_course_category = asyncHandler(async (req, res) => {
     const { category_title } = req.body;
+    
+    const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+    const filename_insert = filename ? `course_category/${filename}` : null; 
 
     try {
-        const sql = 'INSERT INTO course_category (category_title, date_added) VALUES (?, ?)';
-        const [insert_data_course_category] = await db2.query(sql, [category_title, storeCurrentDateTime(0, 'hours')]);
+        const sql = 'INSERT INTO course_category (category_title, date_added, filename) VALUES (?, ?, ?)';
+        const [insert_data_course_category] = await db2.query(sql, [category_title, storeCurrentDateTime(0, 'hours'), filename_insert]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Course category successfully created.' });
@@ -39,10 +50,30 @@ export const update_course_category = asyncHandler(async (req, res) => {
     const { category_title } = req.body;
     const { course_category_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
-    try {
-        const sql = 'UPDATE course_category SET category_title = ? WHERE id = ?';
+    const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+    const filename_insert = filename ? `course_category/${filename}` : null; 
 
-        const [update_data_course_category] = await db2.query(sql, [category_title, course_category_id]);
+    try {
+        const sql  = 'SELECT * FROM course_category WHERE id = ?'; // Use a parameterized query
+        const sql2 = 'UPDATE course_category SET category_title = ?, filename = ? WHERE id = ?';
+
+        const [course_category] = await db2.query(sql, [course_category_id]);
+
+        if (course_category.length === 0) {
+            return res.status(404).json({ message: 'Course category not found' });
+        }
+
+        if (req.file) {
+            const filePath = path.join(uploadsDir, course_category[0]['filename']);
+
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error('Error deleting file:', err);
+                }
+            });
+        }
+
+        const [update_data_course_category] = await db2.query(sql2, [category_title, filename_insert || course_category[0]['filename'], course_category_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ success: 'Course category successfully updated.' });
@@ -76,13 +107,24 @@ export const delete_course_category = asyncHandler(async (req, res) => {
 
 
     try {
-        const sql = 'DELETE FROM course_category WHERE id = ?';
+        const sql  = 'SELECT * FROM course_category WHERE id = ?'; // Use a parameterized query
+        const sql2 = 'DELETE FROM course_category WHERE id = ?';
 
-        const [result] = await db2.query(sql, [course_category_id]);
+        const [course_category] = await db2.query(sql, [course_category_id]);
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Course category not found.' });
+        if (course_category.length === 0) {
+            return res.status(404).json({ error: 'Couurse category not found.' });
         }
+
+        const filePath = path.join(uploadsDir, course_category[0]['filename']);
+
+        fs.unlink(filePath, (err) => {
+            if (err) {
+                console.error('Error deleting file:', err);
+            }
+        });
+
+        const [result] = await db2.query(sql2, [course_category_id]);
 
         return res.status(200).json({ success: 'Course category successfully deleted.' });
     } catch (error) {
