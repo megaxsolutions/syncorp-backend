@@ -36,10 +36,10 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
 export const create_holiday = asyncHandler(async (req, res) => {
     const { date, holiday_name, holiday_type, siteIDs } = req.body;
-
+     const siteIDsString = siteIDs.join(',');
     try {
         const sql = 'INSERT INTO holidays (date, datetime_added, holiday_name, holiday_type,site) VALUES (?, ?, ?, ?, ?)';
-        const [insert_data_holiday] = await db.query(sql, [date, storeCurrentDateTime(0, 'hours'), holiday_name, holiday_type, siteIDs]);
+        const [insert_data_holiday] = await db.query(sql, [date, storeCurrentDateTime(0, 'hours'), holiday_name, holiday_type, siteIDsString]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Holiday successfully created.' });
@@ -51,10 +51,10 @@ export const create_holiday = asyncHandler(async (req, res) => {
 export const update_holiday = asyncHandler(async (req, res) => {
     const { date, holiday_name, holiday_type, siteIDs } = req.body;
     const { holiday_id } = req.params; // Assuming holiday_id is passed as a URL parameter
-
+    const siteIDsString = siteIDs.join(',');
     try {
         const sql = 'UPDATE holidays SET date = ?, holiday_name = ?, holiday_type = ?, site=? WHERE id = ?';        
-        const [result] = await db.query(sql, [date, holiday_name, holiday_type, siteIDs, holiday_id]);
+        const [result] = await db.query(sql, [date, holiday_name, holiday_type, siteIDsString, holiday_id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Holiday not found.' });
