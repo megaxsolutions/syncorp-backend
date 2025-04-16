@@ -4,6 +4,13 @@ import jwt from 'jsonwebtoken';
 import { db2 } from '../../config/config.js'; // Import the database connection
 
 import moment from 'moment-timezone';
+import path from 'path'; // Import the path module
+import fs from 'fs'; // Import fs to check if the directory exists
+import { fileURLToPath } from 'url'; // Import fileURLToPath
+import { dirname, join } from 'path'; // Import dirname
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const uploadsDir = path.join(__dirname, '../../../uploads/');
 
 // Function to get the current date and time in Asia/Manila and store it in the database
 function storeCurrentDateTime(expirationAmount, expirationUnit) {
@@ -23,9 +30,12 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 export const create_material = asyncHandler(async (req, res) => {
     const { course_id, category_id, title, filename, created_by } = req.body;
 
+    const filename_uploaded = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+    const filename_insert = filename_uploaded ? `materials/${filename_uploaded}` : null; 
+
     try {
-        const sql = 'INSERT INTO materials (courseID, categoryID, title, filename, date_created, created_by) VALUES (?, ?, ?, ?, ?, ?)';
-        const [insert_data_material] = await db2.query(sql, [course_id, category_id, title, filename, storeCurrentDateTime(0, 'hours'), created_by]);
+        const sql = 'INSERT INTO materials (courseID, categoryID, title, filename, date_created, created_by, filename_uploaded) VALUES (?, ?, ?, ?, ?, ?, ?)';
+        const [insert_data_material] = await db2.query(sql, [course_id, category_id, title, filename, storeCurrentDateTime(0, 'hours'), created_by, filename_insert]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Material successfully created.' });
@@ -38,15 +48,38 @@ export const update_material = asyncHandler(async (req, res) => {
     const { course_id, category_id, title, filename, created_by } = req.body;
     const { material_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
+    const filename_uploaded = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+    const filename_insert = filename_uploaded ? `materials/${filename_uploaded}` : null; 
+
     try {
-        const sql = `UPDATE materials SET courseID = ?, categoryID = ?, title = ?, filename = ?, created_by = ? WHERE id = ?`;
+        const sql  = 'SELECT * FROM materials WHERE id = ?'; // Use a parameterized query
+        const sql2 = `UPDATE materials SET courseID = ?, categoryID = ?, title = ?, filename = ?, created_by = ?, filename_uploaded = ? WHERE id = ?`;
 
-        const [update_data_material] = await db2.query(sql, [course_id, category_id, title, filename, created_by, material_id]);
+        const [material] = await db.query(sql, [material_id]);
 
+        if (material.length === 0) {
+            return res.status(404).json({ message: 'Material not found' });
+        }
+
+        if (req.file) {
+            const filePath = path.join(uploadsDir, material[0]['filename_uploaded']);
+
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error('Error deleting file:', err);
+                }
+            });
+        }
+        
+        const [update_data_material] = await db2.query(sql2, [course_id, category_id, title, filename, created_by, filename_insert || material[0]['filename_uploaded'], material_id]);
+        
+        if (update_data_material.affectedRows === 0) {
+            return res.status(404).json({ error: 'Material not found.' });
+        }
         // Return the merged results in the response
-        return res.status(200).json({ success: 'Course category successfully updated.' });
+        return res.status(200).json({ success: 'Material successfully updated.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to update course category.' });
+        return res.status(500).json({ error: 'Failed to update material.' });
     }
 });
 

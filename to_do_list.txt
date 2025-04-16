@@ -75,4 +75,3 @@ start
 continue
 follow_up_date
 
-
