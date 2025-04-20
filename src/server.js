@@ -123,7 +123,7 @@ app.use("/leave_types", authenticateToken, leaveTypeRoutes);
 app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
 app.use("/overtime_requests", authenticateToken, overtimeRequestRoutes);
 app.use("/bulletins", authenticateToken, bulletinRoutes);
-app.use("/shift_schedules", shiftscheduleRoutes);
+app.use("/shift_schedules", authenticateToken, shiftscheduleRoutes);
 app.use("/coaching_types", authenticateToken, coachingTypeRoutes);
 app.use("/coaching", authenticateToken, coachingRoutes);
 app.use("/payslips", authenticateToken, payslipRoutes);
@@ -134,7 +134,7 @@ app.use("/break_schedules", authenticateToken, breakscheduleRoutes);
 app.use("/adjustments", authenticateToken, adjustmentRoutes);
 app.use("/eod", authenticateToken, eodRoutes);
 app.use("/payrolls", authenticateToken, payrollRoutes);
-app.use("/complexity", authenticateToken, complexityRoutes);
+app.use("/complexity", complexityRoutes);
 app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes);
 app.use("/signatures", authenticateToken, signatureRoutes);
 app.use("/mood_meters", authenticateToken, moodMeterRoutes);
@@ -149,8 +149,8 @@ app.use("/eligible_att_incentives", eligibleAttendanceIncentive);
 
 
 //lms
-app.use("/course_catergory", courseCategoryRoutes);
-app.use("/courses", courseRoutes);
+app.use("/course_catergory", authenticateToken, courseCategoryRoutes);
+app.use("/courses", authenticateToken, courseRoutes);
 app.use("/materials", authenticateToken, materialRoutes);
 app.use("/submissions", authenticateToken, submissionRoutes);
 app.use("/users", authenticateToken, userRoutes);

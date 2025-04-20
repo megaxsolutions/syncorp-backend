@@ -44,13 +44,13 @@ export const get_all_complexity_supervisor = asyncHandler(async (req, res) => {
         complexity.approved_by2,
         complexity.status,
         complexity.status2,
-        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname
+        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname,
         DATE_FORMAT(complexity.datetime_approved, '%Y-%m-%d %H:%i:%s') AS datetime_approved,  
         DATE_FORMAT(complexity.datetime_approved2, '%Y-%m-%d %H:%i:%s') AS datetime_approved2
         FROM complexity
         LEFT JOIN employee_profile ON complexity.emp_ID = employee_profile.emp_ID
-        WHERE employee_profile.clusterID IN (${placeholders})
-        `; // Use a parameterized query
+        WHERE employee_profile.clusterID IN (${placeholders}) 
+        ORDER BY complexity.id ASC`; // Use a parameterized query
                                   
         const [complexity] = await db.query(sql2, bucketArray);
 
@@ -101,7 +101,8 @@ export const get_all_complexity = asyncHandler(async (req, res) => {
         DATE_FORMAT(complexity.datetime_approved2, '%Y-%m-%d %H:%i:%s') AS datetime_approved2,
         CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname
         FROM complexity
-        LEFT JOIN employee_profile ON complexity.emp_ID = employee_profile.emp_ID`; // Use a parameterized query
+        LEFT JOIN employee_profile ON complexity.emp_ID = employee_profile.emp_ID
+        ORDER BY complexity.id ASC`; // Use a parameterized query
 
         
 
