@@ -123,7 +123,7 @@ app.use("/leave_types", authenticateToken, leaveTypeRoutes);
 app.use("/overtime_types", authenticateToken, overtimeTypeRoutes);
 app.use("/overtime_requests", authenticateToken, overtimeRequestRoutes);
 app.use("/bulletins", authenticateToken, bulletinRoutes);
-app.use("/shift_schedules", authenticateToken, shiftscheduleRoutes);
+app.use("/shift_schedules", shiftscheduleRoutes);
 app.use("/coaching_types", authenticateToken, coachingTypeRoutes);
 app.use("/coaching", authenticateToken, coachingRoutes);
 app.use("/payslips", authenticateToken, payslipRoutes);
@@ -150,7 +150,7 @@ app.use("/eligible_att_incentives", eligibleAttendanceIncentive);
 
 //lms
 app.use("/course_catergory", courseCategoryRoutes);
-app.use("/courses", authenticateToken, courseRoutes);
+app.use("/courses", courseRoutes);
 app.use("/materials", authenticateToken, materialRoutes);
 app.use("/submissions", authenticateToken, submissionRoutes);
 app.use("/users", authenticateToken, userRoutes);

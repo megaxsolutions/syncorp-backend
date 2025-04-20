@@ -121,7 +121,7 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
     try {
         const sql  = 'SELECT * FROM login'; // Use a parameterized query
 
-        const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by, schedule_type, is_overtime, is_break) VALUES ?';
+        const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by, schedule_type, is_overtime) VALUES ?';
 
 
         // const sqlSelect = `SELECT emp_ID, 
@@ -193,7 +193,7 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
                 // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
                 if (!existingSchedulesMap.has(key)) {
                     // If the schedule doesn't exist, prepare for insertion
-                    insertValues.push([emp_id, `${day} ${shift_in}`, `${check_shift_type (shift_in, shift_out) === true ? day : extendDateByOneDay(day)} ${shift_out}`, day, admin_emp_id, schedule_type_id, 1, 0]);
+                    insertValues.push([emp_id, `${day} ${shift_in}`, `${check_shift_type (shift_in, shift_out) === true ? day : extendDateByOneDay(day)} ${shift_out}`, day, admin_emp_id, schedule_type_id, 1]);
                     count_employees++;
                 }
             }
@@ -231,7 +231,7 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
     try {
         const sql  = 'SELECT * FROM login'; // Use a parameterized query
 
-        const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by, schedule_type, is_overtime, is_break) VALUES ?';
+        const sqlInsert = 'INSERT INTO shift_schedule (emp_ID, shift_in, shift_out, day, plotted_by, schedule_type, is_overtime) VALUES ?';
 
         // Fix for the SQL query with the IN clause:
         const sqlSelect = `SELECT emp_ID, 
@@ -284,7 +284,7 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
                 // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
                 if (!existingSchedulesMap.has(key)) {
                     // If the schedule doesn't exist, prepare for insertion
-                    insertValues.push([emp_id, `${day} ${shift_in}`, `${check_shift_type (shift_in, shift_out) === true ? day : extendDateByOneDay(day)} ${shift_out}`, day, admin_emp_id, schedule_type_id, 0, 0]);
+                    insertValues.push([emp_id, `${day} ${shift_in}`, `${check_shift_type (shift_in, shift_out) === true ? day : extendDateByOneDay(day)} ${shift_out}`, day, admin_emp_id, schedule_type_id, 0]);
                     count_employees++;
                 }
             }
@@ -326,7 +326,7 @@ export const delete_shift_schedule_multiple_day_overtime = asyncHandler(async (r
     try {
         const sql  = 'SELECT * FROM login'; // Use a parameterized query
 
-        const sqlDelete = `DELETE FROM shift_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') IN (?) AND schedule_type = ? AND is_overtime = ? AND is_break = ?`;
+        const sqlDelete = `DELETE FROM shift_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') IN (?) AND schedule_type = ? AND is_overtime = ?`;
 
         const selected_days = array_selected_days;
 
@@ -342,7 +342,7 @@ export const delete_shift_schedule_multiple_day_overtime = asyncHandler(async (r
 
         const delete_shift_schedules = await Promise.all(
             emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlDelete, [emp_id, days, schedule_type_id, 1, 0]);
+                const [result] = await db.query(sqlDelete, [emp_id, days, schedule_type_id, 1]);
                 if(result.affectedRows > 0) {
                     employees_affected++;
                 }
@@ -378,7 +378,7 @@ export const delete_shift_schedule_multiple_day = asyncHandler(async (req, res) 
     try {
         const sql  = 'SELECT * FROM login'; // Use a parameterized query
 
-        const sqlDelete = `DELETE FROM shift_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') IN (?) AND schedule_type = ? AND is_overtime = ? AND is_break = ?`;
+        const sqlDelete = `DELETE FROM shift_schedule WHERE emp_ID = ? AND DATE_FORMAT(day, '%Y-%m-%d') IN (?) AND schedule_type = ? AND is_overtime = ?`;
 
         const selected_days = array_selected_days;
 
@@ -394,7 +394,7 @@ export const delete_shift_schedule_multiple_day = asyncHandler(async (req, res) 
 
         const delete_shift_schedules = await Promise.all(
             emp_ids.map(async (emp_id) => {
-                const [result] = await db.query(sqlDelete, [emp_id, days, schedule_type_id, 0, 0]);
+                const [result] = await db.query(sqlDelete, [emp_id, days, schedule_type_id, 0]);
                 if(result.affectedRows > 0) {
                     employees_affected++;
                 }
@@ -438,8 +438,8 @@ export const get_shift_schedule_day = asyncHandler(async (req, res) => {
         CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
         FROM shift_schedule 
         LEFT JOIN employee_profile ON shift_schedule.emp_ID = employee_profile.emp_ID
-        WHERE shift_schedule.is_overtime = ? AND shift_schedule.is_break = ?`; // Use a parameterized query
-        const [result] = await db.query(sql, [0, 0]);
+        WHERE shift_schedule.is_overtime = ?`; // Use a parameterized query
+        const [result] = await db.query(sql, [0]);
 
         return res.status(200).json({ data: result });
     } catch (error) {
@@ -477,10 +477,10 @@ export const get_shift_schedule_day_supervisor = asyncHandler(async (req, res) =
         CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
         FROM shift_schedule 
         LEFT JOIN employee_profile ON shift_schedule.emp_ID = employee_profile.emp_ID
-        WHERE shift_schedule.is_break = ? AND shift_schedule.is_overtime = ? AND employee_profile.clusterID IN (${placeholders})`; // Use a parameterized query
+        WHERE shift_schedule.is_overtime = ? AND employee_profile.clusterID IN (${placeholders})`; // Use a parameterized query
 
         // Flatten the parameters for the query
-        const params = [0, 0, ...bucketArray];
+        const params = [0, ...bucketArray];
         const [result] = await db.query(sql2, params);
 
         return res.status(200).json({ data: result });
@@ -509,9 +509,9 @@ export const get_shift_schedule_day_overtime = asyncHandler(async (req, res) => 
         CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
         FROM shift_schedule 
         LEFT JOIN employee_profile ON shift_schedule.emp_ID = employee_profile.emp_ID
-        WHERE shift_schedule.is_overtime = ? AND shift_schedule.is_break = ?`; // Use a parameterized query
+        WHERE shift_schedule.is_overtime = ?`; // Use a parameterized query
 
-        const [result] = await db.query(sql, [1, 0]);
+        const [result] = await db.query(sql, [1]);
 
         return res.status(200).json({ data: result });
     } catch (error) {
@@ -549,9 +549,9 @@ export const get_shift_schedule_day_overtime_supervisor = asyncHandler(async (re
         CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName
         FROM shift_schedule 
         LEFT JOIN employee_profile ON shift_schedule.emp_ID = employee_profile.emp_ID
-        WHERE shift_schedule.is_break = ? AND shift_schedule.is_overtime = ? AND employee_profile.clusterID IN (${placeholders})`; // Use a parameterized query
+        WHERE shift_schedule.is_overtime = ? AND employee_profile.clusterID IN (${placeholders})`; // Use a parameterized query
        
-        const params = [0, 1, ...bucketArray];
+        const params = [1, ...bucketArray];
         const [result] = await db.query(sql2, params);
 
 

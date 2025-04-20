@@ -44,6 +44,7 @@ export const get_all_complexity_supervisor = asyncHandler(async (req, res) => {
         complexity.approved_by2,
         complexity.status,
         complexity.status2,
+        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname
         DATE_FORMAT(complexity.datetime_approved, '%Y-%m-%d %H:%i:%s') AS datetime_approved,  
         DATE_FORMAT(complexity.datetime_approved2, '%Y-%m-%d %H:%i:%s') AS datetime_approved2
         FROM complexity
@@ -94,11 +95,16 @@ export const update_complexity = asyncHandler(async (req, res) => {
 
 export const get_all_complexity = asyncHandler(async (req, res) => {
     try {
-        const sql  = `SELECT id, emp_ID, amount, cutoff_ID, plotted_by,
-        approved_by, approved_by2, status, status2,
-        DATE_FORMAT(datetime_approved, '%Y-%m-%d %H:%i:%s') AS datetime_approved,  
-        DATE_FORMAT(datetime_approved2, '%Y-%m-%d %H:%i:%s') AS datetime_approved2
-        FROM complexity`; // Use a parameterized query
+        const sql  = `SELECT complexity.id, complexity.emp_ID, complexity.amount, complexity.cutoff_ID, complexity.plotted_by,
+        complexity.approved_by, complexity.approved_by2, complexity.status, complexity.status2,
+        DATE_FORMAT(complexity.datetime_approved, '%Y-%m-%d %H:%i:%s') AS datetime_approved,  
+        DATE_FORMAT(complexity.datetime_approved2, '%Y-%m-%d %H:%i:%s') AS datetime_approved2,
+        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname
+        FROM complexity
+        LEFT JOIN employee_profile ON complexity.emp_ID = employee_profile.emp_ID`; // Use a parameterized query
+
+        
+
                                   
         const [complexity] = await db.query(sql);
 
