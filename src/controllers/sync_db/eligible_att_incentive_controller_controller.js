@@ -25,27 +25,8 @@ function formatCutoffPeriod(startDate, endDate) {
 }
 
 
+
 export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
-    try {
-        const sql  = `SELECT eligible_att_incentives.id,
-        eligible_att_incentives.emp_ID,
-        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName,
-        eligible_att_incentives.amount, 
-        eligible_att_incentives.cutoffID, 
-        eligible_att_incentives.cutoff_period
-        FROM eligible_att_incentives
-        LEFT JOIN employee_profile ON eligible_att_incentives.emp_ID = employee_profile.emp_ID`; // Use a parameterized query
-
-        const [eligible_att_incentives] = await db.query(sql);
-
-        // Return the merged results in the response
-        return res.status(200).json({ data: eligible_att_incentives });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to get all data.' });
-    }
-});
-
-export const get_all_eligible_att_incentive_test = asyncHandler(async (req, res) => {
     const { cutoff_id } = req.params; // Assuming cluster_id is passed as a URL parameter
 
     try {
@@ -322,65 +303,312 @@ export const get_all_eligible_att_incentive_test = asyncHandler(async (req, res)
 });
 
 
+ 
+
+
 export const get_all_eligible_att_incentive_supervisor = asyncHandler(async (req, res) => {
-    const { supervisor_emp_id } = req.params; // Assuming cluster_id is passed as a URL parameter
+    const { cutoff_id, supervisor_emp_id  } = req.params; // Assuming cluster_id is passed as a URL parameter
 
     try {
-        const sql = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+        const sql  = `SELECT id, 
+            DATE_FORMAT(startDate, '%Y-%m-%d') AS startDate,
+            DATE_FORMAT(endDate, '%Y-%m-%d') AS endDate,
+            status FROM cutoff WHERE id = ?`; // Use a parameterized query 
 
-        const [data_admin_login] = await db.query(sql, [supervisor_emp_id]);
+        const sql2 = `
+            SELECT 
+                emp_ID,
+                COUNT(*) AS approved_count,
+                DATE_FORMAT(date, '%Y-%m-%d') AS date
+            FROM 
+                leave_request 
+            WHERE 
+                DATE_FORMAT(date, '%Y-%m-%d') >= ? 
+                AND DATE_FORMAT(date, '%Y-%m-%d') <= ? 
+                AND status2 = 'Approved'
+            GROUP BY 
+                emp_ID
+            HAVING 
+                approved_count >= 2`;
 
+
+        const sql3 = `
+            SELECT 
+                emp_ID,
+                COUNT(*) AS report_count,
+                DATE_FORMAT(submitted_datetime, '%Y-%m-%d') AS submitted_datetime
+            FROM 
+                incident_report 
+            WHERE 
+                DATE_FORMAT(submitted_datetime, '%Y-%m-%d') >= ? 
+                AND DATE_FORMAT(submitted_datetime, '%Y-%m-%d') <= ? 
+            GROUP BY 
+                emp_ID
+            HAVING 
+                report_count >= 1`;
+
+        const sql4 = `
+            SELECT id,
+                emp_ID,
+                DATE_FORMAT(day, '%Y-%m-%d') AS day,
+                SUM(TIMESTAMPDIFF(MINUTE, shift_in, shift_out)) AS total_minutes,
+                DATE_FORMAT(shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in
+            FROM 
+                shift_schedule 
+            WHERE 
+                DATE_FORMAT(day, '%Y-%m-%d') >= ? 
+                AND DATE_FORMAT(day, '%Y-%m-%d') <= ?
+            GROUP BY 
+                DATE_FORMAT(day, '%Y-%m-%d')
+            ORDER BY 
+                id ASC`;
+
+        const sql5 = `
+            SELECT id,
+                emp_ID,
+                DATE_FORMAT(date, '%Y-%m-%d') AS date,
+                DATE_FORMAT(timeIN, '%Y-%m-%d %H:%i:%s') AS timeIN,
+                SUM(TIMESTAMPDIFF(MINUTE, timeIN, timeOUT)) AS total_minutes
+            FROM 
+                attendance 
+            WHERE 
+                DATE_FORMAT(date, '%Y-%m-%d') >= ? 
+                AND DATE_FORMAT(date, '%Y-%m-%d') <= ?
+            GROUP BY 
+                DATE_FORMAT(date, '%Y-%m-%d')
+            ORDER BY 
+                id ASC`;
+
+        const sql6 = `
+            SELECT id,
+                emp_ID,
+                DATE_FORMAT(day, '%Y-%m-%d') AS day,
+                SUM(TIMESTAMPDIFF(MINUTE, shift_in, shift_out)) AS total_minutes
+            FROM 
+                break_schedule 
+            WHERE 
+                DATE_FORMAT(day, '%Y-%m-%d') >= ? 
+                AND DATE_FORMAT(day, '%Y-%m-%d') <= ?
+            GROUP BY 
+                DATE_FORMAT(day, '%Y-%m-%d')
+            ORDER BY 
+                id ASC`;
+
+        const sql7 = `
+            SELECT
+                shift_schedule.id,
+                shift_schedule.emp_ID,
+                DATE_FORMAT(shift_schedule.day, '%Y-%m-%d') AS absent_day
+            FROM 
+                shift_schedule 
+            LEFT JOIN 
+                attendance ON shift_schedule.emp_ID = attendance.emp_ID AND DATE_FORMAT(shift_schedule.day, '%Y-%m-%d') = DATE_FORMAT(attendance.date, '%Y-%m-%d')
+            WHERE 
+                attendance.id IS NULL 
+                AND DATE_FORMAT(shift_schedule.day, '%Y-%m-%d') >= ? 
+                AND DATE_FORMAT(shift_schedule.day, '%Y-%m-%d') <= ?
+            ORDER BY 
+                shift_schedule.id ASC`;
+
+        const sql8 = `
+            SELECT id,
+                emp_ID,
+                CONCAT(fName, ' ', lName) AS employee_fullname,
+                2000 as amount,
+                ? AS cutoff_period,
+                ? as cutoffID
+            FROM 
+                employee_profile
+            WHERE emp_ID NOT IN (?)`;
+
+        const sql9 = `
+            SELECT
+                ss.id,
+                ss.emp_ID,
+                DATE_FORMAT(ss.day, '%Y-%m-%d') AS day,
+                SUM(TIMESTAMPDIFF(MINUTE, ss.shift_in, a.timeIN)) AS late_minutes
+            FROM 
+                shift_schedule ss
+            LEFT JOIN 
+                attendance a ON ss.emp_ID = a.emp_ID  AND DATE_FORMAT(ss.day, '%Y-%m-%d') = DATE_FORMAT(a.date, '%Y-%m-%d')
+            WHERE 
+                a.id IS NOT NULL 
+                AND ss.day >= ? 
+                AND ss.day <= ?
+                AND a.timeIN > ss.shift_in 
+            GROUP BY 
+                ss.day
+            ORDER BY 
+                ss.id ASC`;
+
+
+        const sql10 = `
+            SELECT
+                ss.id,
+                ss.emp_ID,
+                DATE_FORMAT(ss.day, '%Y-%m-%d') AS day,
+                SUM(TIMESTAMPDIFF(MINUTE, ss.shift_in, a.timeIN)) AS late_minutes,
+                SUM(TIMESTAMPDIFF(MINUTE, a.timeIN, a.timeOUT)) AS total_minutes_attendance,
+                SUM(TIMESTAMPDIFF(MINUTE, ss.shift_in, ss.shift_out)) AS total_minutes_shift,
+                (SUM(TIMESTAMPDIFF(MINUTE, ss.shift_in, ss.shift_out)) - SUM(TIMESTAMPDIFF(MINUTE, a.timeIN, a.timeOUT))) AS undertime
+            FROM 
+                shift_schedule ss
+            LEFT JOIN 
+                attendance a ON ss.emp_ID = a.emp_ID  AND DATE_FORMAT(ss.day, '%Y-%m-%d') = DATE_FORMAT(a.date, '%Y-%m-%d')
+            WHERE 
+                a.id IS NOT NULL 
+                AND ss.day >= ? 
+                AND ss.day <= ?
+            GROUP BY 
+                ss.day
+            HAVING 
+                undertime >= 1
+            ORDER BY 
+                ss.id ASC`;
+
+        const sql11 = `
+            SELECT 
+                ep.emp_ID
+            FROM 
+                employee_profile ep
+            WHERE 
+                ep.emp_ID NOT IN (
+                    SELECT 
+                        ss.emp_ID
+                    FROM 
+                        shift_schedule ss
+                    WHERE 
+                        ss.day >= ? 
+                        AND ss.day <= ?
+                    GROUP BY 
+                        ss.emp_ID
+                )
+            ORDER BY 
+                ep.id ASC`;
+
+
+        const sql12 = `
+            SELECT
+                bs.id,
+                bs.emp_ID,
+                DATE_FORMAT(bs.day, '%Y-%m-%d') AS day,
+                SUM(TIMESTAMPDIFF(MINUTE, b.breakIN, b.breakOUT)) AS total_minutes_break,
+                SUM(TIMESTAMPDIFF(MINUTE, bs.shift_in, bs.shift_out)) AS total_minutes_break2,
+                (SUM(TIMESTAMPDIFF(MINUTE, b.breakIN, b.breakOUT)) - SUM(TIMESTAMPDIFF(MINUTE, bs.shift_in, bs.shift_out))) AS over_break_time
+            FROM 
+                 break_schedule bs
+            LEFT JOIN 
+                breaks b ON bs.emp_ID = b.emp_ID  AND DATE_FORMAT(bs.day, '%Y-%m-%d') = DATE_FORMAT(b.date, '%Y-%m-%d')
+            WHERE 
+                bs.day >= ? 
+                AND bs.day <= ?
+                AND b.id IS NOT NULL
+            GROUP BY 
+                bs.day AND bs.emp_ID
+            HAVING 
+                over_break_time >= 1
+            ORDER BY 
+                bs.id ASC`;
+
+        const sql13 = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+
+
+
+        const [data_admin_login] = await db.query(sql13, [supervisor_emp_id]);
+        
         if (data_admin_login.length === 0) {
-            return res.status(404).json({ error: 'Supervisor not found.' });
+                return res.status(404).json({ error: 'Supervisor not found.' });
         }
 
         const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == null || data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
         const placeholders = bucketArray.map(() => '?').join(', ');
+        
+        const sql14 = `
+        SELECT id,
+            emp_ID,
+            CONCAT(fName, ' ', lName) AS employee_fullname,
+            2000 as amount,
+            ? AS cutoff_period,
+            ? as cutoffID
+        FROM 
+            employee_profile
+        WHERE emp_ID IN (?) 
+        AND clusterID IN (${placeholders})`;
+                
+        const [cutoff] = await db.query(sql, [cutoff_id]); //100%
+        const [leave_requests] = await db.query(sql2, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
+        const [incident_reports] = await db.query(sql3, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
+        //const [shift_schedules] = await db.query(sql4, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
+       // const [attendance] = await db.query(sql5, [cutoff[0]['startDate'], cutoff[0]['endDate']]);//100%
+       // const [break_schedule] = await db.query(sql6, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
+        const [absent_employees] = await db.query(sql7, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
+        const [late_employees] = await db.query(sql9, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
+        const [undertime_employees] = await db.query(sql10, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
+        const [initial_employees] = await db.query(sql11,  [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
+        const [over_break_time_employees] = await db.query(sql12,  [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
 
-        const sql2  = `SELECT eligible_att_incentives.id,
-        eligible_att_incentives.emp_ID,
-        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullName,
-        eligible_att_incentives.amount, 
-        eligible_att_incentives.cutoffID, 
-        eligible_att_incentives.cutoff_period
-        FROM eligible_att_incentives
-        LEFT JOIN employee_profile ON eligible_att_incentives.emp_ID = employee_profile.emp_ID
-        WHERE employee_profile.clusterID IN (${placeholders})`; // Use a parameterized query
+    
 
-        const [eligible_att_incentives] = await db.query(sql2, bucketArray);
-
-        // Return the merged results in the response
-        return res.status(200).json({ data: eligible_att_incentives });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to get all data.' });
-    }
-});
-
-export const create_eligible_att_incentive = asyncHandler(async (req, res) => {
-    try {
-        const sql  = 'SELECT * FROM login'; // Use a parameterized query
-        const sql2  = 'SELECT * FROM incident_report'; // Use a parameterized query
-
-        const sql3 = 'INSERT INTO eligible_att_incentives (emp_ID, amount, cutoffID, cutoff_period) VALUES (?, ?, ?, ?)';
-
-
-        const [logins] = await db.query(sql);
-
-        const logins_user = await Promise.all(
-            logins.map(async (login) => {
-               // console.log(login.emp_ID);
-                return login;
+        const _over_break_time_employees = await Promise.all(
+            over_break_time_employees.map(async (over_break_time_employee) => {
+                return over_break_time_employee.emp_ID;
             })
         );
 
-        
-      //  const [insert_data_eligible_att_incentives] = await db.query(sql2, [date, storeCurrentDateTime(0, 'hours'), holiday_name, holiday_type]);
+        const _initial_employees = await Promise.all(
+            initial_employees.map(async (initial_employee) => {
+                return initial_employee.emp_ID;
+            })
+        );
+
+        const _undertime_employees = await Promise.all(
+            undertime_employees.map(async (undertime_employee) => {
+                return undertime_employee.emp_ID;
+            })
+        );
+
+
+        const _late_employees = await Promise.all(
+            late_employees.map(async (late_employee) => {
+                return late_employee.emp_ID;
+            })
+        );
+
+        const _absent_employees = await Promise.all(
+            absent_employees.map(async (absent_employee) => {
+                return absent_employee.emp_ID;
+            })
+        );
+
+
+        const leave_request_employees = await Promise.all(
+            leave_requests.map(async (leave_request) => {
+                return leave_request.emp_ID;
+            })
+        );
+
+        const incident_report_employees = await Promise.all(
+            incident_reports.map(async (incident_report) => {
+                return incident_report.emp_ID;
+            })
+        );
+
+
+        const combinedEmployees = [...new Set([...leave_request_employees, ...incident_report_employees, ..._absent_employees, ..._late_employees, ..._undertime_employees, ..._initial_employees, ..._over_break_time_employees])];
+        const [employee_profiles] = await db.query(sql8, [formatCutoffPeriod(cutoff[0]['startDate'], cutoff[0]['endDate']), cutoff_id, combinedEmployees]);  
+
+        const _employee_profile = await Promise.all(
+            employee_profiles.map(async (employee_profile) => {
+                return employee_profile.emp_ID;
+            })
+        );
+
+        const combinedEmployeesSupervisor = [...new Set([..._employee_profile])];
+        const [eligible_att_incentives] = await db.query(sql14, [formatCutoffPeriod(cutoff[0]['startDate'], cutoff[0]['endDate']), cutoff_id, combinedEmployeesSupervisor, ...bucketArray]);
 
         // Return the merged results in the response
-        return res.status(200).json({ data: 123 });
+        return res.status(200).json({  data : eligible_att_incentives });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
-
-
