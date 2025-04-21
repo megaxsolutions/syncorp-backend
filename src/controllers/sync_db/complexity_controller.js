@@ -44,7 +44,7 @@ export const get_all_complexity_supervisor = asyncHandler(async (req, res) => {
         complexity.approved_by2,
         complexity.status,
         complexity.status2,
-        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname
+        CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname,
         DATE_FORMAT(complexity.datetime_approved, '%Y-%m-%d %H:%i:%s') AS datetime_approved,  
         DATE_FORMAT(complexity.datetime_approved2, '%Y-%m-%d %H:%i:%s') AS datetime_approved2
         FROM complexity
