@@ -113,7 +113,7 @@ app.use("/clusters", authenticateToken, clusterRoutes);
 app.use("/positions", authenticateToken, positionRoutes);
 app.use("/employee_levels", authenticateToken, employeeLevelRoutes);
 app.use("/admin_levels", authenticateToken, adminLevelRoutes);
-app.use("/holidays", holidayRoutes);
+app.use("/holidays", authenticateToken, holidayRoutes);
 app.use("/cutoffs", authenticateToken, cutOffRoutes);
 app.use("/attendances", authenticateToken, attendanceRoutes);
 app.use("/dtr", authenticateToken, dtrRoutes);
@@ -136,10 +136,10 @@ app.use("/eod", authenticateToken, eodRoutes);
 app.use("/payrolls", authenticateToken, payrollRoutes);
 app.use("/complexity", authenticateToken, complexityRoutes);
 app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes);
-app.use("/signatures", signatureRoutes);
+app.use("/signatures", authenticateToken, signatureRoutes);
 app.use("/mood_meters", authenticateToken, moodMeterRoutes);
-app.use("/incident_reports", incidentReportRoutes);
-app.use("/eligible_att_incentives", authenticateToken, eligibleAttendanceIncentive);
+app.use("/incident_reports", authenticateToken, incidentReportRoutes);
+app.use("/eligible_att_incentives", eligibleAttendanceIncentive);
 
 
 

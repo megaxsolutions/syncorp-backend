@@ -20,13 +20,32 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
     return formattedExpirationDateTime;
 }
 
+function storeCurrentDate(expirationAmount, expirationUnit) {
+    // Get the current date and time in Asia/Manila timezone
+    const currentDateTime = moment.tz("Asia/Manila");
+
+    // Calculate the expiration date and time
+    const expirationDateTime = currentDateTime.clone().add(expirationAmount, expirationUnit);
+
+    // Format the current date and expiration date
+    const formattedCurrentDateTime = currentDateTime.format('YYYY-MM-DD');
+    const formattedExpirationDateTime = expirationDateTime.format('YYYY-MM-DD');
+
+    // Return both current and expiration date-time
+    return formattedExpirationDateTime;
+    // return {
+    //     currentDateTime: formattedCurrentDateTime,
+    //     expirationDateTime: formattedExpirationDateTime
+    // };
+}
+
 export const create_break = asyncHandler(async (req, res) => {
     const { emp_id } = req.body;
 
     try {
-        const sql = 'INSERT INTO breaks (breakIN, emp_ID) VALUES (?, ?)';
+        const sql = 'INSERT INTO breaks (breakIN, emp_ID, date) VALUES (?, ?, ?)';
         const sql2 = 'UPDATE clock_state SET break_state = ? WHERE emp_ID = ?';
-        const [insert_data_break] = await db.query(sql, [storeCurrentDateTime(0, 'hours'), emp_id]);
+        const [insert_data_break] = await db.query(sql, [storeCurrentDateTime(0, 'hours'), emp_id, storeCurrentDate(0, 'hours')]);
         const [update_data_clock_break_state] = await db.query(sql2, [1, emp_id]);
 
       
