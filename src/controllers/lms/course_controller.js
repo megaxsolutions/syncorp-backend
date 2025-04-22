@@ -90,7 +90,9 @@ export const get_all_course = asyncHandler(async (req, res) => {
         const sql  = `SELECT id,
         course_title,
         course_details,
-        DATE_FORMAT(date_added, '%Y-%m-%d %H:%i:%s') AS date_added 
+        DATE_FORMAT(date_added, '%Y-%m-%d %H:%i:%s') AS date_added,
+        filename,
+        categoryID
         FROM courses`; // Use a parameterized query
                                   
         const [courses] = await db2.query(sql);
