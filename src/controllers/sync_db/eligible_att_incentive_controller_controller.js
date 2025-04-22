@@ -24,18 +24,50 @@ function formatCutoffPeriod(startDate, endDate) {
     return `${formattedStart} - ${formattedEnd}, ${formattedYear}`;
 }
 
+function getPreviousMonthDates(referenceDate) {
+    // Create a new Date object based on the reference date
+    const date = new Date(referenceDate);
+
+    // Set the date to the first day of the current month
+    date.setDate(1);
+    
+    // Move back one month
+    date.setMonth(date.getMonth() - 1);
+
+    // Get the start date (first day of the previous month)
+    const startDate = new Date(date);
+    
+    // Get the end date (last day of the previous month)
+    const endDate = new Date(date);
+    endDate.setMonth(endDate.getMonth() + 1); // Move to the next month
+    endDate.setDate(0); // Set to the last day of the previous month
+
+    // Format the dates to MM-DD-YYYY
+    const formatDate = (d) => {
+        const month = String(d.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        const day = String(d.getDate()).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${year}-${month}-${day}`;
+    };
+
+    return {
+        start: formatDate(startDate),
+        end: formatDate(endDate)
+    };
+}
+
 
 
 export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
     const { cutoff_id } = req.params; // Assuming cluster_id is passed as a URL parameter
 
     try {
-        const sql  = `SELECT id, 
+        const sql_cutoff  = `SELECT id, 
             DATE_FORMAT(startDate, '%Y-%m-%d') AS startDate,
             DATE_FORMAT(endDate, '%Y-%m-%d') AS endDate,
             status FROM cutoff WHERE id = ?`; // Use a parameterized query 
 
-        const sql2 = `
+        const sql_leave_request = `
             SELECT 
                 emp_ID,
                 COUNT(*) AS approved_count,
@@ -52,7 +84,7 @@ export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
                 approved_count >= 2`;
 
 
-        const sql3 = `
+        const sql_incident_report = `
             SELECT 
                 emp_ID,
                 COUNT(*) AS report_count,
@@ -67,54 +99,8 @@ export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
             HAVING 
                 report_count >= 1`;
 
-        const sql4 = `
-            SELECT id,
-                emp_ID,
-                DATE_FORMAT(day, '%Y-%m-%d') AS day,
-                SUM(TIMESTAMPDIFF(MINUTE, shift_in, shift_out)) AS total_minutes,
-                DATE_FORMAT(shift_in, '%Y-%m-%d %H:%i:%s') AS shift_in
-            FROM 
-                shift_schedule 
-            WHERE 
-                DATE_FORMAT(day, '%Y-%m-%d') >= ? 
-                AND DATE_FORMAT(day, '%Y-%m-%d') <= ?
-            GROUP BY 
-                DATE_FORMAT(day, '%Y-%m-%d')
-            ORDER BY 
-                id ASC`;
 
-        const sql5 = `
-            SELECT id,
-                emp_ID,
-                DATE_FORMAT(date, '%Y-%m-%d') AS date,
-                DATE_FORMAT(timeIN, '%Y-%m-%d %H:%i:%s') AS timeIN,
-                SUM(TIMESTAMPDIFF(MINUTE, timeIN, timeOUT)) AS total_minutes
-            FROM 
-                attendance 
-            WHERE 
-                DATE_FORMAT(date, '%Y-%m-%d') >= ? 
-                AND DATE_FORMAT(date, '%Y-%m-%d') <= ?
-            GROUP BY 
-                DATE_FORMAT(date, '%Y-%m-%d')
-            ORDER BY 
-                id ASC`;
-
-        const sql6 = `
-            SELECT id,
-                emp_ID,
-                DATE_FORMAT(day, '%Y-%m-%d') AS day,
-                SUM(TIMESTAMPDIFF(MINUTE, shift_in, shift_out)) AS total_minutes
-            FROM 
-                break_schedule 
-            WHERE 
-                DATE_FORMAT(day, '%Y-%m-%d') >= ? 
-                AND DATE_FORMAT(day, '%Y-%m-%d') <= ?
-            GROUP BY 
-                DATE_FORMAT(day, '%Y-%m-%d')
-            ORDER BY 
-                id ASC`;
-
-        const sql7 = `
+        const sql_absent_1 = `
             SELECT
                 shift_schedule.id,
                 shift_schedule.emp_ID,
@@ -130,7 +116,23 @@ export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
             ORDER BY 
                 shift_schedule.id ASC`;
 
-        const sql8 = `
+        const sql_absent_2 = `
+            SELECT
+                shift_schedule.id,
+                shift_schedule.emp_ID,
+                DATE_FORMAT(shift_schedule.day, '%Y-%m-%d') AS absent_day
+            FROM 
+                shift_schedule 
+            LEFT JOIN 
+                dtr ON shift_schedule.emp_ID = dtr.emp_ID AND DATE_FORMAT(shift_schedule.day, '%Y-%m-%d') = DATE_FORMAT(dtr.date, '%Y-%m-%d')
+            WHERE 
+                dtr.id IS NULL 
+                AND DATE_FORMAT(shift_schedule.day, '%Y-%m-%d') >= ? 
+                AND DATE_FORMAT(shift_schedule.day, '%Y-%m-%d') <= ?
+            ORDER BY 
+                shift_schedule.id ASC`;
+
+        const sql_employee_profile = `
             SELECT id,
                 emp_ID,
                 CONCAT(fName, ' ', lName) AS employee_fullname,
@@ -186,7 +188,7 @@ export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
             ORDER BY 
                 ss.id ASC`;
 
-        const sql11 = `
+        const sql_init_employee = `
             SELECT 
                 ep.emp_ID
             FROM 
@@ -207,7 +209,7 @@ export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
                 ep.id ASC`;
 
 
-        const sql12 = `
+        const sql_break_time = `
             SELECT
                 bs.id,
                 bs.emp_ID,
@@ -229,22 +231,60 @@ export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
                 over_break_time >= 1
             ORDER BY 
                 bs.id ASC`;
-                
 
+        const sql_undertime = `
+            SELECT
+                id,
+                emp_ID,
+                undertime,
+                DATE_FORMAT(date, '%Y-%m-%d') AS date
+            FROM 
+                dtr 
+            WHERE 
+                date >= ? 
+                AND date <= ?
+            HAVING 
+                undertime >= 1
+            ORDER BY 
+                id ASC`;
 
-        const [cutoff] = await db.query(sql, [cutoff_id]); //100%
-        const [leave_requests] = await db.query(sql2, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
-        const [incident_reports] = await db.query(sql3, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
-        //const [shift_schedules] = await db.query(sql4, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
-       // const [attendance] = await db.query(sql5, [cutoff[0]['startDate'], cutoff[0]['endDate']]);//100%
-       // const [break_schedule] = await db.query(sql6, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
-        const [absent_employees] = await db.query(sql7, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
-        const [late_employees] = await db.query(sql9, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
-        const [undertime_employees] = await db.query(sql10, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
-        const [initial_employees] = await db.query(sql11,  [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
-        const [over_break_time_employees] = await db.query(sql12,  [cutoff[0]['startDate'], cutoff[0]['endDate']]); //100%
-
+        const sql_late = `
+            SELECT
+                id,
+                emp_ID,
+                late,
+                DATE_FORMAT(date, '%Y-%m-%d') AS date
+            FROM 
+                dtr 
+            WHERE 
+                date >= ? 
+                AND date <= ?
+            HAVING 
+                late >= 1
+            ORDER BY 
+                id ASC`;
     
+
+        const [cutoff] = await db.query(sql_cutoff, [cutoff_id]); //100%
+
+        if (cutoff.length === 0) {
+            return res.status(404).json({ error: 'Cutoff not found.' });
+        }
+        
+        const previousMonthDates = getPreviousMonthDates(cutoff[0]['startDate']);
+
+
+        const [leave_requests] = await db.query(sql_leave_request, [previousMonthDates.start, previousMonthDates.end]); //100%
+        const [incident_reports] = await db.query(sql_incident_report, [previousMonthDates.start, previousMonthDates.end]); //100%
+        const [absent_employees] = await db.query(sql_absent_2, [previousMonthDates.start, previousMonthDates.end]); //100%
+        //const [late_employees] = await db.query(sql9, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //90%
+        //const [undertime_employees] = await db.query(sql10, [cutoff[0]['startDate'], cutoff[0]['endDate']]); //90%
+        const [initial_employees] = await db.query(sql_init_employee,  [previousMonthDates.start, previousMonthDates.end]); //100%
+        const [over_break_time_employees] = await db.query(sql_break_time,  [previousMonthDates.start, previousMonthDates.end]); //100%
+        const [undertime_employees] = await db.query(sql_undertime,  [previousMonthDates.start, previousMonthDates.end]); //100%
+        const [late_employees] = await db.query(sql_late,  [previousMonthDates.start, previousMonthDates.end]); //100%
+
+
 
         const _over_break_time_employees = await Promise.all(
             over_break_time_employees.map(async (over_break_time_employee) => {
@@ -292,8 +332,7 @@ export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
 
 
         const combinedEmployees = [...new Set([...leave_request_employees, ...incident_report_employees, ..._absent_employees, ..._late_employees, ..._undertime_employees, ..._initial_employees, ..._over_break_time_employees])];
-     
-        const [employee_profile] = await db.query(sql8, [formatCutoffPeriod(cutoff[0]['startDate'], cutoff[0]['endDate']), cutoff_id, combinedEmployees]);  
+        const [employee_profile] = await db.query(sql_employee_profile, [formatCutoffPeriod(cutoff[0]['startDate'], cutoff[0]['endDate']), cutoff_id, combinedEmployees]);  
 
         // Return the merged results in the response
         return res.status(200).json({  data : employee_profile });
