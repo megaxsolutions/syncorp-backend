@@ -3,6 +3,10 @@ import cors from 'cors';
 
 import { app, server, io, db } from './config/config.js'; // Import the database connection
 
+import cron from 'node-cron';
+import axios from 'axios';
+
+
 import employeeRoutes from "./routes/sync_db/employee_routes.js";
 import mainRoutes from "./routes/sync_db/main_routes.js";
 import departmentRoutes from "./routes/sync_db/department_routes.js";
@@ -105,6 +109,10 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use("/employees", employeeRoutes);
 app.use("/admins", adminRoutes);
 app.use("/recovery", recoveryRoutes);
+app.use("/eligible_att_incentives", eligibleAttendanceIncentive);
+app.use("/cutoffs", cutOffRoutes);
+
+
 
 app.use("/main", authenticateToken, mainRoutes);
 app.use("/departments", authenticateToken, departmentRoutes);
@@ -114,7 +122,6 @@ app.use("/positions", authenticateToken, positionRoutes);
 app.use("/employee_levels", authenticateToken, employeeLevelRoutes);
 app.use("/admin_levels", authenticateToken, adminLevelRoutes);
 app.use("/holidays", authenticateToken, holidayRoutes);
-app.use("/cutoffs", authenticateToken, cutOffRoutes);
 app.use("/attendances", authenticateToken, attendanceRoutes);
 app.use("/dtr", authenticateToken, dtrRoutes);
 app.use("/breaks", authenticateToken, breakRoutes);
@@ -139,7 +146,6 @@ app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes)
 app.use("/signatures", authenticateToken, signatureRoutes);
 app.use("/mood_meters", authenticateToken, moodMeterRoutes);
 app.use("/incident_reports", authenticateToken, incidentReportRoutes);
-app.use("/eligible_att_incentives", eligibleAttendanceIncentive);
 
 
 
@@ -157,6 +163,34 @@ app.use("/users", authenticateToken, userRoutes);
 app.use("/questions", authenticateToken, questionRoutes);
 app.use("/enrolls", authenticateToken, enrollRoutes);
 app.use("/trainers", authenticateToken, trainerRoutes);
+
+
+setInterval(async () => {
+  try {
+        const response_cutoff = await axios.get(`${process.env.BASE_URL}/cutoffs/get_latest_cutoff`);
+        const response = await axios.get(`${process.env.BASE_URL}/eligible_att_incentives/get_all_eligible_att_incentive/${response_cutoff.data.data.id}`);
+  
+        console.log('Route executed successfully:', response.data);
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+}, 1 * 1000); // 30 seconds
+
+//cron.schedule('0 0 1-15 * *', async () => {
+// cron.schedule('* * * * *', async () => {
+
+//   try {
+//       // Replace `cutoff_id` with the actual value you want to pass
+//       const cutoff_id = '1';
+
+//       // Make a GET request to your route
+//       const response = await axios.get(`http://localhost:8000/eligible_att_incentives/get_all_eligible_att_incentive/${cutoff_id}`);
+
+//       console.log('Route executed successfully:', response.data);
+//   } catch (error) {
+//       console.error('Error executing route:', error.message);
+//   }
+// });
 
 
 
@@ -252,5 +286,6 @@ io.on('connection', async (socket) => {
 server.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
+
 
 

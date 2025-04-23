@@ -138,7 +138,7 @@ export const create_shift_schedule_multiple_day_overtime = asyncHandler(async (r
         AND schedule_type = ? 
         AND is_overtime = ? 
         AND DATE_FORMAT(shift_in, '%H:%i') = ? 
-        AND DATE_FORMAT(shift_out, '%H:%i') = ?;`;
+        AND DATE_FORMAT(shift_out, '%H:%i') = ?`;
  
         const selected_days = array_selected_days;
 
@@ -242,7 +242,7 @@ export const create_shift_schedule_multiple_day = asyncHandler(async (req, res) 
         AND schedule_type = ? 
         AND is_overtime = ? 
         AND DATE_FORMAT(shift_in, '%H:%i') = ? 
-        AND DATE_FORMAT(shift_out, '%H:%i') = ?;`;
+        AND DATE_FORMAT(shift_out, '%H:%i') = ?`;
 
         // Fetch all the existing shift schedules for the current employees and weekdays in one go
        // const selected_days = [storeCurrentDate(0, 'hours')];

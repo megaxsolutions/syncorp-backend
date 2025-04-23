@@ -14,8 +14,8 @@ npm install express ws
 npm install mysql2
 npm install worker_threads
 npm install ws
-
-
+npm install node-cron
+npm install axios
 
 13.228.73.214
 sync_db
