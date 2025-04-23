@@ -60,13 +60,25 @@ function getPreviousMonthDates(referenceDate) {
 export const get_all_eligible_att_incentive_employees = asyncHandler(async (req, res) => {
 
     try {
-        const sql = 'SELECT * FROM eligible_att_incentives'; // Use a parameterized query
+        const sql = `
+        SELECT 
+            eligible_att_incentives.id,
+            eligible_att_incentives.emp_ID,
+            eligible_att_incentives.amount,
+            eligible_att_incentives.cutoffID,
+            eligible_att_incentives.cutoff_period,
+            CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname
+        FROM 
+            eligible_att_incentives
+        LEFT JOIN
+            employee_profile ON employee_profile.emp_ID = eligible_att_incentives.emp_ID 
+        `; 
         const [eligible_att_incentives] = await db.query(sql);
 
  
         return res.status(200).json({ data: eligible_att_incentives });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to delete eligible attendance incentive.' });
+        return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
 
@@ -90,7 +102,8 @@ export const get_all_eligible_att_incentive_employees_supervisor = asyncHandler(
             eligible_att_incentives.emp_ID,
             eligible_att_incentives.amount,
             eligible_att_incentives.cutoffID,
-            eligible_att_incentives.cutoff_period
+            eligible_att_incentives.cutoff_period,
+            CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname
         FROM 
             eligible_att_incentives
         LEFT JOIN
@@ -104,7 +117,7 @@ export const get_all_eligible_att_incentive_employees_supervisor = asyncHandler(
  
         return res.status(200).json({ data: eligible_att_incentives });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to delete eligible attendance incentive.' });
+        return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
 
