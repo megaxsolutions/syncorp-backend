@@ -57,6 +57,19 @@ function getPreviousMonthDates(referenceDate) {
 }
 
 
+export const get_all_eligible_att_incentive_employees = asyncHandler(async (req, res) => {
+
+    try {
+        const sql4 = 'SELECT * FROM eligible_att_incentives'; // Use a parameterized query
+        const [eligible_att_incentives] = await db.query(sql4);
+
+ 
+        return res.status(200).json({ data: eligible_att_incentives });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to delete eligible attendance incentive.' });
+    }
+});
+
 export const delete_eligible_att_incentive = asyncHandler(async (req, res) => {
     const { eligible_att_incentive_id } = req.params; // Assuming cutoff_id is passed as a URL parameter
 
