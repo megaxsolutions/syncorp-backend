@@ -162,7 +162,7 @@ app.use("/submissions", authenticateToken, submissionRoutes);
 app.use("/users", authenticateToken, userRoutes);
 app.use("/questions", authenticateToken, questionRoutes);
 app.use("/enrolls", authenticateToken, enrollRoutes);
-app.use("/trainers", authenticateToken, trainerRoutes);
+app.use("/trainers", trainerRoutes);
 
 
 setInterval(async () => {
@@ -174,7 +174,7 @@ setInterval(async () => {
   } catch (error) {
     console.error('Error:', error.message);
   }
-}, 1 * 1000); // 30 seconds
+}, 10000 * 1000); // 30 seconds
 
 //cron.schedule('0 0 1-15 * *', async () => {
 // cron.schedule('* * * * *', async () => {
