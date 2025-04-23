@@ -57,6 +57,68 @@ function getPreviousMonthDates(referenceDate) {
 }
 
 
+export const get_all_eligible_att_incentive_employees = asyncHandler(async (req, res) => {
+
+    try {
+        const sql4 = 'SELECT * FROM eligible_att_incentives'; // Use a parameterized query
+        const [eligible_att_incentives] = await db.query(sql4);
+
+ 
+        return res.status(200).json({ data: eligible_att_incentives });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to delete eligible attendance incentive.' });
+    }
+});
+
+export const delete_eligible_att_incentive = asyncHandler(async (req, res) => {
+    const { eligible_att_incentive_id } = req.params; // Assuming cutoff_id is passed as a URL parameter
+
+    try {
+        const sql = 'DELETE FROM eligible_att_incentives WHERE id = ?';
+        const [result] = await db.query(sql, [eligible_att_incentive_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Eligible attendance incentive not found.' });
+        }
+
+        return res.status(200).json({ success: 'Eligible attendance incentive successfully deleted.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to delete eligible attendance incentive.' });
+    }
+});
+
+export const create_eligible_att_incentive = asyncHandler(async (req, res) => {
+    const { emp_id, amount, cutoff_id, cutoff_period } = req.body;
+
+    try {
+        const sql = 'INSERT INTO eligible_att_incentives (emp_ID, amount, cutoffID, cutoff_period) VALUES (?, ?, ?, ?)';
+        const [insert_data_eligible_att_incentive] = await db.query(sql, [emp_id, amount, cutoff_id, cutoff_period]);
+      
+        // Return the merged results in the response
+        return res.status(200).json({ success: 'Eligible attendance incentive successfully created.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to create eligible attendance incentive.' });
+    }
+});
+
+export const update_eligible_att_incentive = asyncHandler(async (req, res) => {
+    const { emp_id, amount, cutoff_id, cutoff_period } = req.body;
+    const { eligible_att_incentive_id } = req.params; // Assuming cutoff_id is passed as a URL parameter
+
+    try {
+        const sql = 'UPDATE eligible_att_incentives SET emp_ID = ?, amount = ?, cutoffID = ?, cutoff_period = ? WHERE id = ?';
+        const [result] = await db.query(sql, [emp_id, amount, cutoff_id, cutoff_period, eligible_att_incentive_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Eligible attendance incentive not found.' });
+        }
+
+        return res.status(200).json({ success: 'Eligible attendance incentive successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update eligible attendance incentive.' });
+    }
+});
+
 
 export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
     const { cutoff_id } = req.params; // Assuming cluster_id is passed as a URL parameter
