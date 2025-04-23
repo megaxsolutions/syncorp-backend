@@ -60,13 +60,64 @@ function getPreviousMonthDates(referenceDate) {
 export const get_all_eligible_att_incentive_employees = asyncHandler(async (req, res) => {
 
     try {
-        const sql4 = 'SELECT * FROM eligible_att_incentives'; // Use a parameterized query
-        const [eligible_att_incentives] = await db.query(sql4);
+        const sql = `
+        SELECT 
+            eligible_att_incentives.id,
+            eligible_att_incentives.emp_ID,
+            eligible_att_incentives.amount,
+            eligible_att_incentives.cutoffID,
+            eligible_att_incentives.cutoff_period,
+            CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname
+        FROM 
+            eligible_att_incentives
+        LEFT JOIN
+            employee_profile ON employee_profile.emp_ID = eligible_att_incentives.emp_ID 
+        `; 
+        const [eligible_att_incentives] = await db.query(sql);
 
  
         return res.status(200).json({ data: eligible_att_incentives });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to delete eligible attendance incentive.' });
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+export const get_all_eligible_att_incentive_employees_supervisor = asyncHandler(async (req, res) => {
+    const { supervisor_emp_id  } = req.params; // Assuming cluster_id is passed as a URL parameter
+    try {
+        const sql = 'SELECT * FROM admin_login WHERE emp_ID = ?'; // Use a parameterized query
+
+        const [data_admin_login] = await db.query(sql, [supervisor_emp_id]);
+        
+        if (data_admin_login.length === 0) {
+                return res.status(404).json({ error: 'Supervisor not found.' });
+        }
+
+        const bucketArray = JSON.parse(data_admin_login[0]['bucket'] == null || data_admin_login[0]['bucket'] == "" || JSON.parse(data_admin_login[0]['bucket']).length == 0 ? "[0]" : data_admin_login[0]['bucket'] );
+        const placeholders = bucketArray.map(() => '?').join(', ');
+
+        const sql2 = `
+        SELECT 
+            eligible_att_incentives.id,
+            eligible_att_incentives.emp_ID,
+            eligible_att_incentives.amount,
+            eligible_att_incentives.cutoffID,
+            eligible_att_incentives.cutoff_period,
+            CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname
+        FROM 
+            eligible_att_incentives
+        LEFT JOIN
+            employee_profile ON employee_profile.emp_ID = eligible_att_incentives.emp_ID 
+        WHERE 
+            employee_profile.clusterID IN (${placeholders})
+        `; 
+
+        const [eligible_att_incentives] = await db.query(sql2, bucketArray);
+
+ 
+        return res.status(200).json({ data: eligible_att_incentives });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
     }
 });
 
