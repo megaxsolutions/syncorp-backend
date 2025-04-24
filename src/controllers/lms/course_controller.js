@@ -87,13 +87,22 @@ export const update_course = asyncHandler(async (req, res) => {
 
 export const get_all_course = asyncHandler(async (req, res) => {
     try {
-        const sql  = `SELECT id,
-        course_title,
-        course_details,
-        DATE_FORMAT(date_added, '%Y-%m-%d %H:%i:%s') AS date_added,
-        filename,
-        categoryID
-        FROM courses`; // Use a parameterized query
+        const sql  = `
+        SELECT courses.id,
+            courses.course_title,
+            courses.course_details,
+            DATE_FORMAT(courses.date_added, '%Y-%m-%d %H:%i:%s') AS date_added,
+            courses.filename,
+            courses.categoryID,
+            count(ratings.id) AS total_rating,
+            ROUND(AVG(ratings.rating), 1) AS average_rating
+        FROM 
+            courses
+        LEFT JOIN 
+            ratings ON courses.id = ratings.courseID
+        GROUP BY 
+            courses.id
+        `; // Use a parameterized query
                                   
         const [courses] = await db2.query(sql);
 
