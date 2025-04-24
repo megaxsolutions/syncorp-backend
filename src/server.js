@@ -44,6 +44,8 @@ import signatureRoutes from "./routes/sync_db/signature_routes.js";
 import moodMeterRoutes from "./routes/sync_db/mood_meter_routes.js";
 import incidentReportRoutes from "./routes/sync_db/incident_report_routes.js";
 import eligibleAttendanceIncentive from "./routes/sync_db/eligible_att_incentive_routes.js";
+import pagibigLoanRoutes from "./routes/sync_db/sss_loan_routes.js";
+import sssLoanRoutes from "./routes/sync_db/pagibig_loan_routes.js";
 
 
 
@@ -148,7 +150,8 @@ app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes)
 app.use("/signatures", authenticateToken, signatureRoutes);
 app.use("/mood_meters", authenticateToken, moodMeterRoutes);
 app.use("/incident_reports", authenticateToken, incidentReportRoutes);
-
+app.use("/pagibig_loans", authenticateToken, pagibigLoanRoutes);
+app.use("/sss_loans", authenticateToken, sssLoanRoutes);
 
 
 
