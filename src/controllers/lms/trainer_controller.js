@@ -125,8 +125,7 @@ export const create_trainer_multiple = asyncHandler(async (req, res) => {
 
 export const get_all_trainer = asyncHandler(async (req, res) => {
     try {
-        const sql = `SELECT id, emp_ID, categoryID, courseID, plotted_by
-        FROM trainer`;
+        const sql = `SELECT id, emp_ID, categoryID, courseID, plotted_by, facebook, twitter, linkedin, filename_photo FROM trainer`;
                                   
         const [trainers] = await db2.query(sql);
 
