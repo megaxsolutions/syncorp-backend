@@ -95,7 +95,7 @@ export const get_all_course = asyncHandler(async (req, res) => {
             courses.filename,
             courses.categoryID,
             count(ratings.id) AS total_rating,
-            ROUND(AVG(ratings.rating), 1) AS average_rating
+            IFNULL(ROUND(AVG(ratings.rating), 1), 0) AS average_rating
         FROM 
             courses
         LEFT JOIN 
