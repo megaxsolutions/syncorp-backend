@@ -5,6 +5,24 @@ import { db } from '../../config/config.js'; // Import the database connection
 
 import moment from 'moment-timezone';
 
+export const get_latest_cutoff = asyncHandler(async (req, res) => {
+
+    try {
+        const sql = 'SELECT * FROM cutoff ORDER BY id DESC LIMIT 1';
+        
+        const [cutoff] = await db.query(sql);
+
+        if (cutoff.length === 0) {
+            return res.status(404).json({ error: 'No cutoff found.' });
+        }
+      
+        // Return the merged results in the response
+        return res.status(200).json({ data: cutoff[0] });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get data.' });
+    }
+});
+
 export const create_cutoff = asyncHandler(async (req, res) => {
     const { start_date, end_date } = req.body;
 

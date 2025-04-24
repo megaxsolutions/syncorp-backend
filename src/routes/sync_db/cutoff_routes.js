@@ -7,9 +7,10 @@ import { authenticateToken } from "../../middleware/auth.js";
 const cutOffRoutes = Router();
 
 
-cutOffRoutes.post('/add_cutoff', CutoffController.create_cutoff);
-cutOffRoutes.put('/update_cutoff/:cutoff_id', CutoffController.update_cutoff);
-cutOffRoutes.delete('/delete_cutoff/:cutoff_id', CutoffController.delete_cutoff);
+cutOffRoutes.get('/get_latest_cutoff', CutoffController.get_latest_cutoff);
+cutOffRoutes.post('/add_cutoff', authenticateToken, CutoffController.create_cutoff);
+cutOffRoutes.put('/update_cutoff/:cutoff_id', authenticateToken, CutoffController.update_cutoff);
+cutOffRoutes.delete('/delete_cutoff/:cutoff_id', authenticateToken, CutoffController.delete_cutoff);
 
 
 

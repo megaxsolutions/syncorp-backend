@@ -445,10 +445,58 @@ export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
 
 
         const combinedEmployees = [...new Set([...leave_request_employees, ...incident_report_employees, ..._absent_employees, ..._late_employees, ..._undertime_employees, ..._initial_employees, ..._over_break_time_employees])];
-        const [employee_profile] = await db.query(sql_employee_profile, [formatCutoffPeriod(cutoff[0]['startDate'], cutoff[0]['endDate']), cutoff_id, combinedEmployees]);  
+        const [employee_profiles] = await db.query(sql_employee_profile, [formatCutoffPeriod(cutoff[0]['startDate'], cutoff[0]['endDate']), cutoff_id, combinedEmployees]);  
 
-        // Return the merged results in the response
-        return res.status(200).json({  data : employee_profile });
+
+        const sql_insert = `INSERT INTO eligible_att_incentives (emp_ID, amount, cutoffID, cutoff_period) VALUES ?`;
+        const sql_select = `
+        SELECT 
+            id, emp_ID, amount, cutoffID, cutoff_period
+        FROM 
+            eligible_att_incentives 
+        WHERE 
+            emp_ID = ? 
+            AND cutoffID = ? 
+            AND cutoff_period = ?`;
+
+        const existingSchedulesMap = new Map();
+        const insertValues = [];
+
+        const eligible_att_incentives_employees = await Promise.all(
+            employee_profiles.map(async (employee_profile) => {
+                    const [result] = await db.query(sql_select, [employee_profile.emp_ID, employee_profile.cutoffID, employee_profile.cutoff_period]);
+                    return result;
+                })
+        );
+
+        eligible_att_incentives_employees.flat().forEach(eligible_att_incentives_employee => {
+            const key = `${eligible_att_incentives_employee.emp_ID}-${eligible_att_incentives_employee.cutoffID}-${eligible_att_incentives_employee.cutoff_period}`;
+            existingSchedulesMap.set(key, true);
+        });
+
+
+        const results = await Promise.all(
+            employee_profiles.map(async (employee_profile) => {
+                const key = `${employee_profile.emp_ID}-${employee_profile.cutoffID}-${employee_profile.cutoff_period}`;
+                // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
+                if (!existingSchedulesMap.has(key)) {
+                    // If the schedule doesn't exist, prepare for insertion
+                    insertValues.push([employee_profile.emp_ID, 2000, employee_profile.cutoffID, employee_profile.cutoff_period]);
+                }
+                return employee_profile;
+            })
+        );
+        if (insertValues.length > 0) {
+            const [insert_data_employee_profiles] = await db.query(sql_insert, [insertValues]);  
+        }
+
+       
+        //console.log(eligible_att_incentives_employees);
+       // const sql = 'INSERT INTO eligible_att_incentives (emp_ID, amount, cutoffID, cutoff_period) VALUES (?, ?, ?, ?)';
+       // const [insert_data_eligible_att_incentive] = await db.query(sql, [emp_id, amount, cutoff_id, cutoff_period]);
+       
+       // Return the merged results in the response
+        return res.status(200).json({ data : employee_profiles });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
@@ -763,10 +811,9 @@ export const get_all_eligible_att_incentive_supervisor = asyncHandler(async (req
         );
 
         const combinedEmployeesSupervisor = [...new Set([..._employee_profile])];
-
         const [eligible_att_incentives] = await db.query(sql14, [formatCutoffPeriod(cutoff[0]['startDate'], cutoff[0]['endDate']), cutoff_id, combinedEmployeesSupervisor.length > 0 ? combinedEmployeesSupervisor : [null], ...bucketArray]);
-
-
+       
+   
         return res.status(200).json({ data : eligible_att_incentives });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
