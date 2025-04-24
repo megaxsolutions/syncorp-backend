@@ -66,8 +66,16 @@ export const create_att_incentive = asyncHandler(async (req, res) => {
     const { emp_id, amount, cutoff_id, status, supervisor_emp_id } = req.body;
 
     try {
-        const sql = 'INSERT INTO att_incentives (emp_ID, amount, cutoff_ID, status, plotted_by, approved_by, datetime_approved) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        const [insert_data_att_incentive] = await db.query(sql, [emp_id, amount, cutoff_id, status, supervisor_emp_id, supervisor_emp_id, storeCurrentDateTime(0, 'hours')]);
+        const sql = 'SELECT * FROM att_incentives WHERE emp_ID = ? AND cutoff_ID = ?'; // Use a parameterized query
+        const sql_insert = 'INSERT INTO att_incentives (emp_ID, amount, cutoff_ID, status, plotted_by, approved_by, datetime_approved) VALUES (?, ?, ?, ?, ?, ?, ?)';
+        
+        const [att_incentives] = await db.query(sql, [emp_id, cutoff_id]);
+
+        if (att_incentives.length >= 1) {
+            return res.status(400).json({ error: 'The record already exists.' });
+        }
+      
+        const [insert_data_att_incentive] = await db.query(sql_insert, [emp_id, amount, cutoff_id, status, supervisor_emp_id, supervisor_emp_id, storeCurrentDateTime(0, 'hours')]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Attendance incentive successfully created.' });

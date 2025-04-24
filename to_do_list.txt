@@ -78,3 +78,13 @@ follow_up_date
 
 add and update image [course and course category]
 
+
+restrict att incentive - insert duplicate
+
+rating table
+
+id, emp_ID, rating, datetime, comment, courseID
+result - 1 decimal
+details of trainer - employoee profile
+
+trainer - facebook, tweeter, linkedin, upload_picture
