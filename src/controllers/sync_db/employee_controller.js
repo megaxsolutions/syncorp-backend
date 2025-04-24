@@ -185,8 +185,12 @@ export const login_employee = asyncHandler(async (req, res) => {
 
         if(login[0]['password'] == hash) {
             // Generate a JWT token
+            // const token = jwt.sign({ login }, JWT_SECRET, {
+            //     expiresIn: '7d' // Token expiration time
+            // });
+
             const token = jwt.sign({ login }, JWT_SECRET, {
-                expiresIn: '7d' // Token expiration time
+                expiresIn: '1m' // Token expiration time
             });
 
             //const hashTokenBCRYPT = hashConverterBCRYPT(token);

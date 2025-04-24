@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as AdminController  from '../../controllers/sync_db/admin_controller.js'; // Adjust the path as necessary
 import { authenticateToken } from "../../middleware/auth.js";
+import { authenticateTokenSecondary } from "../../middleware/auth_secondary.js";
 
 import multer from 'multer';
 import path from 'path'; // Import the path module
@@ -64,7 +65,7 @@ adminRoutes.post('/update_admin_user_level_supervisor_cluster', authenticateToke
 
 
 
-adminRoutes.get('/protected', authenticateToken, (req, res) => {
+adminRoutes.get('/protected', authenticateTokenSecondary, (req, res) => {
     res.status(200).json({ data: req.user });
 });
 

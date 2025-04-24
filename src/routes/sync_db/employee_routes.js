@@ -1,6 +1,9 @@
 import { Router } from "express";
 import * as UserController from '../../controllers/sync_db/employee_controller.js'; // Adjusted the path
 import { authenticateToken } from "../../middleware/auth.js";
+import { authenticateTokenSecondary } from "../../middleware/auth_secondary.js";
+
+
 
 import multer from 'multer';
 import path from 'path'; // Import the path module
@@ -50,10 +53,9 @@ employeeRoutes.put('/update_employee_login/:emp_id', authenticateToken, UserCont
 
 
 
-employeeRoutes.get('/protected', authenticateToken, (req, res) => {
+employeeRoutes.get('/protected', authenticateTokenSecondary, (req, res) => {
     res.status(200).json({ data: req.user });
 });
-
 
 
 export default employeeRoutes;
