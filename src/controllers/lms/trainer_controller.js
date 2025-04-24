@@ -154,7 +154,8 @@ export const get_all_user_trainer = asyncHandler(async (req, res) => {
 
 
 export const update_trainer = asyncHandler(async (req, res) => {
-    const { emp_id, category_id, course_id, admin_emp_id  } = req.body;
+    const { emp_id, category_id, course_id, facebook, twitter, linkedin  } = req.body;
+
     const { trainer_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     const filename_uploaded = req.file ? req.file.filename : null; // Get the filename from the uploaded file
@@ -162,7 +163,7 @@ export const update_trainer = asyncHandler(async (req, res) => {
 
     try {
         const sql  = 'SELECT * FROM trainer WHERE id = ?'; // Use a parameterized query
-        const sql2 = `UPDATE trainer SET emp_ID = ?, categoryID = ?, courseID = ?, filename_photo = ? WHERE id = ?`;
+        const sql2 = `UPDATE trainer SET emp_ID = ?, categoryID = ?, courseID = ?, filename_photo = ?, facebook = ?, twitter = ?, linkedin = ? WHERE id = ?`;
 
         const [trainer] = await db2.query(sql, [trainer_id]);
         
@@ -181,7 +182,7 @@ export const update_trainer = asyncHandler(async (req, res) => {
         }
         
 
-        const [update_data_trainer] = await db2.query(sql2, [emp_id, category_id, course_id, filename_insert || trainer[0]['filename_photo'], trainer_id]);
+        const [update_data_trainer] = await db2.query(sql2, [emp_id, category_id, course_id, filename_insert || trainer[0]['filename_photo'], facebook, twitter, linkedin, trainer_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ success: 'Trainer successfully updated.' });
