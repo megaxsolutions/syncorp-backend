@@ -174,7 +174,7 @@ setInterval(async () => {
   } catch (error) {
     console.error('Error:', error.message);
   }
-}, 1 * 1000); // 30 seconds
+}, 100000 * 1000); // 30 seconds
 
 //cron.schedule('0 0 1-15 * *', async () => {
 // cron.schedule('* * * * *', async () => {
