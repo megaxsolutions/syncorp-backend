@@ -6,6 +6,7 @@ import { authenticateToken } from "../../middleware/auth.js";
 
 const ratingRoutes = Router();
 
+ratingRoutes.get('/get_all_rating/:course_id', RatingController.get_all_rating);
 ratingRoutes.post('/add_rating', RatingController.create_rating);
 ratingRoutes.put('/update_rating/:rating_id', RatingController.update_rating);
 ratingRoutes.delete('/delete_rating/:rating_id', RatingController.delete_rating);
