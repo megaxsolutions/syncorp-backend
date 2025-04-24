@@ -20,13 +20,71 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
     return formattedExpirationDateTime;
 }
 
+
+export const get_all_rating = asyncHandler(async (req, res) => {
+    const { course_id } = req.params; // Assuming emp_id is passed as a URL parameter
+    try {
+      
+        const sql  = `
+            SELECT 
+                ratings.id,
+                ratings.emp_ID,
+                ratings.rating,
+                ratings.comment,
+                ratings.courseID,
+                DATE_FORMAT(ratings.datetime, '%Y-%m-%d %H:%i:%s') AS datetime,
+                CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname
+            FROM 
+                ratings
+            LEFT JOIN
+                sync_db.employee_profile ON ratings.emp_ID = employee_profile.emp_ID
+            WHERE 
+                ratings.courseID = ?
+        `; // parameterized query
+                                  
+
+
+   
+
+        const [ratings] = await db2.query(sql, [course_id]);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: ratings });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
 export const create_rating = asyncHandler(async (req, res) => {
     const { emp_id, rating, comment, course_id } = req.body;
 
 
     try {
-        const sql = 'INSERT INTO ratings (emp_ID, rating, datetime, comment, courseID) VALUES (?, ?, ?, ?, ?)';
-        const [insert_data_rating] = await db2.query(sql, [emp_id, rating, storeCurrentDateTime(0, 'hours'), comment, course_id]);
+        const sql  = `
+        SELECT 
+            ratings.id,
+            ratings.emp_ID,
+            ratings.rating,
+            ratings.comment,
+            ratings.courseID,
+            DATE_FORMAT(ratings.datetime, '%Y-%m-%d %H:%i:%s') AS datetime
+        FROM 
+            ratings
+        WHERE
+            courseID = ?`; // parameterized query
+        const sql_insert = 'INSERT INTO ratings (emp_ID, rating, datetime, comment, courseID) VALUES (?, ?, ?, ?, ?)';
+        const sql_update = 'UPDATE ratings SET rating = ?, comment = ? WHERE id = ?';
+
+        const [ratings] = await db2.query(sql, [course_id]);
+
+
+        if (ratings.length >= 1) {
+            const [update_data_rating] = await db2.query(sql_update, [rating, comment, ratings[0]['id']]);
+
+            return res.status(200).json({ success: 'Rating successfully updated.' });
+        }
+        
+        const [insert_data_rating] = await db2.query(sql_insert, [emp_id, rating, storeCurrentDateTime(0, 'hours'), comment, course_id]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'Rating successfully created.' });

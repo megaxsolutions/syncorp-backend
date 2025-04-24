@@ -161,7 +161,7 @@ app.use("/users", authenticateToken, userRoutes);
 app.use("/questions", authenticateToken, questionRoutes);
 app.use("/enrolls", authenticateToken, enrollRoutes);
 app.use("/trainers", authenticateToken, trainerRoutes);
-app.use("/ratings", authenticateToken,  ratingRoutes);
+app.use("/ratings", ratingRoutes);
 
 
 setInterval(async () => {
