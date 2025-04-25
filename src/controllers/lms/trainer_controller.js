@@ -64,68 +64,32 @@ export const create_trainer = asyncHandler(async (req, res) => {
 
 
 
-export const create_trainer_multiple = asyncHandler(async (req, res) => {
-    const { array_employee_emp_id, category_id, course_id, admin_emp_id, facebook, twitter, linkedin  } = req.body;
-    
-
-
-    try {
-        const insertValues = [];
-        let trainers_affected = 0;
-        const existingSchedulesMap = new Map();
-
-        const sqlInsert = 'INSERT INTO trainer (emp_ID, categoryID, courseID, plotted_by) VALUES ?';
-        const sqlSelect = `SELECT id, emp_ID, categoryID, courseID, plotted_by
-        FROM trainer WHERE emp_ID = ? AND categoryID = ? AND courseID = ?`;
-
-
-        const lms_trainers = await Promise.all(
-            array_employee_emp_id.map(async (emp_id) => {
-                const [result] = await db2.query(sqlSelect, [emp_id, category_id, course_id]);
-                return result;
-            })
-        );
-
-
-        lms_trainers.flat().forEach(user => {
-            const key = `${user.emp_ID}`;
-            existingSchedulesMap.set(key, true);
-        });
-
-         // Loop through each employee and day to prepare the insertion data
-         for (const emp_id of array_employee_emp_id) {
-            let count_trainers = 0;
-            const key = `${emp_id}`;
-
-            // Check if the (emp_id, day) combination is already in the map (i.e., the shift exists)
-            if (!existingSchedulesMap.has(key)) {
-                insertValues.push([emp_id, category_id, course_id, admin_emp_id]);
-                ++count_trainers;
-            }
-
-            // If at least one schedule was added for this employee, increment the affected count
-            if (count_trainers > 0) {
-                trainers_affected++;
-            }
-        }
-
-
-        // If there are any values to insert, perform a batch insert
-        if (insertValues.length > 0) {
-            await db2.query(sqlInsert, [insertValues]);
-        }
-
-        return res.status(200).json({ 
-            success: `${trainers_affected} trainer${trainers_affected >= 2 ? 's' : ''} have been added to the LMS.` 
-        });        // Return the merged results in the response
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to create trainer.' });
-    }
-});
-
 export const get_all_trainer = asyncHandler(async (req, res) => {
     try {
-        const sql = `SELECT id, emp_ID, categoryID, courseID, plotted_by, facebook, twitter, linkedin, filename_photo FROM trainer`;
+        const sql = `
+        SELECT 
+            trainer.id, 
+            trainer.emp_ID, 
+            trainer.categoryID, 
+            trainer.courseID, 
+            trainer.plotted_by, 
+            trainer.facebook, 
+            trainer.twitter, 
+            trainer.linkedin, 
+            trainer.filename_photo,
+            CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname,
+            courses.course_title,
+            courses.course_details,
+            course_category.category_title
+        FROM 
+            trainer
+        LEFT JOIN
+            sync_db.employee_profile ON trainer.emp_ID = employee_profile.emp_ID
+        LEFT JOIN
+            courses ON trainer.courseID = courses.id
+        LEFT JOIN
+            course_category ON trainer.categoryID = course_category.id
+        `;
                                   
         const [trainers] = await db2.query(sql);
 
@@ -140,7 +104,31 @@ export const get_all_user_trainer = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
-        const sql = `SELECT id, emp_ID, categoryID, courseID, plotted_by FROM trainer WHERE emp_ID = ?`;
+        const sql = `
+        SELECT 
+            trainer.id, 
+            trainer.emp_ID, 
+            trainer.categoryID, 
+            trainer.courseID, 
+            trainer.plotted_by, 
+            trainer.facebook, 
+            trainer.twitter, 
+            trainer.linkedin, 
+            trainer.filename_photo,
+            CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname,
+            courses.course_title,
+            courses.course_details,
+            course_category.category_title
+        FROM 
+            trainer
+        LEFT JOIN
+            sync_db.employee_profile ON trainer.emp_ID = employee_profile.emp_ID
+        LEFT JOIN
+            courses ON trainer.courseID = courses.id
+        LEFT JOIN
+            course_category ON trainer.categoryID = course_category.id
+        WHERE
+            trainer.emp_ID = ?`;
                                   
         const [trainers] = await db2.query(sql, [emp_id]);
 

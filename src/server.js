@@ -46,6 +46,14 @@ import incidentReportRoutes from "./routes/sync_db/incident_report_routes.js";
 import eligibleAttendanceIncentive from "./routes/sync_db/eligible_att_incentive_routes.js";
 import pagibigLoanRoutes from "./routes/sync_db/sss_loan_routes.js";
 import sssLoanRoutes from "./routes/sync_db/pagibig_loan_routes.js";
+import pagibigContributionRoutes from "./routes/sync_db/pagibig_contribution_routes.js";
+import philHealthContributionRoutes from "./routes/sync_db/philh_contribution_routes.js";
+import sssContributionRoutes from "./routes/sync_db/sss_contribution_routes.js";
+import payrollAdjustmentRoutes from "./routes/sync_db/payroll_adjustment_routes.js";
+
+
+
+
 
 
 
@@ -152,19 +160,26 @@ app.use("/mood_meters", authenticateToken, moodMeterRoutes);
 app.use("/incident_reports", authenticateToken, incidentReportRoutes);
 app.use("/pagibig_loans", authenticateToken, pagibigLoanRoutes);
 app.use("/sss_loans", authenticateToken, sssLoanRoutes);
+app.use("/pagibig_contributions", authenticateToken, pagibigContributionRoutes);
+app.use("/philhealth_contributions", authenticateToken, philHealthContributionRoutes);
+app.use("/sss_contributions", authenticateToken, sssContributionRoutes);
+app.use("/payroll_adjustments", authenticateToken, payrollAdjustmentRoutes);
+
+
+
 
 
 
 //lms
 app.use("/course_catergory", authenticateToken, courseCategoryRoutes);
-app.use("/courses", courseRoutes);
+app.use("/courses", authenticateToken, courseRoutes);
 app.use("/materials", authenticateToken, materialRoutes);
 app.use("/submissions", authenticateToken, submissionRoutes);
 app.use("/users", authenticateToken, userRoutes);
 app.use("/questions", authenticateToken, questionRoutes);
 app.use("/enrolls", authenticateToken, enrollRoutes);
-app.use("/trainers", authenticateToken, trainerRoutes);
-app.use("/ratings", ratingRoutes);
+app.use("/trainers", trainerRoutes);
+app.use("/ratings", authenticateToken, ratingRoutes);
 
 
 setInterval(async () => {

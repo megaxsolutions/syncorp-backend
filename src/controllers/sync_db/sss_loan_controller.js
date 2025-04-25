@@ -27,8 +27,8 @@ export const get_all_sss_loan = asyncHandler(async (req, res) => {
             SELECT 
                 sss_loan.id,
                 sss_loan.emp_ID,
-                sss_loan.payroll_id_start,
-                sss_loan.payroll_id_end,
+                DATE_FORMAT(sss_loan.start_date, '%Y-%m-%d') AS start_date,
+                DATE_FORMAT(sss_loan.end_date, '%Y-%m-%d') AS end_date,
                 sss_loan.amount,
                 CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname
             FROM 
@@ -49,12 +49,12 @@ export const get_all_sss_loan = asyncHandler(async (req, res) => {
 });
 
 export const create_sss_loan = asyncHandler(async (req, res) => {
-    const { emp_id, amount, payroll_id_start, payroll_id_end } = req.body;
+    const { emp_id, amount, start_date, end_date } = req.body;
 
     try {
-        const sql_insert = 'INSERT INTO sss_loan (emp_ID, amount, payroll_id_start, payroll_id_end) VALUES (?, ?, ?, ?)';
+        const sql_insert = 'INSERT INTO sss_loan (emp_ID, amount, start_date, end_date) VALUES (?, ?, ?, ?)';
   
-        const [insert_data_sss_loan] = await db.query(sql_insert, [emp_id, amount, payroll_id_start, payroll_id_end]);
+        const [insert_data_sss_loan] = await db.query(sql_insert, [emp_id, amount, start_date, end_date]);
       
         // Return the merged results in the response
         return res.status(200).json({ success: 'SSS loan successfully created.' });
@@ -65,14 +65,14 @@ export const create_sss_loan = asyncHandler(async (req, res) => {
 
 
 export const update_sss_loan = asyncHandler(async (req, res) => {
-    const { emp_id, amount, payroll_id_start, payroll_id_end } = req.body;
+    const { emp_id, amount, start_date, end_date } = req.body;
     const { sss_loan_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
 
     try {
-        const sql = 'UPDATE sss_loan SET emp_id = ?, amount = ?, payroll_id_start = ?, payroll_id_end = ?  WHERE id = ?';
+        const sql = 'UPDATE sss_loan SET emp_id = ?, amount = ?, start_date = ?, end_date = ?  WHERE id = ?';
 
-        const [update_data_sss_loan] = await db.query(sql, [emp_id, amount, payroll_id_start, payroll_id_end, sss_loan_id]);
+        const [update_data_sss_loan] = await db.query(sql, [emp_id, amount, start_date, end_date, sss_loan_id]);
  
         // Return the merged results in the response
         return res.status(200).json({ success: 'SSS loan successfully updated.' });

@@ -94,12 +94,15 @@ export const get_all_course = asyncHandler(async (req, res) => {
             DATE_FORMAT(courses.date_added, '%Y-%m-%d %H:%i:%s') AS date_added,
             courses.filename,
             courses.categoryID,
+            course_category.category_title,
             count(ratings.id) AS total_rating,
             IFNULL(ROUND(AVG(ratings.rating), 1), 0) AS average_rating
         FROM 
             courses
         LEFT JOIN 
             ratings ON courses.id = ratings.courseID
+        LEFT JOIN 
+            course_category ON courses.categoryID = course_category.id
         GROUP BY 
             courses.id
         `; // Use a parameterized query
