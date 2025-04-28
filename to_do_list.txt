@@ -88,3 +88,7 @@ result - 1 decimal
 details of trainer - employoee profile
 
 trainer - facebook, tweeter, linkedin, upload_picture
+
+
+
+payslip -
