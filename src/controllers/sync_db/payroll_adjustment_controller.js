@@ -33,7 +33,7 @@ export const get_all_payroll_adjustment = asyncHandler(async (req, res) => {
             FROM 
                 payroll_adjustments
             LEFT JOIN
-                employee_profile ON sss_loan.emp_ID = employee_profile.emp_ID
+                employee_profile ON payroll_adjustments.emp_ID = employee_profile.emp_ID
         `; // parameterized query
                                   
 

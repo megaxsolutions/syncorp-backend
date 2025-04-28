@@ -27,26 +27,23 @@ export const get_all_pagibig_loan = asyncHandler(async (req, res) => {
             SELECT 
                 pagibig_loan.id,
                 pagibig_loan.emp_ID,
-                pagibig_loan.payroll_id_start,
                 DATE_FORMAT(pagibig_loan.start_date, '%Y-%m-%d') AS start_date,
                 DATE_FORMAT(pagibig_loan.end_date, '%Y-%m-%d') AS end_date,
-                pagibig_loan.payroll_id_end,
                 pagibig_loan.amount,
-                CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname
+                CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname 
             FROM 
                 pagibig_loan
             LEFT JOIN
                 employee_profile ON pagibig_loan.emp_ID = employee_profile.emp_ID
         `; // parameterized query
-                                  
-
+                                
 
         const [pagibig_loan] = await db.query(sql);
 
         // Return the merged results in the response
         return res.status(200).json({ data: pagibig_loan });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to get all data.' });
+        return res.status(500).json({ error: '1Failed to get all data.' });
     }
 });
 
