@@ -163,7 +163,7 @@ app.use("/sss_loans", authenticateToken, sssLoanRoutes);
 app.use("/pagibig_contributions", authenticateToken, pagibigContributionRoutes);
 app.use("/philhealth_contributions", authenticateToken, philHealthContributionRoutes);
 app.use("/sss_contributions", authenticateToken, sssContributionRoutes);
-app.use("/payroll_adjustments", authenticateToken, payrollAdjustmentRoutes);
+app.use("/payroll_adjustments", payrollAdjustmentRoutes);
 
 
 
