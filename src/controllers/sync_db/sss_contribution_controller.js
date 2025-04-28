@@ -31,7 +31,7 @@ export const get_all_sss_contribution = asyncHandler(async (req, res) => {
             FROM 
                 sss_contribution
             LEFT JOIN
-                employee_profile ON sss_loan.emp_ID = employee_profile.emp_ID
+                employee_profile ON sss_contribution.emp_ID = employee_profile.emp_ID
         `; // parameterized query
                                   
 

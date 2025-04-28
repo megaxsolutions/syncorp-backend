@@ -32,7 +32,7 @@ export const get_all_pagibig_contribution = asyncHandler(async (req, res) => {
             FROM 
                 pagibig_contribution
             LEFT JOIN
-                employee_profile ON sss_loan.emp_ID = employee_profile.emp_ID`; // parameterized query
+                employee_profile ON pagibig_contribution.emp_ID = employee_profile.emp_ID`; // parameterized query
                                   
 
 
