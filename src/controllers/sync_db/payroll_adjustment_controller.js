@@ -39,7 +39,7 @@ export const get_all_payroll_adjustment = asyncHandler(async (req, res) => {
             LEFT JOIN
                 cutoff ON payroll_adjustments.payroll_id = cutoff.id
             ORDER BY 
-                payroll_adjustments.id ASC
+                payroll_adjustments.id DESC
         `; // parameterized query
                                   
 
