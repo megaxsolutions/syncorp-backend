@@ -34,6 +34,8 @@ export const get_all_payroll_adjustment = asyncHandler(async (req, res) => {
                 payroll_adjustments
             LEFT JOIN
                 employee_profile ON payroll_adjustments.emp_ID = employee_profile.emp_ID
+            ORDER BY 
+                payroll_adjustments.id ASC
         `; // parameterized query
                                   
 
