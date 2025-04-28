@@ -118,11 +118,12 @@ export const get_all_course = asyncHandler(async (req, res) => {
 
 
 
-export const get_all_course_specific = asyncHandler(async (req, res) => {
+export const get_specific_course = asyncHandler(async (req, res) => {
     const { course_id } = req.params; // Assuming emp_id is passed as a URL parameter
     try {
         const sql  = `
-        SELECT courses.id,
+        SELECT 
+            courses.id,
             courses.course_title,
             courses.course_details,
             DATE_FORMAT(courses.date_added, '%Y-%m-%d %H:%i:%s') AS date_added,
@@ -137,10 +138,10 @@ export const get_all_course_specific = asyncHandler(async (req, res) => {
             ratings ON courses.id = ratings.courseID
         LEFT JOIN 
             course_category ON courses.categoryID = course_category.id
-        GROUP BY 
-            courses.id
         WHERE 
             courses.id = ?
+        GROUP BY 
+            courses.id
         `; // Use a parameterized query
                                   
         const [courses] = await db2.query(sql, [course_id]);
