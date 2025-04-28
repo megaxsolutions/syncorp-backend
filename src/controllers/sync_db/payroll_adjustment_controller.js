@@ -29,11 +29,15 @@ export const get_all_payroll_adjustment = asyncHandler(async (req, res) => {
                 payroll_adjustments.amount,
                 payroll_adjustments.payroll_id,
                 payroll_adjustments.status,
+                DATE_FORMAT(cutoff.startDate, '%Y-%m-%d') AS startDate,
+                DATE_FORMAT(cutoff.endDate, '%Y-%m-%d') AS endDate,
                 CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS fullname
             FROM 
                 payroll_adjustments
             LEFT JOIN
                 employee_profile ON payroll_adjustments.emp_ID = employee_profile.emp_ID
+            LEFT JOIN
+                cutoff ON payroll_adjustments.payroll_id = cutoff.id
             ORDER BY 
                 payroll_adjustments.id ASC
         `; // parameterized query
