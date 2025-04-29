@@ -73,6 +73,26 @@ export const get_all_submission = asyncHandler(async (req, res) => {
 });
 
 
+export const get_specific_submission = asyncHandler(async (req, res) => {
+    const { submission_id } = req.params; // Assuming emp_id is passed as a URL parameter
+
+
+    try {
+        const sql  = `SELECT id, courseID, categoryID, emp_ID, questionID, answer, correct_answer,
+        DATE_FORMAT(datetime_submitted, '%Y-%m-%d %H:%i:%s') AS datetime_submitted
+        FROM submissions
+        WHERE id = ?`; // Use a parameterized query
+                                  
+        const [submission] = await db2.query(sql, [submission_id]);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: submission });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+
 export const delete_submission = asyncHandler(async (req, res) => {
     const { submission_id } = req.params; // Assuming emp_id is passed as a URL parameter
 

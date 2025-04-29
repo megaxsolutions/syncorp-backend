@@ -120,6 +120,7 @@ export const get_all_course = asyncHandler(async (req, res) => {
 
 export const get_specific_course = asyncHandler(async (req, res) => {
     const { course_id } = req.params; // Assuming emp_id is passed as a URL parameter
+    
     try {
         const sql  = `
         SELECT 
