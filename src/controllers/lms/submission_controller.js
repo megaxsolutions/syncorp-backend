@@ -68,6 +68,11 @@ export const update_submission = asyncHandler(async (req, res) => {
 
 export const get_score_submission = asyncHandler(async (req, res) => {
     const { course_id, category_id, emp_id } = req.params;
+    
+    
+    console.log(123);
+    console.log('YES' == 'yes');
+    console.log(123);
 
     try {
         const sql  = `SELECT id, courseID, categoryID, emp_ID, questionID, answer, correct_answer,
