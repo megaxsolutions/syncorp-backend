@@ -22,14 +22,26 @@ function storeCurrentDateTime(expirationAmount, expirationUnit) {
 
 export const create_submission = asyncHandler(async (req, res) => {
     const { course_id, category_id, emp_id, question_id, answer } = req.body;
+  
 
     try {
-        const sql  = `SELECT correct_answer FROM questions WHERE id = ?`; // Use a parameterized query
-        const sql2 = 'INSERT INTO submissions (courseID, categoryID, emp_ID, questionID, answer, correct_answer, datetime_submitted) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        
-        const [data_question] = await db2.query(sql, [question_id]);
-        const [insert_data_submission] = await db2.query(sql2, [course_id, category_id, emp_id, question_id, answer, data_question[0]['correct_answer'], storeCurrentDateTime(0, 'hours')]);
-      
+        const sql  = `SELECT * FROM submissions WHERE emp_ID = ? AND courseID = ? AND categoryID = ? AND questionID = ?`; // Use a parameterized query
+        const sql2 = `SELECT correct_answer FROM questions WHERE id = ?`; // Use a parameterized query
+        const sql3 = `UPDATE submissions SET answer = ? WHERE id = ?`;
+        const sql4 = 'INSERT INTO submissions (courseID, categoryID, emp_ID, questionID, answer, correct_answer, datetime_submitted) VALUES (?, ?, ?, ?, ?, ?, ?)';
+
+
+        const [data_submission] = await db2.query(sql, [emp_id, course_id, category_id, question_id]);
+        const [data_question] = await db2.query(sql2, [question_id]);
+
+        if (data_submission.length >= 1) {
+            const [update_data_submission] = await db2.query(sql3, [answer, data_submission[0]['id']]);
+
+            return res.status(200).json({ success: 'Submission successfully updated.' });
+        }
+
+        const [insert_data_submission] = await db2.query(sql4, [course_id, category_id, emp_id, question_id, answer, data_question[0]['correct_answer'], storeCurrentDateTime(0, 'hours')]);
+
         // Return the merged results in the response
         return res.status(200).json({ success: 'Submission successfully created.' });
     } catch (error) {
@@ -54,7 +66,29 @@ export const update_submission = asyncHandler(async (req, res) => {
     }
 });
 
+export const get_score_submission = asyncHandler(async (req, res) => {
+    const { course_id, category_id, emp_id } = req.params;
 
+    try {
+        const sql  = `SELECT id, courseID, categoryID, emp_ID, questionID, answer, correct_answer,
+        DATE_FORMAT(datetime_submitted, '%Y-%m-%d %H:%i:%s') AS datetime_submitted,
+        IF(
+            correct_answer LIKE CONCAT('%[', answer, ']%') OR
+            correct_answer LIKE CONCAT('%,', answer, ',%') OR
+            correct_answer LIKE CONCAT('%,', answer, ']') OR
+            correct_answer LIKE CONCAT('[', answer, ',%'),
+            1, 0
+          ) AS is_correct
+        FROM submissions WHERE emp_ID = ? AND courseID = ? AND categoryID = ?`; // Use a parameterized query
+
+        const [data_submission] = await db2.query(sql, [emp_id, course_id, category_id]);
+      
+        // Return the merged results in the response
+        return res.status(200).json({ data: data_submission });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
 
 
 export const get_all_submission = asyncHandler(async (req, res) => {

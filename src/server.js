@@ -172,13 +172,13 @@ app.use("/payroll_adjustments", payrollAdjustmentRoutes);
 
 //lms
 app.use("/course_catergory", authenticateToken, courseCategoryRoutes);
-app.use("/courses", courseRoutes);
+app.use("/courses", authenticateToken, courseRoutes);
 app.use("/materials", authenticateToken, materialRoutes);
-app.use("/submissions", authenticateToken, submissionRoutes);
+app.use("/submissions", submissionRoutes);
 app.use("/users", authenticateToken, userRoutes);
 app.use("/questions", authenticateToken, questionRoutes);
 app.use("/enrolls", authenticateToken, enrollRoutes);
-app.use("/trainers", trainerRoutes);
+app.use("/trainers", authenticateToken, trainerRoutes);
 app.use("/ratings", authenticateToken, ratingRoutes);
 
 

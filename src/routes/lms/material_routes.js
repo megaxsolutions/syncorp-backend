@@ -42,7 +42,8 @@ const materialRoutes = Router();
 materialRoutes.post('/add_material', upload.single('file_uploaded'), MaterialController.create_material);
 materialRoutes.put('/update_material/:material_id', upload.single('file_uploaded'), MaterialController.update_material);
 materialRoutes.get('/get_all_material', MaterialController.get_all_material);
-materialRoutes.get('/get_specific_material/:material_id', MaterialController.get_specific_material);
+//materialRoutes.get('/get_specific_material/:material_id', MaterialController.get_specific_material);
+materialRoutes.get('/get_all_specific_material/:course_id/:category_id', MaterialController.get_all_specific_material);
 materialRoutes.delete('/delete_material/:material_id', MaterialController.delete_material);
 
 export default materialRoutes;

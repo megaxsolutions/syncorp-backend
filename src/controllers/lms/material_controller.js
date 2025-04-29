@@ -120,6 +120,24 @@ export const get_specific_material = asyncHandler(async (req, res) => {
 });
 
 
+export const get_all_specific_material = asyncHandler(async (req, res) => {
+    const { course_id, category_id } = req.params; // Assuming emp_id is passed as a URL parameter
+    try {
+        const sql  = `SELECT id, courseID, categoryID, title, filename, created_by, filename_uploaded,
+        DATE_FORMAT(date_created, '%Y-%m-%d %H:%i:%s') AS date_created
+        FROM materials
+        WHERE courseID = ? AND categoryID = ?`; // Use a parameterized query
+                                  
+        const [materials] = await db2.query(sql, [course_id, category_id]);
+
+        // Return the merged results in the response
+        return res.status(200).json({ data: materials });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all data.' });
+    }
+});
+
+
 export const delete_material = asyncHandler(async (req, res) => {
     const { material_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
