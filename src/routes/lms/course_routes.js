@@ -42,7 +42,7 @@ const courseRoutes = Router();
 courseRoutes.post('/add_course', upload.single('file_uploaded'), CourseController.create_course);
 courseRoutes.put('/update_course/:course_id', upload.single('file_uploaded'), CourseController.update_course);
 courseRoutes.get('/get_all_course', CourseController.get_all_course);
-courseRoutes.get('/get_user_course/:course_id', CourseController.get_all_course_specific);
+courseRoutes.get('/get_specific_course/:course_id', CourseController.get_specific_course);
 courseRoutes.delete('/delete_course/:course_id', CourseController.delete_course);
 
 
