@@ -60,7 +60,14 @@ export const update_submission = asyncHandler(async (req, res) => {
 export const get_all_submission = asyncHandler(async (req, res) => {
     try {
         const sql  = `SELECT id, courseID, categoryID, emp_ID, questionID, answer, correct_answer,
-        DATE_FORMAT(datetime_submitted, '%Y-%m-%d %H:%i:%s') AS datetime_submitted
+        DATE_FORMAT(datetime_submitted, '%Y-%m-%d %H:%i:%s') AS datetime_submitted,
+        IF(
+            correct_answer LIKE CONCAT('%[', answer, ']%') OR
+            correct_answer LIKE CONCAT('%,', answer, ',%') OR
+            correct_answer LIKE CONCAT('%,', answer, ']') OR
+            correct_answer LIKE CONCAT('[', answer, ',%'),
+            1, 0
+          ) AS is_correct
         FROM submissions`; // Use a parameterized query
                                   
         const [submission] = await db2.query(sql);
@@ -79,7 +86,14 @@ export const get_specific_submission = asyncHandler(async (req, res) => {
 
     try {
         const sql  = `SELECT id, courseID, categoryID, emp_ID, questionID, answer, correct_answer,
-        DATE_FORMAT(datetime_submitted, '%Y-%m-%d %H:%i:%s') AS datetime_submitted
+        DATE_FORMAT(datetime_submitted, '%Y-%m-%d %H:%i:%s') AS datetime_submitted,
+        IF(
+            correct_answer LIKE CONCAT('%[', answer, ']%') OR
+            correct_answer LIKE CONCAT('%,', answer, ',%') OR
+            correct_answer LIKE CONCAT('%,', answer, ']') OR
+            correct_answer LIKE CONCAT('[', answer, ',%'),
+            1, 0
+          ) AS is_correct
         FROM submissions
         WHERE id = ?`; // Use a parameterized query
                                   
