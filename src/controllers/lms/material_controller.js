@@ -87,7 +87,7 @@ export const update_material = asyncHandler(async (req, res) => {
 
 export const get_all_material = asyncHandler(async (req, res) => {
     try {
-        const sql  = `SELECT id, courseID, categoryID, title, filename, created_by,
+        const sql  = `SELECT id, courseID, categoryID, title, filename, created_by, filename_uploaded,
         DATE_FORMAT(date_created, '%Y-%m-%d %H:%i:%s') AS date_created
         FROM materials`; // Use a parameterized query
                                   
@@ -105,7 +105,7 @@ export const get_specific_material = asyncHandler(async (req, res) => {
     const { material_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
-        const sql  = `SELECT id, courseID, categoryID, title, filename, created_by,
+        const sql  = `SELECT id, courseID, categoryID, title, filename, created_by, filename_uploaded,
         DATE_FORMAT(date_created, '%Y-%m-%d %H:%i:%s') AS date_created
         FROM materials
         WHERE id = ?`; // Use a parameterized query
