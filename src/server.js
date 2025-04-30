@@ -107,9 +107,13 @@ const port = process.env.PORT;
 // const wss = new WebSocketServer({ port: 8001 });
 
 
-app.use(express.json());
+//app.use(express.json());
+//app.use(express.urlencoded({ extended: true }));
+
 app.use(express.text()); 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '2000mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2000mb' }));
+
 //app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: true }));
 
