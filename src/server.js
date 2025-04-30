@@ -156,7 +156,7 @@ app.use("/payrolls", authenticateToken, payrollRoutes);
 app.use("/complexity", authenticateToken, complexityRoutes);
 app.use("/attendance_incentives", authenticateToken, attendanceIncentivesRoutes);
 app.use("/signatures", authenticateToken, signatureRoutes);
-app.use("/mood_meters", authenticateToken, moodMeterRoutes);
+app.use("/mood_meters", moodMeterRoutes);
 app.use("/incident_reports", authenticateToken, incidentReportRoutes);
 app.use("/pagibig_loans", authenticateToken, pagibigLoanRoutes);
 app.use("/sss_loans", authenticateToken, sssLoanRoutes);
@@ -172,14 +172,14 @@ app.use("/payroll_adjustments", payrollAdjustmentRoutes);
 
 //lms
 app.use("/course_catergory", authenticateToken, courseCategoryRoutes);
-app.use("/courses", authenticateToken, courseRoutes);
-app.use("/materials", authenticateToken, materialRoutes);
+app.use("/courses", courseRoutes);
+app.use("/materials", materialRoutes);
 app.use("/submissions", submissionRoutes);
 app.use("/users", authenticateToken, userRoutes);
 app.use("/questions", authenticateToken, questionRoutes);
 app.use("/enrolls", authenticateToken, enrollRoutes);
 app.use("/trainers", authenticateToken, trainerRoutes);
-app.use("/ratings", authenticateToken, ratingRoutes);
+app.use("/ratings", ratingRoutes);
 
 
 setInterval(async () => {
