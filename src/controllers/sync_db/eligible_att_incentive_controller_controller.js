@@ -67,6 +67,7 @@ export const get_all_eligible_att_incentive_employees = asyncHandler(async (req,
             eligible_att_incentives.amount,
             eligible_att_incentives.cutoffID,
             eligible_att_incentives.cutoff_period,
+            eligible_att_incentives.status,
             CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname
         FROM 
             eligible_att_incentives
@@ -95,6 +96,7 @@ export const get_all_eligible_att_incentive_employees_cutoff = asyncHandler(asyn
             eligible_att_incentives.amount,
             eligible_att_incentives.cutoffID,
             eligible_att_incentives.cutoff_period,
+            eligible_att_incentives.status,
             CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname
         FROM 
             eligible_att_incentives
@@ -134,6 +136,7 @@ export const get_all_eligible_att_incentive_employees_supervisor_cutoff = asyncH
             eligible_att_incentives.amount,
             eligible_att_incentives.cutoffID,
             eligible_att_incentives.cutoff_period,
+            eligible_att_incentives.status,
             CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname
         FROM 
             eligible_att_incentives
@@ -175,6 +178,7 @@ export const get_all_eligible_att_incentive_employees_supervisor = asyncHandler(
             eligible_att_incentives.amount,
             eligible_att_incentives.cutoffID,
             eligible_att_incentives.cutoff_period,
+            eligible_att_incentives.status,
             CONCAT(employee_profile.fName, ' ', employee_profile.lName) AS employee_fullname
         FROM 
             eligible_att_incentives
@@ -604,7 +608,7 @@ export const get_all_eligible_att_incentive = asyncHandler(async (req, res) => {
         }
        
        // Return the merged results in the response
-        return res.status(200).json({ data : employee_profiles, data2: employee_profiles_not_eligible });
+        return res.status(200).json({ data : employee_profiles });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all data.' });
     }
