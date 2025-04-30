@@ -29,6 +29,14 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
     return formattedExpirationDateTime;
 }
+function forcutoffDate() {
+    // Get the current date and time in Asia/Manila timezone
+    const currentDateTime = moment.tz("Asia/Manila");
+
+    const formattedDate = currentDateTime.format('YYYY-MM-DD');
+
+    return formattedDate;
+}
 
 export const create_attendance_time_in = asyncHandler(async (req, res) => {
     const { emp_id, cluster_id } = req.body;
@@ -74,13 +82,20 @@ export const update_attendance_time_out = asyncHandler(async (req, res) => {
     const { emp_id } = req.params; // Assuming emp_id is passed as a URL parameter
 
     try {
+    
         const sql = 'SELECT * FROM attendance WHERE emp_ID = ? ORDER BY id DESC LIMIT 1';
         const sql2 = 'UPDATE attendance SET timeOUT = ? WHERE id = ?';
         const sql3 = 'UPDATE clock_state SET state = ? WHERE emp_ID = ?';
+        const sql4 = 'SELECT id from cutoff where ? BETWEEN startDate AND endDate';
+        const [cutoffID] = await db.query(sql4, forcutoffDate());
+        const sql5 = 'call DTR_api(?,?)';
+
+        
 
         const [attendance] = await db.query(sql, [emp_id]);
         const [update_data_attendance] = await db.query(sql2, [storeCurrentDateTime(0, 'hours'), attendance[0]['id']]);
         const [update_data_clock_state] = await db.query(sql3, [0, emp_id]);
+        const [payroll] = await db.query(sql5, [cutoffID,emp_id]);
 
         // Return the merged results in the response
         return res.status(200).json({ success: 'Attendance successfully updated.' });
