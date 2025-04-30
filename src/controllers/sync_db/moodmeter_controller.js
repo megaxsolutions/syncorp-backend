@@ -52,7 +52,7 @@ export const check_moodmeter = asyncHandler(async (req, res) => {
         const [moodmeter] = await db.query(sql, [emp_id, storeCurrentDate(0, 'hours')]);
 
         if (moodmeter.length >= 1) {
-            return res.status(200).json({ data: 'You have already submitted your mood meter today.' });
+            return res.status(400).json({ error: 'You have already submitted your mood meter today.' });
         }
 
         // Return the merged results in the response
