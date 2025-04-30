@@ -73,6 +73,8 @@ export const get_all_eligible_att_incentive_employees = asyncHandler(async (req,
             eligible_att_incentives
         LEFT JOIN
             employee_profile ON employee_profile.emp_ID = eligible_att_incentives.emp_ID 
+        ORDER BY 
+            eligible_att_incentives.amount DESC
         `; 
         const [eligible_att_incentives] = await db.query(sql);
 
@@ -104,6 +106,8 @@ export const get_all_eligible_att_incentive_employees_cutoff = asyncHandler(asyn
             employee_profile ON employee_profile.emp_ID = eligible_att_incentives.emp_ID 
         WHERE
             eligible_att_incentives.cutoffID = ?
+        ORDER BY 
+            eligible_att_incentives.amount DESC
         `; 
         const [eligible_att_incentives] = await db.query(sql, [cutoff_id]);
 
@@ -145,6 +149,8 @@ export const get_all_eligible_att_incentive_employees_supervisor_cutoff = asyncH
         WHERE 
             eligible_att_incentives.cutoffID = ?
             AND employee_profile.clusterID IN (${placeholders})
+        ORDER BY 
+            eligible_att_incentives.amount DESC
         `; 
 
         const [eligible_att_incentives] = await db.query(sql2, [cutoff_id, ...bucketArray]);
@@ -186,6 +192,8 @@ export const get_all_eligible_att_incentive_employees_supervisor = asyncHandler(
             employee_profile ON employee_profile.emp_ID = eligible_att_incentives.emp_ID 
         WHERE 
             employee_profile.clusterID IN (${placeholders})
+        ORDER BY 
+            eligible_att_incentives.amount DESC
         `; 
 
         const [eligible_att_incentives] = await db.query(sql2, bucketArray);
