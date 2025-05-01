@@ -20,6 +20,11 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H 13.229.75.55 >> ~/.ssh/known_hosts
           
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@13.229.75.55 << 'EOF'
+            sudo sed -i '/http {/a \\tclient_max_body_size 200M;' /etc/nginx/nginx.conf
+            sudo systemctl restart nginx
+          EOF
+          
       - name: Deploy to EC2
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@13.229.75.55 << 'EOF'
